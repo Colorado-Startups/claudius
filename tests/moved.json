@@ -283,6 +283,10 @@
   [
    "quality/fixtures/claude/projects/-Users-someone-Developer-acme-site/session-fixture-three.jsonl",
    "fixtures/claude/projects/-Users-someone-Developer-acme-site/session-fixture-three.jsonl"
+  ],
+  [
+   ".claude/agents/reviewer.md",
+   "templates/claude/.claude/agents/reviewer.md"
   ]
  ]
 }
