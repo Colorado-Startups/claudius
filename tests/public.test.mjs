@@ -36,7 +36,7 @@ test('public: each metric that needs local files is dropped, every other one is 
     assert.deepEqual(pub, mine.map((d) => (d.needs === 'local-files' ? { ...d, drop: true } : d)), f);
   }
   const kept = files.flatMap((f) => read(join(root, 'quality', 'public', 'targets', f))).filter((d) => d.drop !== true).map((d) => d.id);
-  assert.deepEqual(kept.sort(), ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr', 'claude_settings.valid', 'lead_time.hours']);
+  assert.deepEqual(kept.sort(), ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr', 'claude_settings.deny_coverage', 'claude_settings.valid', 'lead_time.hours']);
 });
 
 test('public: the config is the repo own, its targets and the page files under quality/public', () => {
