@@ -43,7 +43,7 @@ jobs:
           pages: quality
           quality-config: quality/config.json
 
-      # The run the page is drawn from: CI mode, no local-only value, no home path, email or account name.
+      # The run the page is drawn from: CI mode, no local-only value, no home path or email. CI sets no account names.
       - name: Privacy gate
         run: node tests/privacy.mjs quality/data/latest.json targets
 
