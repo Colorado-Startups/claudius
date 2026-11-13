@@ -26,6 +26,7 @@ export const PUBLIC = 'quality/public';
 
 // The ids that go public from repo files alone, and the params they read them with (quality/public-params.json).
 export const NO_PUBLIC = { ids: [], params: {} };
+export const DROPS = 'repo-drops.json';
 export const readPublicParams = (root) => {
   const file = join(root, 'quality/public-params.json');
   return existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : NO_PUBLIC;
@@ -108,6 +109,8 @@ export function writePublic(root = '.') {
     for (const d of list) if (d.drop !== true && d.tab) liveTabs.add(d.tab);
     writeFileSync(join(out, 'targets', file), json(list));
   }
+  // Git Crafter metrics that cannot apply here, dropped on the public page only: targets/ is the pack adopters load.
+  if (pub.drop?.length) writeFileSync(join(out, 'targets', DROPS), json(pub.drop.map((id) => ({ id, drop: true }))));
   writeFileSync(join(out, 'config.json'), json(publicConfig(config, liveTabs)));
   const processFile = join(root, 'quality/process/config.json');
   if (existsSync(processFile)) writeFileSync(join(out, 'process.json'), json(publicProcess(JSON.parse(readFileSync(processFile, 'utf8')), packMaps(root), new Set(dropped))));

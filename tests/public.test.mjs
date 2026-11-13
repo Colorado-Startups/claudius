@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { publicProcess, writePublic } from '../quality/public.mjs';
+import { DROPS, publicProcess, writePublic } from '../quality/public.mjs';
 import { localOnlyIds } from './privacy.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
@@ -32,7 +32,8 @@ test('public: each metric that needs local files is dropped but the repo-file on
   assert.deepEqual(new Set(dropped), new Set([...local].filter((id) => !pub.ids.includes(id))));
   assert.equal(dropped.length, 45);
   const files = readdirSync(join(ROOT, 'targets')).filter((f) => f.endsWith('.json')).sort();
-  assert.deepEqual(readdirSync(join(root, 'quality', 'public', 'targets')).sort(), files, 'every targets file, so no collector runs without its targets');
+  assert.deepEqual(readdirSync(join(root, 'quality', 'public', 'targets')).sort(), [...files, DROPS].sort(), 'every targets file, so no collector runs without its targets, and the drops');
+  assert.deepEqual(read(join(root, 'quality', 'public', 'targets', DROPS)), pub.drop.map((id) => ({ id, drop: true })));
   for (const f of files) {
     const mine = read(join(ROOT, 'targets', f));
     const scoped = mine.some((d) => pub.ids.includes(d.id));
