@@ -1,0 +1,13 @@
+# Bumps every action pin once a week in one pull request, Git Crafter's engine pins in ci.yml and pages.yml together
+# (Git Crafter templates/ci/dependabot.yml). A new release waits 14 days first.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+    groups:
+      actions:
+        patterns: ["*"]
