@@ -1,6 +1,6 @@
 // The Blockers metrics about the bash guard, tool refusals and git hooks (blockers.mjs).
 
-import { percentile } from '../github/github.mjs';
+import { percentile } from '../lib/engine.mjs';
 import { LAST_GIT, LAST_GUARD, MARK_MS, iso, item, median, newestFirst, pct, round } from './blockers-core.mjs';
 import { ledgerRow, readable } from './blockers-ledger.mjs';
 

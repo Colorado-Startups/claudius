@@ -2,7 +2,7 @@
   {
     "id": "instructions.protected_clauses_missing",
     "params": {
-      "comment": "A ~/ path is under home, an absolute one is itself, any other is under the repo root. project_match (default the repo's own project folder), managed_claude_md (default the platform's managed policy CLAUDE.md) and code_os_checkout (default the Git Crafter checkout this collector runs from) name no path here. kept_rules: file names of path-scoped rules a repo keeps for the account's other repos; instructions.unused sets them aside, as desktop-app.json's kept_kinds sets aside servers. None by default.",
+      "comment": "A ~/ path is under home, an absolute one is itself, any other is under the repo root. project_match (default the repo's own project folder), managed_claude_md (default the platform's managed policy CLAUDE.md) and code_os_checkout (a Git Crafter checkout; default the pack checkout, which holds no Git Crafter tools) name no path here. kept_rules: file names of path-scoped rules a repo keeps for the account's other repos; instructions.unused sets them aside, as desktop-app.json's kept_kinds sets aside servers. None by default.",
       "projects_dir": "~/.claude/projects",
       "subagents_dir": "subagents",
       "memory_index": "memory/MEMORY.md",

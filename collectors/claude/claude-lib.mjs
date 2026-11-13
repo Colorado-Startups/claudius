@@ -2,7 +2,7 @@
 // params, pricing, which subagent rows count, and small arithmetic.
 
 import fs from 'node:fs';
-import { percentile } from '../github/github.mjs';
+import { percentile } from '../lib/engine.mjs';
 
 const TARGETS = JSON.parse(fs.readFileSync(new URL('../../targets/claude.json', import.meta.url), 'utf8'));
 export const metricIds = TARGETS.map((t) => t.id);

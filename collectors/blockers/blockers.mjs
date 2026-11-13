@@ -57,7 +57,7 @@ import { readTranscripts } from './blockers-transcripts.mjs';
 import { replayGuard, replayRecent } from './blockers-outcome.mjs';
 import { graphql, readLater, readMerged } from './blockers-github.mjs';
 import { computeMetrics } from './blockers-metrics.mjs';
-import { redact } from '../lib/redact.mjs';
+import { redact, useLib } from '../lib/engine.mjs';
 
 export { area, metricIds } from './blockers-core.mjs';
 export { classifyBlock } from './blockers-transcripts.mjs';
@@ -103,6 +103,7 @@ export function config(params, root) {
 // Every metric of this tab, with each home path and account name taken out
 // of the text (redact.mjs).
 export async function collect(opts = {}) {
+  useLib(opts.lib);
   return redact(await gather(opts), opts.home);
 }
 

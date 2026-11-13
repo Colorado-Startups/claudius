@@ -46,7 +46,7 @@ import { promisify } from 'node:util';
 import { reviewRounds } from '../blockers/blockers.mjs';
 import { mapFolders, readFolders, readPlan, readPulls } from './tokens-io.mjs';
 import { lastN, ownRepo, PROJECTS_DIR, resolvePath } from '../claude/claude.mjs';
-import { redact } from '../lib/redact.mjs';
+import { redact, useLib } from '../lib/engine.mjs';
 
 export { remoteRepo, returnedTokens } from './tokens-io.mjs';
 
@@ -87,6 +87,7 @@ const defaultExec = async (cmd, args) => (await run(cmd, args, { maxBuffer: 64 *
 // Every metric of this tab, with each home path and account name taken out
 // of the text (redact.mjs).
 export async function collect(opts = {}) {
+  useLib(opts.lib);
   return redact(await gather(opts), opts.home);
 }
 

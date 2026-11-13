@@ -15,7 +15,7 @@
     "needs": "local-files",
     "chart": "table",
     "params": {
-      "comment": "Each setting has a default (simplicity.mjs): project_match (the repo's own project folder), managed_claude_md (the platform's managed policy CLAUDE.md), code_os_checkout (the Git Crafter checkout this collector runs from), sync_entry (user-claude). not_living: doc paths that record the past on purpose. stale_days: how old a figure's read date may be. doc_set, doc_set_left_out ([{ glob }]) and skip_dirs: the living docs, used when the engine does not pass docs.json's. projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root.",
+      "comment": "Each setting has a default (simplicity.mjs): project_match (the repo's own project folder), managed_claude_md (the platform's managed policy CLAUDE.md), code_os_checkout (a Git Crafter checkout; default the pack checkout, which holds no Git Crafter tools), sync_entry (user-claude). not_living: doc paths that record the past on purpose. stale_days: how old a figure's read date may be. doc_set, doc_set_left_out ([{ glob }]) and skip_dirs: the living docs, used when the engine does not pass docs.json's. projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root.",
       "not_living": [
         "baseline"
       ],

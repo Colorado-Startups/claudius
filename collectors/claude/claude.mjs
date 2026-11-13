@@ -39,10 +39,9 @@ import { promisify } from 'node:util';
 import { joinGithub } from './claude-github.mjs';
 import { allCouldNotCheck, computeMetrics } from './claude-metrics.mjs';
 import { metricIds, num, TEMPLATE, TOKEN_KEYS, usageCounts } from './claude-lib.mjs';
-import { redact } from '../lib/redact.mjs';
-import { PROJECTS_DIR, projectMatch, resolvePath } from '../lib/paths.mjs';
+import { PROJECTS_DIR, projectMatch, redact, resolvePath, useLib } from '../lib/engine.mjs';
 
-export { managedClaudeMd, ownRepo, PROJECTS_DIR, projectMatch, remoteRepo, resolvePath } from '../lib/paths.mjs';
+export { managedClaudeMd, ownRepo, PROJECTS_DIR, projectMatch, remoteRepo, resolvePath } from '../lib/engine.mjs';
 export { classifyChecks } from './claude-github.mjs';
 export { lastN, metricIds, priceCall, SUBAGENT_USAGE_FROM, usageCounts, versionAtLeast } from './claude-lib.mjs';
 
@@ -63,6 +62,7 @@ const defaultGh = (args) => defaultExec('gh', args);
 // Every metric of this tab, with each home path and account name taken out
 // of the text (redact.mjs).
 export async function collect(opts = {}) {
+  useLib(opts.lib);
   return redact(await gather(opts), opts.home);
 }
 

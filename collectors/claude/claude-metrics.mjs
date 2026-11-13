@@ -1,6 +1,6 @@
 // The Claude tab's metrics from the transcripts and the GitHub join (claude.mjs).
 
-import { percentile } from '../github/github.mjs';
+import { percentile } from '../lib/engine.mjs';
 import { HOUR, item, lastN, metricIds, median, pct, per10, priceCall, round, sum, TOKEN_KEYS, usageCounts } from './claude-lib.mjs';
 
 const PR_SOURCE = 'gh api graphql: each linked pullRequest, 50 to a query, with PULL_FIELDS from github.mjs plus state, author type, commits and head checks';

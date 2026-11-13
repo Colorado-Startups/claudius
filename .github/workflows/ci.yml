@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   ci:
-    uses: SoulCraft-Org/git-crafter/.github/workflows/ci-standard.yml@8e284cbaa0c86fcb25473685ec68aea69d9a024b # v4.3.4
+    uses: SoulCraft-Org/git-crafter/.github/workflows/ci-standard.yml@b02074f5b0716ee0f2eb871b22b55d712b40415a # v4.6.0
     with:
       node-version: "26"
       short: node --test tests/*.test.mjs

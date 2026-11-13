@@ -19,8 +19,8 @@
 // under home, an absolute one is itself, any other is under the repo root.
 // Three have defaults that name no path: project_match (the repo's own project
 // folder, projectMatch in claude.mjs), managed_claude_md (the platform's
-// managed policy CLAUDE.md) and code_os_checkout (the Git Crafter checkout this
-// collector runs from).
+// managed policy CLAUDE.md) and code_os_checkout (a Git Crafter checkout; default
+// the pack checkout, KIT_ROOT).
 //
 // Privacy: `local` mode only, from this account's own files. Files are read
 // for sizes, line breaks, frontmatter keys and clause matches; transcripts for
@@ -40,7 +40,7 @@ import { fileURLToPath } from 'node:url';
 import { managedClaudeMd, projectMatch } from '../claude/claude.mjs';
 import { agentsIn, attempt, exists, item, iso, lineCount, listDir, loadsAlways, md, memoryHead, rulePaths, skillsIn, sum, toList } from './instructions-lib.mjs';
 import { checkClauses, mainSessions, usesIn, globRegex } from './instructions-sessions.mjs';
-import { redact } from '../lib/redact.mjs';
+import { redact, useLib } from '../lib/engine.mjs';
 
 export { frontmatter, memoryHead, rulePaths } from './instructions-lib.mjs';
 export { globRegex, normClause } from './instructions-sessions.mjs';
@@ -52,8 +52,9 @@ export const metricIds = TARGETS.map((t) => t.id);
 // The template's own params, merged as the engine merges a file's: the
 // defaults for a bare call. The engine passes the repo's merged params.
 export const PARAMS = Object.assign({}, ...TARGETS.map((t) => t.params ?? {}));
-// The Git Crafter checkout this file runs from: quality/collectors/ is two below it.
-const KIT_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
+// The pack checkout this file runs from, collectors/<tab>/ two below it; it holds no Git Crafter
+// tools, so a Git Crafter metric is not measured until params.code_os_checkout names one.
+const KIT_ROOT = fileURLToPath(new URL('../../', import.meta.url));
 
 const HOOK_TYPES = new Set(['hook_success', 'hook_additional_context', 'hook_non_blocking_error']);
 
@@ -61,6 +62,7 @@ const HOOK_TYPES = new Set(['hook_success', 'hook_additional_context', 'hook_non
 // Every metric of this tab, with each home path and account name taken out
 // of the text (redact.mjs).
 export async function collect(opts = {}) {
+  useLib(opts.lib);
   return redact(await gather(opts), opts.home);
 }
 

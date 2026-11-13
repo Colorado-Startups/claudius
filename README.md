@@ -22,7 +22,7 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 | `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard and Decide maps |
 | `collectors/<tab>/`, `fixtures/` | the collectors, their tests and test fixtures |
 | `tests/moved.json` | where each file came from in Git Crafter |
-| `tests/engine-tests.sh` | CI: each file matches its source, then its tests run inside the pinned engine |
+| `tests/engine-tests.sh` | CI: each file matches its source or is listed as edited, then the tests run beside the pinned engine |
 
 ## Add the pack
 
@@ -34,8 +34,8 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 
 | Pin | Works |
 | --- | --- |
-| Git Crafter engine up to `8e284cb` | No. That engine still ships these tabs, and a pack named like them is a usage error |
-| An engine release without its own Claude tabs, whose `lib` carries every helper these collectors import | Yes, once the collectors take those helpers from `lib` |
+| Git Crafter engine up to `b02074f` (v4.6.0) | No. That engine still ships these tabs, and a pack named like them is a usage error |
+| An engine release without its own Claude tabs, whose `lib` carries every helper these collectors import | Yes: the collectors take every engine helper from `lib` (`collectors/lib/engine.mjs`) |
 
 ## The one local command
 

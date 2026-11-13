@@ -1,7 +1,7 @@
 // The GitHub half of the Blockers collector: merged PRs, the revert breaker and the review rounds (blockers.mjs).
 
 import path from 'node:path';
-import { causes, prRefs } from '../github/github.mjs';
+import { causes, prRefs } from '../lib/engine.mjs';
 import { LAST_PRS, MAX_PAGES, MIN, PR_PAGE, RED, TEMPLATE } from './blockers-core.mjs';
 
 // ---------------------------------------------------------------- github

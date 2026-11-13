@@ -1,16 +1,16 @@
 // node --test quality/collectors/claude/claude.test.mjs
 // Fixtures under quality/fixtures/claude/ are synthetic; no transcript line is copied.
 
-import { causes, prRefs } from '../github/github.mjs';
+import { causes, prRefs } from '../lib/engine.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { CHARTS, loadTargets, TEXT_FIELDS } from '../lib/score.mjs';
+import { CHARTS, loadTargets, TEXT_FIELDS } from '../lib/engine.mjs';
 import { area, classifyChecks, collect, LAST, lastN, metricIds, priceCall, projectMatch, resolvePath } from './claude.mjs';
-import { redactText } from '../lib/redact.mjs';
+import { redactText } from '../lib/engine.mjs';
 
 // Only this collector's targets files, so another collector's file never fails these tests.
 function ownTargets(...files) {

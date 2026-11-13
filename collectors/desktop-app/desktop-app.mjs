@@ -32,7 +32,7 @@ import os from 'node:os';
 import { projectMatch, resolvePath } from '../claude/claude.mjs';
 import { attempt, item } from '../instructions/instructions-lib.mjs';
 import { eachLine, mainSessions } from '../instructions/instructions-sessions.mjs';
-import { redact } from '../lib/redact.mjs';
+import { redact, useLib } from '../lib/engine.mjs';
 import { emptyCalls, pluginsCalled, tallyCalls } from './desktop-app-calls.mjs';
 import { emptyListing, foldListing, hasListing, isAppServer, pluginsIn, serverKind, serversIn } from './desktop-app-listings.mjs';
 import { emptyTurns, foldTurn } from './desktop-app-turns.mjs';
@@ -55,6 +55,7 @@ const usageWindow = (params) => Math.max(1, Math.floor(Number(params.usage_sessi
 // Every metric of this tab, with each home path and account name taken out
 // of the text (redact.mjs).
 export async function collect(opts = {}) {
+  useLib(opts.lib);
   return redact(await gather(opts), opts.home);
 }
 
