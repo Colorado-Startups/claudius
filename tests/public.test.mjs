@@ -48,21 +48,12 @@ test('public: each metric that needs local files is dropped but the repo-file on
   assert.deepEqual(kept.sort(), ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr', 'claude.instruction_tokens', 'claude_settings.valid', 'instructions.description_tokens', 'lead_time.hours']);
 });
 
-test('public: a tab of the repo own with no metric left is left out; a Git Crafter tab stays', () => {
-  const root = copy();
-  writePublic(root);
-  const tabs = read(join(root, 'quality', 'public', 'config.json')).tabs.map((t) => (Array.isArray(t) ? t[0] : t));
-  for (const gone of ['desktop-app', 'tokens']) assert.ok(!tabs.includes(gone), gone);
-  for (const kept of ['claude', 'claude-settings', 'blockers', 'instructions', 'dependabot', 'security']) assert.ok(tabs.includes(kept), kept);
-});
-
 test('public: the config is the repo own, its targets and the page files under quality/public', () => {
   const root = copy();
   writePublic(root);
   const mine = read(join(ROOT, 'quality', 'config.json'));
   const pub = read(join(root, 'quality', 'public', 'config.json'));
-  assert.deepEqual({ ...pub, comment: mine.comment, tabs: mine.tabs }, { ...mine, targets: 'quality/public/targets', data: 'quality/public/data', history: 'quality/public/history', out: 'quality/public/dist' });
-  assert.ok(pub.tabs.every((t) => mine.tabs.some((m) => JSON.stringify(m) === JSON.stringify(t))), 'only tabs the repo lists');
+  assert.deepEqual({ ...pub, comment: mine.comment }, { ...mine, targets: 'quality/public/targets', data: 'quality/public/data', history: 'quality/public/history', out: 'quality/public/dist' });
   assert.match(pub.comment, /quality\/public\.mjs/);
 });
 
