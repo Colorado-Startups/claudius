@@ -39,7 +39,11 @@ jobs:
           PRIVACY_NAMES: ${{ secrets.PRIVACY_NAMES }}
         run: |
           IFS=, read -ra names <<< "$PRIVACY_NAMES"
-          for n in "${names[@]}"; do if [ -n "$n" ]; then echo "::add-mask::$n"; fi; done
+          for n in "${names[@]}"; do
+            # Trim as the gate does, so "a, b" masks "b" and not " b".
+            n="${n#"${n%%[![:space:]]*}"}"; n="${n%"${n##*[![:space:]]}"}"
+            if [ -n "$n" ]; then echo "::add-mask::$n"; fi
+          done
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
