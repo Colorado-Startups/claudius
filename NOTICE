@@ -11,6 +11,7 @@ Git Crafter began as Code-OS, Copyright 2026 Colorado Startups, licensed under t
 
 The open-repo files (CONTRIBUTING.md, GOVERNANCE.md, MAINTAINERS.md, SECURITY.md, CODE_OF_CONDUCT.md,
 the .github issue, discussion and pull request templates, CODEOWNERS, dco.yml, release.yml and
-FUNDING.yml, and tools/merge_policy.py and tools/merge_policy.json) come from Git Crafter's
-templates/open and its CODE_OF_CONDUCT.md and tools/merge_policy.py, at commit
-72e3b86692bbf8e5bbb8865ff3c3b878f449e6f9, filled for Claudius. tools/merge_policy.py is unchanged.
+FUNDING.yml, tools/merge_policy.py, tools/merge_policy_selftest.py, tools/merge_policy_fixtures/ and tools/merge_policy.json) come from Git Crafter's
+templates/open and its CODE_OF_CONDUCT.md and tools/merge_policy*, at commit
+72e3b86692bbf8e5bbb8865ff3c3b878f449e6f9, filled for Claudius. The tools/merge_policy* files are unchanged.
+The .claude/ files and templates/claude/.claude/agents/reviewer.md: tests/moved.json and tests/templates.test.mjs.
