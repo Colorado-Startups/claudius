@@ -20,6 +20,26 @@
     }
   },
   {
+    "id": "claude_settings.deny_coverage",
+    "tab": "claude-settings",
+    "kind": "quality",
+    "group": "Quality",
+    "label": "Credential paths Claude cannot read",
+    "means": "Share of credential paths, such as .env and keys, that the repo's Claude Code settings deny reading; higher is better.",
+    "unit": "%",
+    "goal": 100,
+    "near": 80,
+    "direction": "higher",
+    "goal_source": "Anthropic, Claude Code settings: permissions.deny with Read(./.env) and Read(./.env.*) keeps secrets out of Claude's reach (code.claude.com/docs/en/settings, read 2026-11-13). Moved from Git Crafter v4.6.4, which dropped it (#7)",
+    "source": "state: the Read(...) rules in permissions.deny of each file in params.files, against params.credential_patterns (denyMetric() in collectors/claude/claude-settings.mjs)",
+    "needs": "none",
+    "chart": "table",
+    "defined": "2026-11-13",
+    "params": {
+      "credential_patterns": [".env", ".env.*", "secrets/**", "**/*.pem", "**/*.key"]
+    }
+  },
+  {
     "id": "claude_settings.prompts_per_100_calls",
     "tab": "claude-settings",
     "kind": "speed",
