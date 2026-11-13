@@ -10,6 +10,8 @@ export const area = 'blockers';
 
 const TARGETS = JSON.parse(fs.readFileSync(new URL('../../targets/blockers.json', import.meta.url), 'utf8'));
 export const metricIds = TARGETS.map((t) => t.id);
+// The metrics read from GitHub alone, needs "gh": the only ones a CI run reads.
+export const GITHUB_IDS = TARGETS.filter((t) => t.needs === 'gh').map((t) => t.id);
 
 // This repo's settings are params on quality/targets/blockers.json, each with
 // a default that names no repo, path or person (config(), below).

@@ -11,7 +11,7 @@
     "near": 168,
     "direction": "lower",
     "goal_source": "goal from DORA's elite band (2024 Accelerate State of DevOps Report, p. 13, dora.dev/research/2024/dora-report), change lead time less than one day. Near is the high band's edge, one week. DORA times \"from committed to version control to deployed in production\" (dora.dev/guides/dora-metrics, read 2026-11-10); this starts at the session, a little earlier, and in CI at the PR opening",
-    "source": "last N merged PRs timed end to end (N = params.last_prs, default 10): the median hours of session start to PR open (this Mac's transcripts, local runs only; in CI it is named in missing and the metric is could_not_check, the read steps kept in detail), PR open to all green, all green to merge and merge to live (gh api graphql: createdAt, the merged head's last check, mergedAt, and the first successful params.environment deployment created at or after the merge), summed, so the parts add up to the whole (quality/collectors/claude/lead-time.mjs)",
+    "source": "last N merged PRs timed end to end (N = params.last_prs, default 10): the median hours of session start to PR open (this Mac's transcripts, local runs only; in CI it is named in missing and the total starts at the PR opening), PR open to all green, all green to merge and merge to live (gh api graphql: createdAt, the merged head's last check, mergedAt, and the first successful params.environment deployment created at or after the merge), summed, so the parts add up to the whole (quality/collectors/claude/lead-time.mjs)",
     "needs": "gh",
     "chart": "stack",
     "params": {

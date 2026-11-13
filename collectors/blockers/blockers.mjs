@@ -10,7 +10,8 @@
 // sum the rows by kind.
 //
 // Privacy: transcripts and the guard log are read in `local` mode only, from
-// this account's own ~/.claude. Prompts and replies are never read. Commands,
+// this account's own ~/.claude. A CI run reads GitHub alone, for the metrics
+// marked needs gh. Prompts and replies are never read. Commands,
 // file paths and tool results are read in memory to classify a block or match
 // a retry, and never leave this module.
 // The output holds counts, durations, token sums, and rule, hook and file
@@ -51,7 +52,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { managedClaudeMd, ownRepo, PROJECTS_DIR, projectMatch, resolvePath, ruleLoadsAlways } from '../claude/claude.mjs';
-import { CI_REASON, LAST_PRS, TEMPLATE, attempt, defaultExec, defaultGh, firstLine, metricIds } from './blockers-core.mjs';
+import { CI_REASON, GITHUB_IDS, LAST_PRS, TEMPLATE, attempt, defaultExec, defaultGh, firstLine, metricIds } from './blockers-core.mjs';
 import { fixSignals } from './blockers-neutral.mjs';
 import { readTranscripts } from './blockers-transcripts.mjs';
 import { replayGuard, replayRecent } from './blockers-outcome.mjs';
@@ -123,30 +124,43 @@ async function gather({
   const all = (reason, source) => Object.fromEntries(metricIds.map((id) => [id, { could_not_check: reason, source }]));
   const p = params;
   const cfg = config(p, root);
-  if (mode !== 'local') return all(CI_REASON, cfg.transcripts);
+  const local = mode === 'local';
   // A match with no letter or digit (a root of /) is in every folder's name.
-  if (!/[A-Za-z0-9]/.test(cfg.match)) return all(`the project match "${cfg.match}" would read every project folder; set params.project_match on quality/targets/blockers.json`, cfg.transcripts);
+  if (local && !/[A-Za-z0-9]/.test(cfg.match)) return all(`the project match "${cfg.match}" would read every project folder; set params.project_match on quality/targets/blockers.json`, cfg.transcripts);
   cfg.repo = await ownRepo(root, p, exec);
   if (!cfg.repo) return all('no GitHub repo: set params.repo on quality/targets/blockers.json, or give the checkout a GitHub origin', cfg.transcripts);
-  const dir = projectsDir ?? resolvePath(cfg.projects, { home, root });
   const nowMs = now.getTime();
+  // In CI only the metrics marked needs gh are read, from GitHub with the workflow token; every other one
+  // lives on the machine that ran the sessions, and nothing on this machine is read.
+  if (!local) {
+    const none = { error: CI_REASON };
+    const got = computeMetrics({ files: none, log: none, instructions: none, github: await readGithub(cfg.repo, gh, nowMs), replayed: none, now: nowMs, readAt: now.toISOString(), cfg });
+    return { ...all(CI_REASON, cfg.transcripts), ...Object.fromEntries(GITHUB_IDS.map((id) => [id, got[id]])) };
+  }
+  const dir = projectsDir ?? resolvePath(cfg.projects, { home, root });
   const files = attempt(() => readTranscripts(dir, cfg));
   const replayed = files.error ? { error: files.error } : await replayRecent(files, nowMs, resolvePath(cfg.guardScript, { home, root }), replay, exec);
   const log = attempt(() => readGuardLog(guardLog ?? resolvePath(cfg.guardLog, { home, root }), cfg.checkout));
   const instructions = attempt(() => sizeInstructions({ root, home, managedPath: managedPath ?? cfg.managed, projectsDir: dir, match: cfg.match }));
+  const github = await readGithub(cfg.repo, gh, nowMs);
+  return computeMetrics({ files, log, instructions, github, replayed, now: nowMs, readAt: now.toISOString(), cfg });
+}
+
+// The last merged PRs and what came after them, the reverts and bug issues; a failed read is its error.
+async function readGithub(repo, gh, nowMs) {
   let github;
   try {
-    github = { prs: await readMerged(cfg.repo, gh, nowMs) };
+    github = { prs: await readMerged(repo, gh, nowMs) };
     try {
       const last = github.prs.slice(0, LAST_PRS);
-      github.later = await readLater(cfg.repo, gh, Math.min(...last.map((pr) => Date.parse(pr.mergedAt)), nowMs));
+      github.later = await readLater(repo, gh, Math.min(...last.map((pr) => Date.parse(pr.mergedAt)), nowMs));
     } catch (err) {
       github.laterError = `gh pr list or gh issue list failed (${firstLine(err)})`;
     }
   } catch (err) {
     github = { error: `gh api graphql failed (${firstLine(err)})` };
   }
-  return computeMetrics({ files, log, instructions, github, replayed, now: nowMs, readAt: now.toISOString(), cfg });
+  return github;
 }
 
 // ------------------------------------------------------------- guard log

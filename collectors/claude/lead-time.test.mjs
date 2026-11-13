@@ -90,16 +90,21 @@ const fakeGh = (fail) => ({
 });
 const now = new Date('2026-11-03T12:00:00Z');
 
-test('collect in CI: unscored, naming the missing step, its read steps kept; a failed read is could_not_check', async () => {
+test('collect in CI: scored from the PR opening, the session step named missing; a failed read is could_not_check', async () => {
   assert.equal(area, 'lead_time');
   const r = await collect({ mode: 'ci', params: { repo: 'acme/site' }, gh: fakeGh(), now });
-  assert.ok(!('value' in r[ID]), 'a partial total carries no value');
-  assert.equal(r[ID].could_not_check, `not scored: ${STEPS[0]} not read (transcripts live on the machine that ran the sessions; refreshed by a --local collect there); the 3 steps read add up to 4 h`);
-  assert.deepEqual(scoreMetric(def(), r[ID]), { status: 'not-measured', points: null });
+  assert.equal(r[ID].value, 4, 'the three GitHub steps');
+  assert.equal(r[ID].could_not_check, undefined);
+  assert.equal(sum(r[ID]), r[ID].value);
+  assert.deepEqual(scoreMetric(def(), r[ID]), { status: 'meets', points: 100 });
   assert.deepEqual(r[ID].detail.map((d) => d.label), STEPS.slice(1));
-  assert.equal(r[ID].missing[0].label, STEPS[0]);
+  assert.deepEqual(r[ID].missing.map((m) => m.label), [STEPS[0]]);
   assert.equal(r[ID].read_at, now.toISOString());
   assert.match(r[ID].source, /3 PRs$/);
+  const nodeploy = { graphql: async () => ({ repository: { pullRequests: { nodes: PULLS }, deployments: { nodes: [] } } }) };
+  const partial = await collect({ mode: 'ci', params: { repo: 'acme/site' }, gh: nodeploy, now });
+  assert.ok(!('value' in partial[ID]), 'a missing deploy still leaves the total unscored');
+  assert.match(partial[ID].could_not_check, /^not scored: .*merge to live not read/);
   const bad = await collect({ mode: 'ci', params: { repo: 'acme/site' }, gh: fakeGh(true), now });
   assert.equal(bad[ID].could_not_check, 'gh api graphql failed: HTTP 502: Bad Gateway');
   assert.ok(!('value' in bad[ID]));
