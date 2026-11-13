@@ -1,13 +1,14 @@
 // The privacy gate on fixture runs: a clean CI run passes, and each seeded
 // local value, home path, email or account name fails it.
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { localOnlyIds, privacyProblems } from './privacy.mjs';
+import { localOnlyIds, privacyProblems, textProblems } from './privacy.mjs';
 
 // A targets folder with one local-only metric and one read from GitHub.
 function targetsDir() {
@@ -78,4 +79,25 @@ test('privacy: a listed account name fails, as a whole word', () => {
   run.metrics['fixture.gh'].source = 'read by someone';
   assert.deepEqual(privacyProblems(run, { localIds, names: ['someone'] }), ['account name someone']);
   assert.deepEqual(privacyProblems(run, { localIds, names: ['some', ''] }), []);
+});
+
+// A slice of a real deployed page (fixtures/privacy/page-slice.html) with one planted home path and one planted email.
+const slice = readFileSync(fileURLToPath(new URL('../fixtures/privacy/page-slice.html', import.meta.url)), 'utf8');
+
+test('privacy: a real page slice fails on its planted home path and email, and passes without them', () => {
+  assert.deepEqual(textProblems(slice), ['home path /Users/example', 'email someone@example.com']);
+  assert.deepEqual(textProblems(slice.replace(/<p class="src planted">.*?<\/p>/g, '')), []);
+});
+
+test('privacy: the gate fails a home path planted in a file under --dist', () => {
+  const root = mkdtempSync(join(tmpdir(), 'privacy-dist-'));
+  writeFileSync(join(root, 'latest.json'), JSON.stringify(cleanRun()));
+  mkdirSync(join(root, 'dist', 'tab'), { recursive: true });
+  writeFileSync(join(root, 'dist', 'index.html'), '<p>clean</p>');
+  const gate = () => spawnSync(process.execPath, [fileURLToPath(new URL('./privacy.mjs', import.meta.url)), join(root, 'latest.json'), '--dist', join(root, 'dist')], { encoding: 'utf8', env: { PATH: process.env.PATH } });
+  assert.equal(gate().status, 0);
+  writeFileSync(join(root, 'dist', 'tab', 'page.html'), '<p class="src">/Users/example/project</p>');
+  const run = gate();
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /page\.html: home path \/Users\/example/);
 });
