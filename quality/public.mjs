@@ -7,6 +7,8 @@
 // Writes, under DIR (default the current folder):
 //   quality/public/config.json   quality/config.json, its targets, data, history and out under quality/public
 //   quality/public/targets/      each targets file as written, with "drop": true on each needs "local-files" entry
+//                                but an id quality/public-params.json names, which reads repo files only (needs
+//                                none); a tab of the repo's own with no metric left is left out of the config
 //   quality/public/process.json  quality/process/config.json, the Process page's, when there is one: each
 //                                { "use": id } map that names one of the pack's own (maps/<id>.json) written out
 //                                in full, since CI reads no pack by path; in each map, each step whose metric is
@@ -22,12 +24,29 @@ import { pathToFileURL } from 'node:url';
 
 export const PUBLIC = 'quality/public';
 
-// One targets file with each entry that needs local files dropped.
-export const publicTargets = (list) => list.map((def) => (def.needs === 'local-files' ? { ...def, drop: true } : def));
+// The ids that go public from repo files alone, and the params they read them with (quality/public-params.json).
+export const NO_PUBLIC = { ids: [], params: {} };
+export const readPublicParams = (root) => {
+  const file = join(root, 'quality/public-params.json');
+  return existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : NO_PUBLIC;
+};
 
-// The public config: the repo's own, its targets, data, history and out under PUBLIC.
-export const publicConfig = (config) => ({
+// One targets file for the public page: an id in pub.ids needs none, and the file's params take pub.params;
+// every other entry that needs local files is dropped.
+export const publicTargets = (list, pub = NO_PUBLIC) => {
+  const scoped = list.some((d) => pub.ids.includes(d.id));
+  return list.map((def) => {
+    const out = scoped && def.params ? { ...def, params: { ...def.params, ...pub.params } } : def;
+    if (pub.ids.includes(def.id)) return { ...out, needs: 'none' };
+    return def.needs === 'local-files' ? { ...out, drop: true } : out;
+  });
+};
+
+// The public config: the repo's own, its targets, data, history and out under PUBLIC. A tab of the repo's own
+// with no metric left is left out; a Git Crafter tab id is the engine's, kept as written.
+export const publicConfig = (config, liveTabs = null) => ({
   ...config,
+  ...(liveTabs && config.tabs ? { tabs: config.tabs.filter((t) => !Array.isArray(t) || liveTabs.has(t[0])) } : {}),
   comment: `Written by quality/public.mjs from quality/config.json: each metric that needs local files is dropped. Never edit; rerun it.`,
   targets: `${PUBLIC}/targets`,
   data: `${PUBLIC}/data`,
@@ -81,12 +100,15 @@ export function writePublic(root = '.') {
   rmSync(out, { recursive: true, force: true });
   mkdirSync(join(out, 'targets'), { recursive: true });
   const dropped = [];
+  const liveTabs = new Set();
+  const pub = readPublicParams(root);
   for (const file of readdirSync(from).filter((f) => f.endsWith('.json')).sort()) {
-    const list = publicTargets(JSON.parse(readFileSync(join(from, file), 'utf8')));
+    const list = publicTargets(JSON.parse(readFileSync(join(from, file), 'utf8')), pub);
     dropped.push(...list.filter((d) => d.drop === true && d.needs === 'local-files').map((d) => d.id));
+    for (const d of list) if (d.drop !== true && d.tab) liveTabs.add(d.tab);
     writeFileSync(join(out, 'targets', file), json(list));
   }
-  writeFileSync(join(out, 'config.json'), json(publicConfig(config)));
+  writeFileSync(join(out, 'config.json'), json(publicConfig(config, liveTabs)));
   const processFile = join(root, 'quality/process/config.json');
   if (existsSync(processFile)) writeFileSync(join(out, 'process.json'), json(publicProcess(JSON.parse(readFileSync(processFile, 'utf8')), packMaps(root), new Set(dropped))));
   return dropped;

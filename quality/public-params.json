@@ -1,0 +1,8 @@
+{
+  "comment": "Read by quality/public.mjs. Each id here goes on the public page with needs none, and its targets file's params take params below; every other entry that needs local files is dropped. repo_only (collectors/instructions/instructions.mjs) reads only the files the repo commits, so CI reads them too. AGENTS.md counts because CLAUDE.md imports it (code.claude.com/docs/en/memory, read 2026-11-13).",
+  "ids": ["claude.instruction_tokens", "instructions.description_tokens"],
+  "params": {
+    "repo_only": true,
+    "repo_claude_md": ["CLAUDE.md", "AGENTS.md", ".claude/CLAUDE.md", "CLAUDE.local.md"]
+  }
+}

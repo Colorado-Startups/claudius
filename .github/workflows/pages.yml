@@ -73,7 +73,7 @@ jobs:
       - name: Privacy gate
         env:
           PRIVACY_NAMES: ${{ secrets.PRIVACY_NAMES }}
-        run: node tests/privacy.mjs quality/public/data/latest.json targets --dist quality/public/dist
+        run: node tests/privacy.mjs quality/public/data/latest.json quality/public/targets --dist quality/public/dist
 
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'

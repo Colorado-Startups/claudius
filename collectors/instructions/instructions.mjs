@@ -57,6 +57,8 @@ export const PARAMS = Object.assign({}, ...TARGETS.map((t) => t.params ?? {}));
 const KIT_ROOT = fileURLToPath(new URL('../../', import.meta.url));
 
 const HOOK_TYPES = new Set(['hook_success', 'hook_additional_context', 'hook_non_blocking_error']);
+// The params a repo_only run blanks: each names a file or folder under home.
+const NO_HOME = { user_claude_md: '', user_rules: '', user_skills: '', projects_dir: '' };
 
 
 // Every metric of this tab, with each home path and account name taken out
@@ -68,12 +70,16 @@ export async function collect(opts = {}) {
 
 async function gather({ root = '.', mode, home = os.homedir(), now = new Date(), params: given = PARAMS } = {}) {
   const self = `the ${area} collector`;
-  if (mode !== 'local') return all('the files Claude loads live on the machine that ran the sessions; refreshed by a --local collect there', self);
+  // params.repo_only (the public page's, quality/public.mjs): only the files the repo commits, no home path, so
+  // a CI run reads them too.
+  const repoOnly = given.repo_only === true;
+  if (mode !== 'local' && !repoOnly) return all('the files Claude loads live on the machine that ran the sessions; refreshed by a --local collect there', self);
   const params = {
     ...given,
     project_match: String(given.project_match || projectMatch(root)),
-    managed_claude_md: given.managed_claude_md || managedClaudeMd(),
+    managed_claude_md: repoOnly ? '' : given.managed_claude_md || managedClaudeMd(),
     code_os_checkout: given.code_os_checkout || KIT_ROOT,
+    ...(repoOnly ? NO_HOME : {}),
   };
   // A match with no letter or digit (a root of /) is in every folder's name.
   if (!/[A-Za-z0-9]/.test(params.project_match)) return all(`the project match "${params.project_match}" would read every project folder; set params.project_match in this tab's targets file`, self);
