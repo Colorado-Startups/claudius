@@ -1,0 +1,5 @@
+# What a collect writes. A --local run reads this machine's sessions; it stays here, never committed.
+quality/data/
+quality/history/
+quality/dist/
+node_modules/

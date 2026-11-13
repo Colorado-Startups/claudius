@@ -1,0 +1,23 @@
+name: ci
+
+# Git Crafter's CI standard (Git Crafter templates/ci/README.md): one reusable workflow at a full commit SHA. The
+# ruleset requires its verdict, ci / ci-ok. Default workflow token only, read access.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A newer push cancels a pull request's older run; a push to main always finishes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ci:
+    uses: SoulCraft-Org/git-crafter/.github/workflows/ci-standard.yml@8e284cbaa0c86fcb25473685ec68aea69d9a024b # v4.3.4
+    with:
+      node-version: "26"
+      short: node --test tests/*.test.mjs
