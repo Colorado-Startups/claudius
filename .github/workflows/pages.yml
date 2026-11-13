@@ -45,7 +45,7 @@ jobs:
 
       # The run the page is drawn from: CI mode, no local-only value, no home path, email or account name.
       - name: Privacy gate
-        run: node tests/privacy.mjs quality/data/latest.json
+        run: node tests/privacy.mjs quality/data/latest.json targets
 
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'

@@ -21,3 +21,5 @@ jobs:
     with:
       node-version: "26"
       short: node --test tests/*.test.mjs
+      # Fidelity of the moved files, then their own tests inside the engine at this pin (tests/engine-tests.sh).
+      standard: bash tests/engine-tests.sh
