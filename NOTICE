@@ -8,3 +8,9 @@ Git Crafter (https://github.com/SoulCraft-Org/git-crafter), at commit
 8e284cbaa0c86fcb25473685ec68aea69d9a024b, licensed under the Apache License, Version 2.0.
 Git Crafter: Copyright 2026 The Git Crafter Authors. Published by SoulCraft.
 Git Crafter began as Code-OS, Copyright 2026 Colorado Startups, licensed under the Apache License, Version 2.0.
+
+The open-repo files (CONTRIBUTING.md, GOVERNANCE.md, MAINTAINERS.md, SECURITY.md, CODE_OF_CONDUCT.md,
+the .github issue, discussion and pull request templates, CODEOWNERS, dco.yml, release.yml and
+FUNDING.yml, and tools/merge_policy.py and tools/merge_policy.json) come from Git Crafter's
+templates/open and its CODE_OF_CONDUCT.md and tools/merge_policy.py, at commit
+72e3b86692bbf8e5bbb8865ff3c3b878f449e6f9, filled for Claudius. tools/merge_policy.py is unchanged.
