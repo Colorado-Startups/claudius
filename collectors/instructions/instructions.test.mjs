@@ -228,3 +228,13 @@ test('the project match defaults to the repo path, and a typed command is read b
     fs.rmSync(s3);
   }
 });
+
+test('a repo_only run, as the public page has, reads only the repo files and runs in CI too', async () => {
+  const out = await collect({ ...base, mode: 'ci', params: { ...params, repo_only: true } });
+  // The repo CLAUDE.md and the always-loaded repo rule: 400 + 200 bytes; the managed file and house rules left out.
+  assert.equal(out['claude.instruction_tokens'].value, 150);
+  // Skill a and agent r: 7 + 8 bytes; the installed skills left out.
+  assert.equal(out['instructions.description_tokens'].value, 4);
+  assert.ok(out['instructions.memory_index_tokens'].could_not_check);
+  assert.doesNotMatch(JSON.stringify(out), new RegExp(home.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+});

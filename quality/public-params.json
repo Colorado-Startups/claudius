@@ -1,0 +1,17 @@
+{
+  "comment": "Read by quality/public.mjs. Each id in ids goes on the public page with needs none, and its targets file's params take params below; every other entry that needs local files is dropped. repo_only (collectors/instructions/instructions.mjs) reads only the files the repo commits, so CI reads them too. AGENTS.md counts because CLAUDE.md imports it (code.claude.com/docs/en/memory, read 2026-11-13). drop: Git Crafter metrics that cannot apply to this repo, written to quality/public/targets/repo-drops.json, never to targets/, which adopters load as the pack. security.claude_review_share counts only the Claude GitHub App's reviews, and this repo runs no paid review (#12); the lockfile, dependency and install-step ones read a package.json and an npm install this repo does not have.",
+  "ids": ["claude.instruction_tokens", "instructions.description_tokens"],
+  "params": {
+    "repo_only": true,
+    "repo_claude_md": ["CLAUDE.md", "AGENTS.md", ".claude/CLAUDE.md", "CLAUDE.local.md"]
+  },
+  "drop": [
+    "security.claude_review_share",
+    "security.lockfile_registry_share",
+    "security.young_lockfile_packages",
+    "tools.deps_latest_share",
+    "tools.majors_behind",
+    "tools.oldest_update_wait_days",
+    "tools.npm_ci_seconds"
+  ]
+}
