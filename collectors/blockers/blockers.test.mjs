@@ -8,6 +8,7 @@ import path from 'node:path';
 import { after, test } from 'node:test';
 import { causes, CHARTS, prRefs } from '../lib/engine.mjs';
 import { area, classifyBlock, collect, config, ENFORCEMENT, gitKind, metricIds, pushes, reviewRounds, similar, verdict, words } from './blockers.mjs';
+import { GITHUB_IDS } from './blockers-core.mjs';
 import { managedClaudeMd } from '../claude/claude.mjs';
 import { ownTargets, now, tmp, write, jsonl, projectsDir, site, at, usage, bash, asst, result, guardText, WARN, root, home, managedPath, guardLog, checkout, run, commit, review, PRS, fakeGh, targets, params, base } from "./blockers-fixtures.mjs";
 test('targets: valid, on the Blockers tab, every one with means, group and a goal', () => {
@@ -124,8 +125,20 @@ test('collect: missing inputs read as not measured, never as 0', async () => {
   const got = await collect({ root: gone, mode: 'local', projectsDir: gone, home: gone, guardLog: path.join(gone, 'log'), managedPath: gone, now, params: { repo: 'acme/site' }, gh: async () => Promise.reject(new Error('gh: not logged in')) });
   for (const id of metricIds) assert.ok(got[id].could_not_check, `${id} is not measured`);
   assert.match(got['blockers.pushes_per_merged_pr'].could_not_check, /not logged in/);
-  const ci = await collect({ mode: 'ci' });
-  for (const id of metricIds) assert.ok(ci[id].could_not_check && ci[id].value === undefined, id);
+});
+
+test('collect in CI: only the needs gh metrics read, from GitHub; nothing on the machine is opened', async () => {
+  const calls = [];
+  const ci = await collect({ ...base, mode: 'ci', gh: fakeGh(calls) });
+  assert.deepEqual(GITHUB_IDS, ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr']);
+  const local = await collect({ ...base, gh: fakeGh() });
+  for (const id of GITHUB_IDS) assert.deepEqual(ci[id], local[id], `${id}: the same value as a local run`);
+  assert.deepEqual([ci['blockers.enforcement_reverts'].value, ci['blockers.pushes_per_merged_pr'].value], [2, 1.5]);
+  for (const id of metricIds.filter((x) => !GITHUB_IDS.includes(x))) assert.ok(ci[id].could_not_check && !('value' in ci[id]) && !ci[id].detail, id);
+  assert.ok(calls.some((c) => c.startsWith('api graphql')) && calls.some((c) => c.startsWith('pr list')));
+  const failed = await collect({ ...base, mode: 'ci', gh: async () => Promise.reject(new Error('HTTP 403: Resource not accessible by integration')) });
+  for (const id of metricIds) assert.ok(failed[id].could_not_check && !('value' in failed[id]), id);
+  assert.match(failed['blockers.enforcement_reverts'].could_not_check, /HTTP 403/);
 });
 
 test('the collector holds no repo-specific value: every one is in its targets params', () => {

@@ -1,5 +1,5 @@
 // The privacy gate on fixture runs: a clean CI run passes, and each seeded
-// local value, home path, email or account name fails it.
+// local-only metric, home path, email or account name fails it.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
@@ -17,13 +17,12 @@ function targetsDir() {
   return dir;
 }
 
-// A CI run as collect.mjs writes it: the local metric unread, the GitHub one read.
+// A public CI run as collect.mjs writes it from quality/public.mjs's config: the local metric dropped, the GitHub one read.
 const cleanRun = () => ({
   generated_at: '2026-11-12T00:00:00.000Z',
   mode: 'ci',
   metrics: {
-    'fixture.local': { could_not_check: 'read by a --local collect only', source: 'state: ~/.claude/projects, -Users-<user>-Developer' },
-    'fixture.gh': { value: 3, source: 'last 20 merged pull requests', read_at: '2026-11-12T00:00:00.000Z' },
+    'fixture.gh': { value: 3, source: 'last 20 merged pull requests, ~/.claude never read', read_at: '2026-11-12T00:00:00.000Z' },
   },
 });
 
@@ -37,10 +36,12 @@ test('privacy: a clean CI run passes', () => {
   assert.deepEqual(privacyProblems(cleanRun(), { localIds }), []);
 });
 
-test('privacy: a seeded local value fails', () => {
+test('privacy: a local-only metric fails, read or not', () => {
   const run = cleanRun();
   run.metrics['fixture.local'] = { value: 12, source: 'transcripts' };
-  assert.deepEqual(privacyProblems(run, { localIds }), ['fixture.local needs local files but carries a value']);
+  assert.deepEqual(privacyProblems(run, { localIds }), ['fixture.local needs local files but is in the run']);
+  run.metrics['fixture.local'] = { could_not_check: 'read by a --local collect only', source: 'state: ~/.claude/projects, -Users-<user>-Developer' };
+  assert.deepEqual(privacyProblems(run, { localIds }), ['fixture.local needs local files but is in the run'], 'listed as not read is still listed');
 });
 
 test('privacy: a local run fails', () => {
@@ -71,7 +72,7 @@ test('privacy: the pack targets name 47 local-only ids, and a seeded one fails',
   assert.equal(ids.size, 47);
   const run = { mode: 'ci', metrics: { 'claude.cost_per_merged_pr_usd': { value: 1.5, source: 'transcripts' } } };
   assert.ok(ids.has('claude.cost_per_merged_pr_usd'));
-  assert.deepEqual(privacyProblems(run, { localIds: ids }), ['claude.cost_per_merged_pr_usd needs local files but carries a value']);
+  assert.deepEqual(privacyProblems(run, { localIds: ids }), ['claude.cost_per_merged_pr_usd needs local files but is in the run']);
 });
 
 test('privacy: a listed account name fails, as a whole word', () => {
@@ -100,4 +101,17 @@ test('privacy: the gate fails a home path planted in a file under --dist', () =>
   const run = gate();
   assert.equal(run.status, 1);
   assert.match(run.stderr, /page\.html: home path \/Users\/example/);
+});
+
+test('privacy: the gate fails a local-only metric id in a file under --dist', () => {
+  const root = mkdtempSync(join(tmpdir(), 'privacy-id-'));
+  writeFileSync(join(root, 'latest.json'), JSON.stringify(cleanRun()));
+  mkdirSync(join(root, 'dist'));
+  writeFileSync(join(root, 'dist', 'index.html'), '<tr data-id="fixture.gh"></tr>');
+  const gate = () => spawnSync(process.execPath, [fileURLToPath(new URL('./privacy.mjs', import.meta.url)), join(root, 'latest.json'), targetsDir(), '--dist', join(root, 'dist')], { encoding: 'utf8', env: { PATH: process.env.PATH } });
+  assert.equal(gate().status, 0);
+  writeFileSync(join(root, 'dist', 'index.html'), '<tr data-id="fixture.local"><td>not read</td></tr>');
+  const run = gate();
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /index\.html: local-only metric fixture\.local/);
 });

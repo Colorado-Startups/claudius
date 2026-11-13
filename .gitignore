@@ -2,4 +2,6 @@
 quality/data/
 quality/history/
 quality/dist/
+# What quality/public.mjs writes, and the public page CI builds from it.
+quality/public/
 node_modules/

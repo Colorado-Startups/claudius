@@ -9,10 +9,10 @@
 //
 // The steps join end to end, so each PR's four spans add up to its whole
 // time. The value is the sum of the four medians, so the bar's parts add up
-// to it exactly. In CI, where no transcript is, the first step is named in
-// `missing` and the metric is could_not_check, unscored: detail keeps the
-// three GitHub steps over the same PRs for the bar, never a zero for the
-// step it could not read.
+// to it exactly. In CI, where no transcript is, the total starts at the PR
+// opening, as the target's goal_source says: the first step is named in
+// `missing`, never a zero, and the value is the three GitHub steps over the
+// same PRs.
 //
 // Contract: quality/targets/lead-time.json. Never throws; a failed read is
 // could_not_check.
@@ -132,13 +132,14 @@ export async function collect({ root = '.', mode, params = {}, allParams = {}, g
   const starts = startsFor({ mode, root, repo, claude: allParams['claude.json'] ?? {}, home });
   const got = leadTime(data?.pullRequests?.nodes ?? [], liveTimes(data?.deployments?.nodes), { starts, n: p.last_prs, environment: p.environment });
   if (!got) return { [ID]: { could_not_check: `no merged PR has an all-green head and, when ${p.environment} deploys exist, one after its merge`, source } };
-  return redact({ [ID]: { ...scored(got), source: `${source}; ${got.prs} PRs`, read_at: now.toISOString() } }, home);
+  return redact({ [ID]: { ...scored(got, mode), source: `${source}; ${got.prs} PRs`, read_at: now.toISOString() } }, home);
 }
 
 // A total that lacks a step is no lead time: it is could_not_check, naming
-// the step, and keeps the steps it read in detail for the map's bar.
-function scored({ value, detail, missing }) {
-  if (!missing.length) return { value, detail, missing };
+// the step, and keeps the steps it read in detail for the map's bar. In CI
+// the session step is never there to read, so its absence alone scores.
+function scored({ value, detail, missing }, mode) {
+  if (missing.every((m) => mode !== 'local' && m.label === STEPS[0])) return { value, detail, missing };
   const why = missing.map((m) => `${m.label} not read (${m.reason})`).join('; ');
   return { could_not_check: `not scored: ${why}; the ${detail.length} steps read add up to ${value} h`, detail, missing };
 }

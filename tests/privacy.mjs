@@ -1,16 +1,18 @@
 // The privacy gate: Claudius's public page holds no reading from a
-// maintainer's machine. It reads the run file the page is drawn from, and
-// every file under each --dist folder, the folder the deploy uploads.
+// maintainer's machine, and no metric that needs one. It reads the run file
+// the page is drawn from, and every file under each --dist folder, the folder
+// the deploy uploads.
 //
 //   node tests/privacy.mjs <run.json> [targets folder ...] [--dist <folder> ...]
 //
 // A finding is any of these:
 //   the run's mode is not ci          a --local run is never uploaded
-//   a local-only metric has a value   needs "local-files" in a targets folder
+//   a local-only metric is there      needs "local-files" in a targets folder: in the run at all, read or
+//                                     not, or its id in a --dist file (quality/public.mjs drops each one)
 //   a home path                       /Users/<name>, /home/<name>, C:\Users\<name>, -Users-<name>
 //   an email address                  git@ remotes and noreply addresses pass
 //   a name in PRIVACY_NAMES           comma separated, for a local check; CI sets none
-// A --dist file is text, so only the last three apply to it.
+// A --dist file is text, so all but the mode apply to it.
 // Exit 0 clean, 1 findings (each printed), 2 usage error.
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
@@ -37,9 +39,10 @@ export function filesUnder(dir) {
   return readdirSync(dir).sort().flatMap((f) => (statSync(join(dir, f)).isDirectory() ? filesUnder(join(dir, f)) : [join(dir, f)]));
 }
 
-// Every home path, email or listed name in a text; [] when clean.
-export function textProblems(text, names = []) {
+// Every home path, email, listed name or local-only id in a text; [] when clean.
+export function textProblems(text, names = [], localIds = new Set()) {
   const found = [];
+  for (const id of localIds) if (text.includes(id)) found.push(`local-only metric ${id}`);
   for (const re of HOME_PATHS) for (const hit of new Set(text.match(re) ?? [])) found.push(`home path ${hit}`);
   for (const hit of new Set((text.match(EMAIL) ?? []).filter((e) => !EMAIL_OK(e)))) found.push(`email ${hit}`);
   for (const name of names.map((n) => n.trim()).filter(Boolean)) {
@@ -52,9 +55,7 @@ export function textProblems(text, names = []) {
 export function privacyProblems(run, { localIds = new Set(), names = [] } = {}) {
   const found = [];
   if (run?.mode !== 'ci') found.push(`run mode is ${JSON.stringify(run?.mode)}, not "ci"`);
-  for (const [id, m] of Object.entries(run?.metrics ?? {})) {
-    if (localIds.has(id) && (m?.value != null || m?.detail?.length)) found.push(`${id} needs local files but carries a value`);
-  }
+  for (const id of Object.keys(run?.metrics ?? {})) if (localIds.has(id)) found.push(`${id} needs local files but is in the run`);
   return [...found, ...textProblems(JSON.stringify(run), names)];
 }
 
@@ -78,7 +79,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     process.exit(2);
   }
   const found = privacyProblems(run, { localIds, names });
-  for (const page of pages) for (const f of textProblems(readFileSync(page, 'utf8'), names)) found.push(`${page}: ${f}`);
+  for (const page of pages) for (const f of textProblems(readFileSync(page, 'utf8'), names, localIds)) found.push(`${page}: ${f}`);
   for (const f of found) console.error(`::error::privacy: ${f}`);
   console.log(`privacy: ${Object.keys(run.metrics ?? {}).length} metrics, ${localIds.size} local-only ids, ${pages.length} dist files, ${found.length} findings`);
   process.exit(found.length ? 1 : 0);

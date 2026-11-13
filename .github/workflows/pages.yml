@@ -2,7 +2,8 @@ name: pages
 
 # Claudius's public Quality page, built by Git Crafter's actions/pages at a full commit SHA (Git Crafter
 # templates/ci/pages.yml). A pull request builds it and runs the privacy gate; only a push to main publishes.
-# The build runs in CI mode, so it holds no reading from a maintainer's machine; tests/privacy.mjs checks.
+# The build runs in CI mode from quality/public/config.json, which drops every metric that needs local files,
+# so it holds no reading from a maintainer's machine; tests/privacy.mjs checks.
 on:
   push:
     branches: [main]
@@ -21,11 +22,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # The Claude tabs' collectors read this repo's pull requests, runs and checks; a read refused is not measured.
+    # The metrics marked needs gh read this repo's pull requests, checks, issues and Pages deployments with the
+    # workflow token; a read refused is not measured.
     permissions:
       contents: read
       actions: read
       checks: read
+      deployments: read
       issues: read
       pull-requests: read
     steps:
@@ -38,20 +41,24 @@ jobs:
         with:
           node-version: 26
 
-      - uses: SoulCraft-Org/git-crafter/actions/pages@70ccd19416306f5658883f38f4d0fc77d192ebdb # v5.0.0
+      # quality/config.json with each metric that needs local files dropped: not shown, not counted, not run.
+      - name: Public config
+        run: node quality/public.mjs
+
+      - uses: SoulCraft-Org/git-crafter/actions/pages@dd999dcac64873f77165609f3cc9fde4da49d332 # v6.0.0
         with:
           pages: quality
-          quality-config: quality/config.json
+          quality-config: quality/public/config.json
 
-      # The run the page is drawn from: CI mode, no local-only value, no home path or email. CI sets no account names.
-      # Every file the deploy uploads, quality/dist, gets the same home path and email checks.
+      # The run the page is drawn from: CI mode, no metric that needs local files, no home path or email. CI sets
+      # no account names. Every file the deploy uploads, quality/public/dist, gets the same checks but the mode.
       - name: Privacy gate
-        run: node tests/privacy.mjs quality/data/latest.json targets --dist quality/dist
+        run: node tests/privacy.mjs quality/public/data/latest.json targets --dist quality/public/dist
 
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
-          path: quality/dist
+          path: quality/public/dist
 
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
