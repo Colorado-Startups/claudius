@@ -13,5 +13,7 @@ The open-repo files (CONTRIBUTING.md, GOVERNANCE.md, MAINTAINERS.md, SECURITY.md
 the .github issue, discussion and pull request templates, CODEOWNERS, dco.yml, release.yml and
 FUNDING.yml, tools/merge_policy.py, tools/merge_policy_selftest.py, tools/merge_policy_fixtures/ and tools/merge_policy.json) come from Git Crafter's
 templates/open and its CODE_OF_CONDUCT.md and tools/merge_policy*, at commit
-72e3b86692bbf8e5bbb8865ff3c3b878f449e6f9, filled for Claudius. The tools/merge_policy* files are unchanged.
-The .claude/ files and templates/claude/.claude/agents/reviewer.md: tests/moved.json and tests/templates.test.mjs.
+72e3b86692bbf8e5bbb8865ff3c3b878f449e6f9, filled for Claudius. tools/merge_policy.py, tools/merge_policy_selftest.py
+and tools/merge_policy_fixtures/ are unchanged. templates/claude/.claude/agents/reviewer.md is Git Crafter's
+.claude/agents/reviewer.md, checked by tests/moved.json. The root .claude/ files copy templates/claude/.claude/
+byte for byte, and tests/templates.test.mjs checks that.
