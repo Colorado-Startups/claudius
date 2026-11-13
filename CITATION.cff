@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use Claudius, please cite it as below."
+title: "Claudius: the Claude pack for Git Crafter"
+type: software
+authors:
+  - name: "Colorado Startups"
+repository-code: "https://github.com/Colorado-Startups/claudius"
+url: "https://colorado-startups.github.io/claudius/"
+license: Apache-2.0
+keywords:
+  - claude-code
+  - ai-agents
+  - process-maps
+  - quality-metrics
