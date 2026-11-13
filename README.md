@@ -14,6 +14,16 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 | Private numbers | Usage, cost, transcripts and connectors. Read on your own machine only, never uploaded |
 | Licence | Apache-2.0. Source of the moved files: [NOTICE](NOTICE) |
 
+## Layout
+
+| Path | Holds |
+| --- | --- |
+| `pack.json` | the six tabs |
+| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard and Decide maps |
+| `collectors/<tab>/`, `fixtures/` | the collectors, their tests and test fixtures |
+| `tests/moved.json` | where each file came from in Git Crafter |
+| `tests/engine-tests.sh` | CI: each file matches its source, then its tests run inside the pinned engine |
+
 ## Add the pack
 
 | Step | Do |
@@ -25,7 +35,7 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 | Pin | Works |
 | --- | --- |
 | Git Crafter engine up to `8e284cb` | No. That engine still ships these tabs, and a pack named like them is a usage error |
-| An engine release without its own Claude tabs | Yes |
+| An engine release without its own Claude tabs, whose `lib` carries every helper these collectors import | Yes, once the collectors take those helpers from `lib` |
 
 ## The one local command
 
@@ -37,4 +47,5 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 
 | Check | Fails when |
 | --- | --- |
-| [tests/privacy.mjs](tests/privacy.mjs), on every page build | the run is not a CI run, a local-only metric has a value, or a home path, email or account name is in it |
+| [tests/privacy.mjs](tests/privacy.mjs), on every page build | the run is not a CI run, a local-only metric has a value, or a home path or email is in it |
+| The same file on your machine, with `PRIVACY_NAMES` set | a listed account name is in the run. CI sets no names |

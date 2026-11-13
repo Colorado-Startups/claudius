@@ -5,6 +5,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import { localOnlyIds, privacyProblems } from './privacy.mjs';
 
@@ -62,6 +63,14 @@ test('privacy: an email fails; a git remote and a noreply address pass', () => {
   assert.deepEqual(privacyProblems(run, { localIds }), []);
   run.metrics['fixture.gh'].source = 'someone@example.com';
   assert.deepEqual(privacyProblems(run, { localIds }), ['email someone@example.com']);
+});
+
+test('privacy: the pack targets name 47 local-only ids, and a seeded one fails', () => {
+  const ids = localOnlyIds([fileURLToPath(new URL('../targets/', import.meta.url))]);
+  assert.equal(ids.size, 47);
+  const run = { mode: 'ci', metrics: { 'claude.cost_per_merged_pr_usd': { value: 1.5, source: 'transcripts' } } };
+  assert.ok(ids.has('claude.cost_per_merged_pr_usd'));
+  assert.deepEqual(privacyProblems(run, { localIds: ids }), ['claude.cost_per_merged_pr_usd needs local files but carries a value']);
 });
 
 test('privacy: a listed account name fails, as a whole word', () => {
