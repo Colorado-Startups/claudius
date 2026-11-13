@@ -1,4 +1,14 @@
 {
- "comment": "Claudius's own Quality page: the six Claude tabs. Keys: Git Crafter quality/CONFIG.md. At engine pin b02074f (v4.6.0) these tabs come from Git Crafter's own copy; once Git Crafter drops it, this config reads Claudius's files.",
- "tabs": ["claude", "claude-settings", "desktop-app", "blockers", "tokens", "instructions"]
+  "comment": "Claudius's own Quality page: the six Claude tabs, read from this repo's own targets, collectors and ideals. Keys: Git Crafter quality/CONFIG.md.",
+  "tabs": [
+    ["claude", "Claude"],
+    ["claude-settings", "Claude settings"],
+    ["desktop-app", "Claude desktop app"],
+    ["blockers", "Blockers"],
+    ["tokens", "Tokens"],
+    ["instructions", "Instructions"]
+  ],
+  "targets": "targets",
+  "collectors": "collectors",
+  "ideals": "ideals"
 }
