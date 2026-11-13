@@ -47,5 +47,5 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 
 | Check | Fails when |
 | --- | --- |
-| [tests/privacy.mjs](tests/privacy.mjs), on every page build | the run is not a CI run, a local-only metric has a value, or a home path or email is in it |
+| [tests/privacy.mjs](tests/privacy.mjs), on every page build | the run is not a CI run, a local-only metric has a value, or a home path or email is in it or in any file the deploy uploads (quality/dist) |
 | The same file on your machine, with `PRIVACY_NAMES` set | a listed account name is in the run. CI sets no names |

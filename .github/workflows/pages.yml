@@ -44,8 +44,9 @@ jobs:
           quality-config: quality/config.json
 
       # The run the page is drawn from: CI mode, no local-only value, no home path or email. CI sets no account names.
+      # Every file the deploy uploads, quality/dist, gets the same home path and email checks.
       - name: Privacy gate
-        run: node tests/privacy.mjs quality/data/latest.json targets
+        run: node tests/privacy.mjs quality/data/latest.json targets --dist quality/dist
 
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'

@@ -1,7 +1,8 @@
 // The privacy gate: Claudius's public page holds no reading from a
-// maintainer's machine. It reads the run file the page is drawn from.
+// maintainer's machine. It reads the run file the page is drawn from, and
+// every file under each --dist folder, the folder the deploy uploads.
 //
-//   node tests/privacy.mjs <run.json> [targets folder ...]
+//   node tests/privacy.mjs <run.json> [targets folder ...] [--dist <folder> ...]
 //
 // A finding is any of these:
 //   the run's mode is not ci          a --local run is never uploaded
@@ -9,8 +10,9 @@
 //   a home path                       /Users/<name>, /home/<name>, C:\Users\<name>, -Users-<name>
 //   an email address                  git@ remotes and noreply addresses pass
 //   a name in PRIVACY_NAMES           comma separated, for a local check; CI sets none
+// A --dist file is text, so only the last three apply to it.
 // Exit 0 clean, 1 findings (each printed), 2 usage error.
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -30,14 +32,14 @@ export function localOnlyIds(dirs) {
   return ids;
 }
 
-// Every finding in one run, as text; [] when clean.
-export function privacyProblems(run, { localIds = new Set(), names = [] } = {}) {
+// Every file under a folder, depth first, as paths.
+export function filesUnder(dir) {
+  return readdirSync(dir).sort().flatMap((f) => (statSync(join(dir, f)).isDirectory() ? filesUnder(join(dir, f)) : [join(dir, f)]));
+}
+
+// Every home path, email or listed name in a text; [] when clean.
+export function textProblems(text, names = []) {
   const found = [];
-  if (run?.mode !== 'ci') found.push(`run mode is ${JSON.stringify(run?.mode)}, not "ci"`);
-  for (const [id, m] of Object.entries(run?.metrics ?? {})) {
-    if (localIds.has(id) && (m?.value != null || m?.detail?.length)) found.push(`${id} needs local files but carries a value`);
-  }
-  const text = JSON.stringify(run);
   for (const re of HOME_PATHS) for (const hit of new Set(text.match(re) ?? [])) found.push(`home path ${hit}`);
   for (const hit of new Set((text.match(EMAIL) ?? []).filter((e) => !EMAIL_OK(e)))) found.push(`email ${hit}`);
   for (const name of names.map((n) => n.trim()).filter(Boolean)) {
@@ -46,22 +48,38 @@ export function privacyProblems(run, { localIds = new Set(), names = [] } = {}) 
   return found;
 }
 
+// Every finding in one run, as text; [] when clean.
+export function privacyProblems(run, { localIds = new Set(), names = [] } = {}) {
+  const found = [];
+  if (run?.mode !== 'ci') found.push(`run mode is ${JSON.stringify(run?.mode)}, not "ci"`);
+  for (const [id, m] of Object.entries(run?.metrics ?? {})) {
+    if (localIds.has(id) && (m?.value != null || m?.detail?.length)) found.push(`${id} needs local files but carries a value`);
+  }
+  return [...found, ...textProblems(JSON.stringify(run), names)];
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const [file, ...dirs] = process.argv.slice(2);
-  if (!file) {
-    console.error('usage: node tests/privacy.mjs <run.json> [targets folder ...]');
+  const args = process.argv.slice(2);
+  const dists = [];
+  for (let i = args.indexOf('--dist'); i !== -1; i = args.indexOf('--dist')) dists.push(args.splice(i, 2)[1]);
+  const [file, ...dirs] = args;
+  if (!file || dists.includes(undefined)) {
+    console.error('usage: node tests/privacy.mjs <run.json> [targets folder ...] [--dist <folder> ...]');
     process.exit(2);
   }
-  let run, localIds;
+  const names = (process.env.PRIVACY_NAMES ?? '').split(',');
+  let run, localIds, pages;
   try {
     run = JSON.parse(readFileSync(file, 'utf8'));
     localIds = localOnlyIds(dirs);
+    pages = dists.flatMap(filesUnder);
   } catch (err) {
     console.error(`privacy: ${err.message}`);
     process.exit(2);
   }
-  const found = privacyProblems(run, { localIds, names: (process.env.PRIVACY_NAMES ?? '').split(',') });
+  const found = privacyProblems(run, { localIds, names });
+  for (const page of pages) for (const f of textProblems(readFileSync(page, 'utf8'), names)) found.push(`${page}: ${f}`);
   for (const f of found) console.error(`::error::privacy: ${f}`);
-  console.log(`privacy: ${Object.keys(run.metrics ?? {}).length} metrics, ${localIds.size} local-only ids, ${found.length} findings`);
+  console.log(`privacy: ${Object.keys(run.metrics ?? {}).length} metrics, ${localIds.size} local-only ids, ${pages.length} dist files, ${found.length} findings`);
   process.exit(found.length ? 1 : 0);
 }
