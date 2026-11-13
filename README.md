@@ -38,7 +38,7 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 | Pin | Works |
 | --- | --- |
 | Git Crafter engine up to `d3c15df` (v4.6.4) | No. That engine still ships these tabs, and a pack named like them is a usage error |
-| Git Crafter engine from `70ccd19` (v5.0.0), which ships no Claude tab | Yes: the collectors take every engine helper from `lib` (`collectors/lib/engine.mjs`). This repo pins `dd999dc` (v6.0.0) |
+| Git Crafter engine from `70ccd19` (v5.0.0), which ships no Claude tab | Yes: the collectors take every engine helper from `lib` (`collectors/lib/engine.mjs`). This repo pins `a9d6b45` (v7.0.0) |
 
 ## The one local command
 
