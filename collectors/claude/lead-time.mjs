@@ -17,9 +17,7 @@
 // Contract: quality/targets/lead-time.json. Never throws; a failed read is
 // could_not_check.
 
-import { ghClient } from '../github/github-core.mjs';
-import { greenAt } from '../github/github-reviews.mjs';
-import { redact } from '../lib/redact.mjs';
+import { ghClient, greenAt, redact, useLib } from '../lib/engine.mjs';
 import { median, round } from './claude-lib.mjs';
 import { ownRepo, prSessionStarts, projectMatch, PROJECTS_DIR, resolvePath } from './claude.mjs';
 
@@ -117,7 +115,9 @@ function startsFor({ mode, root, repo, claude, home }) {
 
 // The lead-time metric. gh: a github-core client (graphql); allParams: the
 // Claude tab's params name the transcripts.
-export async function collect({ root = '.', mode, params = {}, allParams = {}, gh = ghClient(), now = new Date(), home } = {}) {
+export async function collect({ root = '.', mode, params = {}, allParams = {}, gh, now = new Date(), home, lib } = {}) {
+  useLib(lib);
+  gh ??= ghClient();
   const p = { ...DEFAULTS, ...params };
   const repo = await ownRepo(root, p);
   const source = `gh api graphql: the last ${p.last_prs} merged pullRequests timed end to end (N = ${p.last_prs}, a template choice: a median that turns over within a day), each step's median in hours, summed; live is the first successful ${p.environment} deployment created at or after the merge; session start from this Mac's transcripts, local runs only`;

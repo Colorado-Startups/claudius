@@ -1,7 +1,7 @@
 // What the Claude collector reads from GitHub: each linked PR, its first
 // push's checks, reverts and bugs naming it (claude.mjs).
 
-import { causes, PULL_FIELDS, reverts as findReverts } from '../github/github.mjs';
+import { causes, PULL_FIELDS, reverts as findReverts } from '../lib/engine.mjs';
 import { firstLine, TEMPLATE } from './claude-lib.mjs';
 
 const PR_CHUNK = 50;
@@ -98,8 +98,8 @@ async function commitContexts(repo, shas, gh) {
 
 // What the Claude tab reads of a PR: the fields github.mjs's shared functions
 // read (PULL_FIELDS), plus its state, its author's type, every commit and the
-// checks on its head.
-const CLAUDE_PULL_FIELDS = `${PULL_FIELDS}
+// checks on its head. A function: PULL_FIELDS arrives with lib, after import.
+const claudePullFields = () => `${PULL_FIELDS}
         state author { __typename }
         commits(first: 100) { nodes { commit { oid committedDate } } }
         headCommit: commits(last: 1) { nodes { commit { statusCheckRollup { contexts(first: 100) { nodes { __typename ... on CheckRun { name conclusion status } ... on StatusContext { context state } } } } } } }`;
@@ -122,7 +122,7 @@ async function readPulls(repo, numbers, gh) {
 
 async function readChunk(owner, name, chunk, gh) {
   const out = { found: new Map(), missing: [], failed: 0, reason: null };
-  const aliases = chunk.map((n) => `p${n}: pullRequest(number: ${n}) { ${CLAUDE_PULL_FIELDS} }`).join(' ');
+  const aliases = chunk.map((n) => `p${n}: pullRequest(number: ${n}) { ${claudePullFields()} }`).join(' ');
   let body;
   try {
     body = await graphql(gh, `query { repository(owner: "${owner}", name: "${name}") { ${aliases} } }`);

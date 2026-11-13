@@ -6,7 +6,6 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { after, test } from 'node:test';
-import { fileURLToPath } from 'node:url';
 import { collect, config, fixSignals, outcomeOf, outputTargets, replayGuard, segments, neutralStep, signalForm, similar, steps, words, writesFile } from './blockers.mjs';
 import { reviewerTokens } from './blockers-metrics.mjs';
 import { reviewedPrs } from './blockers-transcripts.mjs';
@@ -186,7 +185,8 @@ test('held: the rule the block named stopped firing, but the current guard still
 });
 
 test('the replay asks the real guard, the commands on stdin', async () => {
-  const guard = fileURLToPath(new URL('../../../tools/bash_guard.py', import.meta.url));
+  // The guard is Git Crafter's: the engine checkout tests/engine-tests.sh names in GIT_CRAFTER.
+  const guard = path.join(process.env.GIT_CRAFTER ?? '', 'tools', 'bash_guard.py');
   const long = `echo ${'x'.repeat(220)} && git push --force origin x`;
   const got = await replayGuard(guard, [{ id: 0, command: 'git push --force origin x' }, { id: 1, command: 'ls -la' }, { id: 2, command: long }]);
   assert.deepEqual([got.verdicts.get(0), got.verdicts.get(1)], [['git-force-push'], []]);

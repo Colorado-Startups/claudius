@@ -9,7 +9,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { loadTargets } from '../lib/score.mjs';
+import { loadTargets } from '../lib/engine.mjs';
 import { area, collect, figureDates, fileRefs, metricIds, noteFlags, resolves, sentences } from './simplicity.mjs';
 
 // Only this collector's targets files, so another collector's file never fails these tests.
@@ -160,8 +160,8 @@ test('the collector holds no repo-specific value: every one is in its targets pa
   for (const word of ['/Users/', 'Developer/', 'acme', 'Website']) assert.ok(!code.includes(word), `${word} in the code`);
 });
 
-test('with no checkout given, the sync tool runs from the Git Crafter checkout this collector sits in', async () => {
-  const kit = fileURLToPath(new URL('../../../', import.meta.url));
+test('with no checkout given, the sync tool runs from the pack checkout this collector sits in', async () => {
+  const kit = fileURLToPath(new URL('../../', import.meta.url));
   const calls = [];
   await collect({ ...base, codeOs: undefined, exec: fakeExec(calls) });
   const sync = calls.find((c) => c.startsWith('python3'));

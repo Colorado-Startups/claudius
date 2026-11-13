@@ -22,8 +22,8 @@
 //
 // Settings are params on quality/targets/simplicity.json, each with a
 // default: projects_dir (~/.claude/projects), project_match (the repo's own project folder), managed_claude_md
-// (the platform's managed policy CLAUDE.md), code_os_checkout (the Git Crafter
-// checkout this collector runs from), sync_entry (the sync tool's entry for
+// (the platform's managed policy CLAUDE.md), code_os_checkout (a Git Crafter
+// checkout; default the pack checkout, KIT_ROOT), sync_entry (the sync tool's entry for
 // ~/.claude), not_living (doc paths that record the past on purpose) and
 // stale_days. The doc set (doc_set, doc_set_left_out, skip_dirs) is the Docs
 // tab's, from docs.json when the engine passes every file's params
@@ -35,9 +35,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { managedClaudeMd, PROJECTS_DIR, projectMatch, resolvePath } from '../lib/paths.mjs';
-import { expandGlobs } from '../docs/docs.mjs';
-import { redact } from '../lib/redact.mjs';
+import { expandGlobs, managedClaudeMd, PROJECTS_DIR, projectMatch, redact, resolvePath, useLib } from '../lib/engine.mjs';
 
 export const area = 'simplicity';
 
@@ -47,8 +45,9 @@ export const metricIds = TARGETS.map((t) => t.id);
 // defaults for a bare call. The engine passes the repo's merged params.
 const TEMPLATE = Object.assign({}, ...TARGETS.map((t) => t.params ?? {}));
 
-// The Git Crafter checkout this file runs from: quality/collectors/ is two below it.
-const KIT_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
+// The pack checkout this file runs from, collectors/<tab>/ two below it; it holds no Git Crafter
+// tools, so a Git Crafter metric is not measured until params.code_os_checkout names one.
+const KIT_ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const CI_REASON = 'rules and memory live on the machine that ran the sessions; refreshed by a --local collect there';
 const DAY = 864e5;
 const MIN_WORDS = 8;
@@ -61,6 +60,7 @@ const defaultExec = async (cmd, args, opts = {}) => (await run(cmd, args, { maxB
 // Every metric of this tab, with each home path and account name taken out
 // of the text (redact.mjs).
 export async function collect(opts = {}) {
+  useLib(opts.lib);
   return redact(await gather(opts), opts.home);
 }
 

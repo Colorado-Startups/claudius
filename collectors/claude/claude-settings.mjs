@@ -23,7 +23,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { PROJECTS_DIR, projectMatch, resolvePath } from './claude.mjs';
-import { redact } from '../lib/redact.mjs';
+import { redact, useLib } from '../lib/engine.mjs';
 
 export const area = 'claude_settings';
 
@@ -201,6 +201,7 @@ function promptDetail(prompts, read) {
 // Every metric of this tab, with each home path and account name taken out
 // of the text (redact.mjs).
 export async function collect(opts = {}) {
+  useLib(opts.lib);
   return redact(await gather(opts), opts.home);
 }
 

@@ -4,7 +4,7 @@ import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
-import { percentile } from '../github/github.mjs';
+import { percentile } from '../lib/engine.mjs';
 
 export const area = 'blockers';
 
