@@ -24,6 +24,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { PROJECTS_DIR, projectMatch, resolvePath } from './claude.mjs';
 import { redact, useLib } from '../lib/engine.mjs';
+import { globRegex } from '../instructions/instructions-sessions.mjs';
 
 export const area = 'claude_settings';
 
@@ -119,6 +120,31 @@ function validMetric(root, params, def) {
   return { value: problems.length, source: `${source}; ${files.length ? files.join(', ') : 'no settings file in the repo'}`, ...(detail.length ? { detail } : {}) };
 }
 
+// A path without a leading ./.
+const noDot = (p) => p.replace(/^\.\//, '');
+
+// Whether a deny rule's path covers a credential pattern: the same path, or a glob that takes it in (Git Crafter
+// v4.6.4 quality/collectors/github/github-lock.mjs denyCovers).
+export const denyCovers = (rule, pattern) => noDot(rule) === noDot(pattern) || globRegex(noDot(rule)).test(noDot(pattern));
+
+// claude_settings.deny_coverage: the share of params.credential_patterns that a Read(...) deny rule in the
+// repo's settings files covers (Git Crafter v4.6.4 github-metrics-security.mjs, moved here, #7).
+function denyMetric(root, params, def) {
+  const patterns = params.credential_patterns ?? [];
+  const source = def?.source ?? 'deny rules';
+  if (!patterns.length) return { could_not_check: 'params.credential_patterns is empty: list the paths Claude Code should never read', source };
+  const read = (f) => {
+    try {
+      return JSON.parse(fs.readFileSync(path.join(root, f), 'utf8'))?.permissions?.deny ?? [];
+    } catch {
+      return [];
+    }
+  };
+  const rules = (params.files ?? []).flatMap(read).map((r) => /^Read\((.+)\)$/.exec(String(r))?.[1]).filter(Boolean);
+  const detail = patterns.map((p) => ({ label: p, value: rules.some((r) => denyCovers(r, p)) ? 1 : 0, unit: 'denied' }));
+  return { value: Math.round((100 * detail.filter((d) => d.value).length) / patterns.length), source, detail };
+}
+
 // Every *.jsonl under the project folders whose name contains match.
 function transcriptFiles(dir, match) {
   const out = [];
@@ -209,6 +235,7 @@ async function gather({ root = '.', mode, params = TEMPLATE, targets = TARGETS, 
   const def = (id) => targets.find((t) => t.id === id) ?? TARGETS.find((t) => t.id === id);
   const p = { ...TEMPLATE, ...params };
   const out = { 'claude_settings.valid': validMetric(root, p, def('claude_settings.valid')) };
+  out['claude_settings.deny_coverage'] = denyMetric(root, p, def('claude_settings.deny_coverage'));
   const id = 'claude_settings.prompts_per_100_calls';
   out[id] = mode === 'local' ? promptsMetric(root, p, def(id), { home, projectsDir, now: now.getTime() }) : { could_not_check: CI_REASON, source: def(id).source };
   return out;

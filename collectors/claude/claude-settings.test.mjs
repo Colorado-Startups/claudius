@@ -25,7 +25,7 @@ test('targets load, every metric is on the tab, ids match the area', () => {
     assert.equal(d.tab, 'claude-settings');
     assert.ok(d.id.startsWith(`${area}.`));
   }
-  assert.deepEqual(defs.map((d) => d.kind).sort(), ['quality', 'speed']);
+  assert.deepEqual(defs.map((d) => d.kind).sort(), ['quality', 'quality', 'speed']);
 });
 
 test('ruleProblem: the shapes the permissions docs say are skipped or ignored', () => {
@@ -95,4 +95,17 @@ test('collect: valid counts each problem; prompts read local transcripts only', 
   const empty = await collect({ root: path.join(tmp, 'bare'), mode: 'ci', now });
   assert.equal(empty['claude_settings.valid'].value, 0);
   assert.match(empty['claude_settings.valid'].source, /no settings file/);
+});
+
+test('deny_coverage: the share of credential patterns a Read deny rule covers, by path or glob', async () => {
+  const root = path.join(tmp, 'deny');
+  const shipped = fs.readFileSync(new URL('../../templates/claude/.claude/settings.json', import.meta.url), 'utf8');
+  fs.mkdirSync(path.join(root, '.claude'), { recursive: true });
+  fs.writeFileSync(path.join(root, '.claude', 'settings.json'), shipped);
+  const full = await collect({ root, mode: 'ci', home: tmp });
+  assert.equal(full['claude_settings.deny_coverage'].value, 100);
+  fs.writeFileSync(path.join(root, '.claude', 'settings.json'), JSON.stringify({ permissions: { deny: ['Read(./.env)', 'Read(./**/*.pem)'] } }));
+  const part = await collect({ root, mode: 'ci', home: tmp });
+  assert.equal(part['claude_settings.deny_coverage'].value, 40);
+  assert.deepEqual(part['claude_settings.deny_coverage'].detail.filter((d) => d.value).map((d) => d.label), ['.env', '**/*.pem']);
 });

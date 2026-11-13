@@ -3,6 +3,7 @@
  "source_repo": "SoulCraft-Org/git-crafter",
  "source_commit": "8e284cbaa0c86fcb25473685ec68aea69d9a024b",
  "edited": [
+  "targets/claude-settings.json",
   "targets/instructions.json",
   "targets/lead-time.json",
   "targets/simplicity.json",
