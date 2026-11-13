@@ -1,12 +1,16 @@
 {
-  "comment": "Claudius's own Quality page: the six Claude tabs, read from this repo's own targets, collectors and ideals. Keys: Git Crafter quality/CONFIG.md.",
+  "comment": "Claudius's own Quality page: the six Claude tabs, read from this repo's own targets, collectors and ideals, then four Git Crafter tabs that re-check the free GitHub features each build. Keys: Git Crafter quality/CONFIG.md.",
   "tabs": [
     ["claude", "Claude"],
     ["claude-settings", "Claude settings"],
     ["desktop-app", "Claude desktop app"],
     ["blockers", "Blockers"],
     ["tokens", "Tokens"],
-    ["instructions", "Instructions"]
+    ["instructions", "Instructions"],
+    "dependabot",
+    "scanning",
+    "insights",
+    "security"
   ],
   "targets": "targets",
   "collectors": "collectors",

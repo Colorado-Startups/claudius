@@ -31,6 +31,8 @@ jobs:
       deployments: read
       issues: read
       pull-requests: read
+      # Dependabot's open alerts, read live (Git Crafter templates/ci/pages.yml); without it the read is a 403.
+      vulnerability-alerts: read
     steps:
       # GitHub masks a secret's whole value, not each name in it, so each name is masked on its own before any
       # step can print one. A fork's pull request gets no secrets: nothing to mask.
@@ -59,7 +61,7 @@ jobs:
       - name: Public config
         run: node quality/public.mjs
 
-      - uses: SoulCraft-Org/git-crafter/actions/pages@dd999dcac64873f77165609f3cc9fde4da49d332 # v6.0.0
+      - uses: SoulCraft-Org/git-crafter/actions/pages@a9d6b45b7e5ac54091123e2cda1efcfcd2f63696 # v7.0.0
         with:
           pages: process quality
           config: quality/public/process.json
