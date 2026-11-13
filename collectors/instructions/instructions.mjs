@@ -157,7 +157,7 @@ function tokenMetric(ctx) {
     }),
   );
   const loadedNames = `${groups.map(([l]) => l).join(', ')} (params ${['managed_claude_md', 'user_claude_md', 'repo_claude_md', 'user_rules', 'repo_rules'].map((k) => `${k} ${toList(params[k]).join(' + ')}`).join('; ')}; a rule whose frontmatter has paths is left out)`;
-  const tokenSource = `state: bytes / 4 of ${loadedNames}; the MEMORY index is instructions.memory_index_tokens`;
+  const tokenSource = `state: bytes / 4 of ${loadedNames}; the MEMORY index is counted apart`;
   if (loaded.error) cnc('claude.instruction_tokens', loaded.error, tokenSource);
   else {
     const parts = loaded.filter((p) => p.bytes > 0);
