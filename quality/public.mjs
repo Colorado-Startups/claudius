@@ -1,5 +1,5 @@
-// The public page's config: quality/config.json with every metric that needs local files dropped, so the page
-// CI uploads never shows, counts or lists one (pages.yml). The owner, 2026-11-12: the metrics of this Mac's
+// The public pages' configs: quality/config.json with every metric that needs local files dropped, so the pages
+// CI uploads never show, count or list one (pages.yml). The owner, 2026-11-12: the metrics of this Mac's
 // Claude session are personal and never shown in public.
 //
 //   node quality/public.mjs [--root DIR]
@@ -7,11 +7,16 @@
 // Writes, under DIR (default the current folder):
 //   quality/public/config.json   quality/config.json, its targets, data, history and out under quality/public
 //   quality/public/targets/      each targets file as written, with "drop": true on each needs "local-files" entry
+//   quality/public/process.json  quality/process/config.json, the Process page's, when there is one: each
+//                                { "use": id } map that names one of the pack's own (maps/<id>.json) written out
+//                                in full, since CI reads no pack by path; in each map, each step whose metric is
+//                                dropped left out, and a map with no step left out too. Its quality config is the public one,
+//                                so each step reads the public run, and its page goes to the same dist.
 // A dropped entry's params still count, and a collector whose every metric is dropped does not run (Git Crafter
 // quality/CONFIG.md, Overrides). The engine has no filter by needs at v6.0.0, so the drop is chosen here, by
 // needs, never by a list that a new metric could miss. A --local run reads quality/config.json, the full page,
 // and is never uploaded.
-import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -30,6 +35,42 @@ export const publicConfig = (config) => ({
   out: `${PUBLIC}/dist`,
 });
 
+// The pack's own maps (maps/<id>.json), by id.
+function packMaps(root) {
+  const dir = join(root, 'maps');
+  if (!existsSync(dir)) return {};
+  return Object.fromEntries(readdirSync(dir).filter((f) => f.endsWith('.json')).map((f) => [f.replace(/\.json$/, ''), JSON.parse(readFileSync(join(dir, f), 'utf8'))]));
+}
+
+// One map entry with each step whose metric is dropped left out, a pack map's { use } written out in full
+// first; null when no step is left. A Git Crafter library map's { use } is kept as written: its steps read
+// template metrics, which this file never drops.
+function publicMap(entry, maps, dropped) {
+  const own = entry && 'use' in entry ? maps[entry.use] : entry;
+  if (!own) return entry;
+  const extra = 'use' in entry ? Object.keys(entry).filter((k) => k !== 'use' && k !== 'comment') : [];
+  if (extra.length) throw new Error(`quality/process/config.json map use "${entry.use}": a pack map is named by use alone; change maps/${entry.use}.json, not ${extra.join(', ')}`);
+  const steps = (own.steps ?? []).filter((s) => !dropped.has(s.metric));
+  if (!steps.length) return null;
+  const kept = new Set(steps.map((s) => s.id));
+  return { ...own, ...(own.critical_path ? { critical_path: own.critical_path.filter((id) => kept.has(id)) } : {}), steps };
+}
+
+// The public Process config: the repo's own, its maps as publicMap leaves them, read from the public run.
+export function publicProcess(config, maps, dropped) {
+  const kept = (config.maps ?? []).map((m) => publicMap(m, maps, dropped)).filter(Boolean);
+  return {
+    ...config,
+    comment: `Written by quality/public.mjs from quality/process/config.json: each pack map in full, each step whose metric needs local files left out. Never edit; rerun it.`,
+    docs: { ...config.docs, maps: kept.length ? `${PUBLIC}/process.json` : null },
+    maps: kept,
+    quality_config: `${PUBLIC}/config.json`,
+    data: `${PUBLIC}/process/org.json`,
+    history: null,
+    out: `${PUBLIC}/dist`,
+  };
+}
+
 const json = (v) => `${JSON.stringify(v, null, 2)}\n`;
 
 // Writes PUBLIC under root afresh; returns the ids it dropped.
@@ -46,6 +87,8 @@ export function writePublic(root = '.') {
     writeFileSync(join(out, 'targets', file), json(list));
   }
   writeFileSync(join(out, 'config.json'), json(publicConfig(config)));
+  const processFile = join(root, 'quality/process/config.json');
+  if (existsSync(processFile)) writeFileSync(join(out, 'process.json'), json(publicProcess(JSON.parse(readFileSync(processFile, 'utf8')), packMaps(root), new Set(dropped))));
   return dropped;
 }
 
@@ -56,5 +99,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     console.error('usage: node quality/public.mjs [--root DIR]');
     process.exit(2);
   }
-  console.log(`public: ${writePublic(root).length} metrics that need local files dropped, wrote ${PUBLIC}/config.json and targets`);
+  console.log(`public: ${writePublic(root).length} metrics that need local files dropped, wrote ${PUBLIC}/config.json, targets and process.json`);
 }

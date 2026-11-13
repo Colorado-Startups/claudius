@@ -1,9 +1,9 @@
 name: pages
 
-# Claudius's public Quality page, built by Git Crafter's actions/pages at a full commit SHA (Git Crafter
-# templates/ci/pages.yml). A pull request builds it and runs the privacy gate; only a push to main publishes.
-# The build runs in CI mode from quality/public/config.json, which drops every metric that needs local files,
-# so it holds no reading from a maintainer's machine; tests/privacy.mjs checks.
+# Claudius's public Process page and Quality page, built by Git Crafter's actions/pages at a full commit SHA
+# (Git Crafter templates/ci/pages.yml). A pull request builds them and runs the privacy gate; only a push to main
+# publishes. The build runs in CI mode from quality/public/, which drops every metric that needs local files and
+# every map step one scores, so the pages hold no reading from a maintainer's machine; tests/privacy.mjs checks.
 on:
   push:
     branches: [main]
@@ -32,6 +32,19 @@ jobs:
       issues: read
       pull-requests: read
     steps:
+      # GitHub masks a secret's whole value, not each name in it, so each name is masked on its own before any
+      # step can print one. A fork's pull request gets no secrets: nothing to mask.
+      - name: Mask the privacy names
+        env:
+          PRIVACY_NAMES: ${{ secrets.PRIVACY_NAMES }}
+        run: |
+          IFS=, read -ra names <<< "$PRIVACY_NAMES"
+          for n in "${names[@]}"; do
+            # Trim as the gate does, so "a, b" masks "b" and not " b".
+            n="${n#"${n%%[![:space:]]*}"}"; n="${n%"${n##*[![:space:]]}"}"
+            if [ -n "$n" ]; then echo "::add-mask::$n"; fi
+          done
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -41,18 +54,23 @@ jobs:
         with:
           node-version: 26
 
-      # quality/config.json with each metric that needs local files dropped: not shown, not counted, not run.
+      # quality/config.json with each metric that needs local files dropped: not shown, not counted, not run. And
+      # quality/process/config.json with the pack's maps in full and each step such a metric scores left out.
       - name: Public config
         run: node quality/public.mjs
 
       - uses: SoulCraft-Org/git-crafter/actions/pages@dd999dcac64873f77165609f3cc9fde4da49d332 # v6.0.0
         with:
-          pages: quality
+          pages: process quality
+          config: quality/public/process.json
           quality-config: quality/public/config.json
 
-      # The run the page is drawn from: CI mode, no metric that needs local files, no home path or email. CI sets
-      # no account names. Every file the deploy uploads, quality/public/dist, gets the same checks but the mode.
+      # The run the pages are drawn from: CI mode, no metric that needs local files, no home path, email or name
+      # in the PRIVACY_NAMES secret. Every file the deploy uploads, quality/public/dist, gets the same checks but
+      # the mode. A finding prints its file and line, never what it matched; no secret skips the name check.
       - name: Privacy gate
+        env:
+          PRIVACY_NAMES: ${{ secrets.PRIVACY_NAMES }}
         run: node tests/privacy.mjs quality/public/data/latest.json targets --dist quality/public/dist
 
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0

@@ -1,5 +1,6 @@
-// The public config (quality/public.mjs): every metric that needs local files dropped, every other one as
-// written, and the page's files under quality/public, apart from a --local run's.
+// The public configs (quality/public.mjs): every metric that needs local files dropped, every other one as
+// written, each map step such a metric scores left out, and the pages' files under quality/public, apart
+// from a --local run's.
 import assert from 'node:assert/strict';
 import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -7,7 +8,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { writePublic } from '../quality/public.mjs';
+import { publicProcess, writePublic } from '../quality/public.mjs';
 import { localOnlyIds } from './privacy.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
@@ -17,7 +18,8 @@ const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 function copy() {
   const root = mkdtempSync(join(tmpdir(), 'public-'));
   cpSync(join(ROOT, 'quality', 'config.json'), join(root, 'quality', 'config.json'));
-  cpSync(join(ROOT, 'targets'), join(root, 'targets'), { recursive: true });
+  cpSync(join(ROOT, 'quality', 'process'), join(root, 'quality', 'process'), { recursive: true });
+  for (const dir of ['targets', 'maps']) cpSync(join(ROOT, dir), join(root, dir), { recursive: true });
   return root;
 }
 
@@ -52,4 +54,34 @@ test('public: a rerun writes afresh, leaving no stale targets file', () => {
   writeFileSync(join(root, 'quality', 'public', 'targets', 'stale.json'), '[]');
   writePublic(root);
   assert.ok(!existsSync(join(root, 'quality', 'public', 'targets', 'stale.json')));
+});
+
+test('public: the Process config writes each pack map in full, without the steps a dropped metric scores', () => {
+  const root = copy();
+  const dropped = new Set(writePublic(root));
+  const mine = read(join(ROOT, 'quality', 'process', 'config.json'));
+  const pub = read(join(root, 'quality', 'public', 'process.json'));
+  assert.deepEqual(mine.maps, [{ use: 'guard' }, { use: 'decide' }]);
+  assert.deepEqual({ ...pub, comment: mine.comment, maps: mine.maps }, {
+    ...mine,
+    docs: { maps: 'quality/public/process.json' },
+    quality_config: 'quality/public/config.json',
+    data: 'quality/public/process/org.json',
+    history: null,
+    out: 'quality/public/dist',
+  });
+  const guard = read(join(ROOT, 'maps', 'guard.json'));
+  assert.deepEqual(pub.maps, [{ ...guard, critical_path: [], steps: guard.steps.filter((s) => s.id === 'change') }], 'Decide scores only local-only metrics, so it is left out');
+  for (const s of pub.maps.flatMap((m) => m.steps)) assert.ok(!dropped.has(s.metric), s.metric);
+});
+
+test('public: a Process config with no step left names no maps; a library map passes through, a map in full loses its dropped steps', () => {
+  const guard = read(join(ROOT, 'maps', 'guard.json'));
+  const all = new Set(guard.steps.map((s) => s.metric));
+  const none = publicProcess({ docs: { maps: 'x.json' }, maps: [{ use: 'guard' }] }, { guard }, all);
+  assert.deepEqual([none.docs.maps, none.maps], [null, []]);
+  const own = { id: 'own', name: 'Own', why: 'w', critical_path: ['a', 'b'], steps: [{ id: 'a', metric: 'pr.latest_merge_hours' }, { id: 'b', metric: guard.steps[0].metric }] };
+  const kept = { ...own, critical_path: ['a'], steps: [own.steps[0]] };
+  assert.deepEqual(publicProcess({ maps: [{ use: 'delivery' }, own] }, { guard }, all).maps, [{ use: 'delivery' }, kept]);
+  assert.throws(() => publicProcess({ maps: [{ use: 'guard', name: 'Mine' }] }, { guard }, all), /named by use alone/);
 });
