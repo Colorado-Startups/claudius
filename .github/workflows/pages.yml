@@ -61,11 +61,30 @@ jobs:
       - name: Public config
         run: node quality/public.mjs
 
+      # The claudius-quality-read App's one-hour token, read-only and installed on this repo alone, for the metrics
+      # marked needs github-admin (settings, scanning and alert state). Main only: a pull request builds without it,
+      # and those metrics read not measured there. Its key went from the App's manifest conversion straight into the
+      # secret (Git Crafter guard route key-issuer-to-store); no one holds it.
+      - id: admin-app
+        if: github.ref == 'refs/heads/main' && vars.QUALITY_APP_CLIENT_ID != ''
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.QUALITY_APP_CLIENT_ID }}
+          private-key: ${{ secrets.QUALITY_APP_KEY }}
+          repositories: claudius
+          permission-administration: read
+          permission-secret-scanning-alerts: read
+          permission-security-events: read
+          permission-vulnerability-alerts: read
+          permission-organization-administration: read
+          permission-members: read
+
       - uses: SoulCraft-Org/git-crafter/actions/pages@689a2c2d72b0ac2a9d5fd66131b9279e889b6c2a # v7.0.1
         with:
           pages: process quality
           config: quality/public/process.json
           quality-config: quality/public/config.json
+          admin-read-token: ${{ github.ref == 'refs/heads/main' && steps.admin-app.outputs.token || '' }}
 
       # The run the pages are drawn from: CI mode, no metric that needs local files, no home path, email or name
       # in the PRIVACY_NAMES secret. Every file the deploy uploads, quality/public/dist, gets the same checks but
