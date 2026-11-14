@@ -61,7 +61,7 @@ jobs:
       - name: Public config
         run: node quality/public.mjs
 
-      - uses: SoulCraft-Org/git-crafter/actions/pages@a9d6b45b7e5ac54091123e2cda1efcfcd2f63696 # v7.0.0
+      - uses: SoulCraft-Org/git-crafter/actions/pages@689a2c2d72b0ac2a9d5fd66131b9279e889b6c2a # v7.0.1
         with:
           pages: process quality
           config: quality/public/process.json
