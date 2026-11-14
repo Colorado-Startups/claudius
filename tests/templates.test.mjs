@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const COPIES = ['.claude/settings.json', '.claude/agents/reviewer.md', '.claude/skills/bump-pins/SKILL.md'];
+const COPIES = ['.claude/settings.json', '.claude/agents/reviewer.md', '.claude/skills/bump-pins/SKILL.md', '.claude/skills/product-plan/SKILL.md'];
 
 test('templates: each root copy matches templates/claude byte for byte', () => {
   for (const file of COPIES) assert.equal(readFileSync(file, 'utf8'), readFileSync(`templates/claude/${file}`, 'utf8'), file);
