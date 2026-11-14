@@ -40,6 +40,26 @@
     }
   },
   {
+    "id": "claude_settings.setup_files",
+    "tab": "claude-settings",
+    "kind": "quality",
+    "group": "Quality",
+    "label": "Claudius files in place",
+    "means": "Share of the Claudius setup files the repo commits: AGENTS.md, CLAUDE.md, settings, the reviewer agent, the skills.",
+    "unit": "%",
+    "goal": 100,
+    "near": 80,
+    "direction": "higher",
+    "goal_source": "template goal: Claudius templates/claude/README.md lists each file a repo copies, and a missing one leaves a step of the build flow with nothing behind it",
+    "source": "state: each path in params.setup_files exists in the repo (setupMetric() in collectors/claude/claude-settings.mjs)",
+    "needs": "none",
+    "chart": "table",
+    "defined": "2026-11-13",
+    "params": {
+      "setup_files": ["AGENTS.md", "CLAUDE.md", ".claude/settings.json", ".claude/agents/reviewer.md", ".claude/skills/product-plan/SKILL.md", ".claude/skills/bump-pins/SKILL.md"]
+    }
+  },
+  {
     "id": "claude_settings.prompts_per_100_calls",
     "tab": "claude-settings",
     "kind": "speed",

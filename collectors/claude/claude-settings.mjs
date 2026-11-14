@@ -3,8 +3,9 @@
 //
 //   Quality      claude_settings.valid: problems in the settings files the
 //                repo commits (parse, unknown keys, rule shapes the docs say
-//                Claude Code skips or ignores)
-//   Speed        claude_settings.prompts_per_100_calls: tool calls that
+//                Claude Code skips or ignores); claude_settings.deny_coverage
+//                and claude_settings.setup_files, read from the repo's files
+//   Speed       claude_settings.prompts_per_100_calls: tool calls that
 //                waited for a person, from session transcripts
 //   Consumption  blockers.hook_tokens_per_session (blockers.mjs reads it;
 //                hooks are a settings key, so it shows on this tab)
@@ -145,6 +146,16 @@ function denyMetric(root, params, def) {
   return { value: Math.round((100 * detail.filter((d) => d.value).length) / patterns.length), source, detail };
 }
 
+// claude_settings.setup_files: the share of params.setup_files, the files the Claudius setup puts in a repo, that
+// the repo has. Presence only: a repo edits its AGENTS.md and settings, so a byte match would punish filling them in.
+function setupMetric(root, params, def) {
+  const files = params.setup_files ?? [];
+  const source = def?.source ?? 'setup files';
+  if (!files.length) return { could_not_check: 'params.setup_files is empty: list the Claudius files the repo should commit', source };
+  const detail = files.map((f) => ({ label: f, value: fs.existsSync(path.join(root, f)) ? 1 : 0, unit: 'in place' }));
+  return { value: Math.round((100 * detail.filter((d) => d.value).length) / files.length), source, detail };
+}
+
 // Every *.jsonl under the project folders whose name contains match.
 function transcriptFiles(dir, match) {
   const out = [];
@@ -236,6 +247,7 @@ async function gather({ root = '.', mode, params = TEMPLATE, targets = TARGETS, 
   const p = { ...TEMPLATE, ...params };
   const out = { 'claude_settings.valid': validMetric(root, p, def('claude_settings.valid')) };
   out['claude_settings.deny_coverage'] = denyMetric(root, p, def('claude_settings.deny_coverage'));
+  out['claude_settings.setup_files'] = setupMetric(root, p, def('claude_settings.setup_files'));
   const id = 'claude_settings.prompts_per_100_calls';
   out[id] = mode === 'local' ? promptsMetric(root, p, def(id), { home, projectsDir, now: now.getTime() }) : { could_not_check: CI_REASON, source: def(id).source };
   return out;

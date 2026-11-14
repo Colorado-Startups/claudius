@@ -25,7 +25,7 @@ test('targets load, every metric is on the tab, ids match the area', () => {
     assert.equal(d.tab, 'claude-settings');
     assert.ok(d.id.startsWith(`${area}.`));
   }
-  assert.deepEqual(defs.map((d) => d.kind).sort(), ['quality', 'quality', 'speed']);
+  assert.deepEqual(defs.map((d) => d.kind).sort(), ['quality', 'quality', 'quality', 'speed']);
 });
 
 test('ruleProblem: the shapes the permissions docs say are skipped or ignored', () => {
@@ -108,4 +108,17 @@ test('deny_coverage: the share of credential patterns a Read deny rule covers, b
   const part = await collect({ root, mode: 'ci', home: tmp });
   assert.equal(part['claude_settings.deny_coverage'].value, 40);
   assert.deepEqual(part['claude_settings.deny_coverage'].detail.filter((d) => d.value).map((d) => d.label), ['.env', '**/*.pem']);
+});
+
+test('setup_files: the share of the Claudius files the repo has, by presence', async () => {
+  const root = path.join(tmp, 'setup');
+  const files = ['AGENTS.md', 'CLAUDE.md', '.claude/settings.json', '.claude/agents/reviewer.md'];
+  for (const f of files.slice(0, 3)) {
+    fs.mkdirSync(path.dirname(path.join(root, f)), { recursive: true });
+    fs.writeFileSync(path.join(root, f), f.endsWith('.json') ? '{}' : '# filled in\n');
+  }
+  const out = (await collect({ root, mode: 'ci', home: tmp, params: { setup_files: files } }))['claude_settings.setup_files'];
+  assert.equal(out.value, 75);
+  assert.deepEqual(out.detail.filter((d) => !d.value).map((d) => d.label), ['.claude/agents/reviewer.md']);
+  assert.match((await collect({ root, mode: 'ci', home: tmp, params: { setup_files: [] } }))['claude_settings.setup_files'].could_not_check, /setup_files is empty/);
 });
