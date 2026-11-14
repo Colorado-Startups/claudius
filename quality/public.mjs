@@ -43,10 +43,13 @@ export const publicTargets = (list, pub = NO_PUBLIC) => {
   });
 };
 
-// The public config: the repo's own, its targets, data, history and out under PUBLIC. Every tab stays: Git
-// Crafter v7 stops on a target whose tab the config leaves out, dropped or not (score.mjs MOVED_TABS).
-export const publicConfig = (config) => ({
+// The public config: the repo's own, its targets, ideals, data, history and out under PUBLIC. A tab of the repo's
+// own with no metric left is left out, with its ideal; a Git Crafter tab id is the engine's, kept as written. Git
+// Crafter from v7.0.1 accepts a dropped metric on a tab the config leaves out (#116).
+export const publicConfig = (config, liveTabs = null) => ({
   ...config,
+  ...(liveTabs && config.tabs ? { tabs: config.tabs.filter((t) => !Array.isArray(t) || liveTabs.has(t[0])) } : {}),
+  ...(config.ideals ? { ideals: `${PUBLIC}/ideals` } : {}),
   comment: `Written by quality/public.mjs from quality/config.json: each metric that needs local files is dropped. Never edit; rerun it.`,
   targets: `${PUBLIC}/targets`,
   data: `${PUBLIC}/data`,
@@ -101,14 +104,25 @@ export function writePublic(root = '.') {
   mkdirSync(join(out, 'targets'), { recursive: true });
   const dropped = [];
   const pub = readPublicParams(root);
+  const liveTabs = new Set();
   for (const file of readdirSync(from).filter((f) => f.endsWith('.json')).sort()) {
     const list = publicTargets(JSON.parse(readFileSync(join(from, file), 'utf8')), pub);
     dropped.push(...list.filter((d) => d.drop === true && d.needs === 'local-files').map((d) => d.id));
+    for (const d of list) if (d.drop !== true && d.tab) liveTabs.add(d.tab);
     writeFileSync(join(out, 'targets', file), json(list));
+  }
+  // Each ideal but those of a tab the public page leaves out: the engine reads an ideal only for a listed tab.
+  const ownTabs = new Set((config.tabs ?? []).filter(Array.isArray).map(([id]) => id));
+  if (config.ideals && existsSync(join(root, config.ideals))) {
+    mkdirSync(join(out, 'ideals'), { recursive: true });
+    for (const f of readdirSync(join(root, config.ideals)).filter((f) => f.endsWith('.json'))) {
+      const tab = f.replace(/\.json$/, '');
+      if (!ownTabs.has(tab) || liveTabs.has(tab)) writeFileSync(join(out, 'ideals', f), readFileSync(join(root, config.ideals, f)));
+    }
   }
   // Git Crafter metrics that cannot apply here, dropped on the public page only: targets/ is the pack adopters load.
   if (pub.drop?.length) writeFileSync(join(out, 'targets', DROPS), json(pub.drop.map((id) => ({ id, drop: true }))));
-  writeFileSync(join(out, 'config.json'), json(publicConfig(config)));
+  writeFileSync(join(out, 'config.json'), json(publicConfig(config, liveTabs)));
   const processFile = join(root, 'quality/process/config.json');
   if (existsSync(processFile)) writeFileSync(join(out, 'process.json'), json(publicProcess(JSON.parse(readFileSync(processFile, 'utf8')), packMaps(root), new Set(dropped))));
   return dropped;

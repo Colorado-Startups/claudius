@@ -20,7 +20,7 @@ function copy() {
   cpSync(join(ROOT, 'quality', 'config.json'), join(root, 'quality', 'config.json'));
   cpSync(join(ROOT, 'quality', 'public-params.json'), join(root, 'quality', 'public-params.json'));
   cpSync(join(ROOT, 'quality', 'process'), join(root, 'quality', 'process'), { recursive: true });
-  for (const dir of ['targets', 'maps']) cpSync(join(ROOT, dir), join(root, dir), { recursive: true });
+  for (const dir of ['targets', 'maps', 'ideals']) cpSync(join(ROOT, dir), join(root, dir), { recursive: true });
   return root;
 }
 
@@ -53,7 +53,12 @@ test('public: the config is the repo own, its targets and the page files under q
   writePublic(root);
   const mine = read(join(ROOT, 'quality', 'config.json'));
   const pub = read(join(root, 'quality', 'public', 'config.json'));
-  assert.deepEqual({ ...pub, comment: mine.comment }, { ...mine, targets: 'quality/public/targets', data: 'quality/public/data', history: 'quality/public/history', out: 'quality/public/dist' });
+  assert.deepEqual({ ...pub, comment: mine.comment, tabs: mine.tabs }, { ...mine, targets: 'quality/public/targets', ideals: 'quality/public/ideals', data: 'quality/public/data', history: 'quality/public/history', out: 'quality/public/dist' });
+  // A tab of the repo's own with no metric left goes, with its ideal; a Git Crafter tab stays (Git Crafter #116).
+  const ids = pub.tabs.map((t) => (Array.isArray(t) ? t[0] : t));
+  for (const gone of ['desktop-app', 'tokens']) assert.ok(!ids.includes(gone) && !existsSync(join(root, 'quality', 'public', 'ideals', `${gone}.json`)), gone);
+  for (const kept of ['claude', 'claude-settings', 'blockers', 'instructions', 'dependabot', 'security']) assert.ok(ids.includes(kept), kept);
+  assert.ok(existsSync(join(root, 'quality', 'public', 'ideals', 'blockers.json')));
   assert.match(pub.comment, /quality\/public\.mjs/);
 });
 
