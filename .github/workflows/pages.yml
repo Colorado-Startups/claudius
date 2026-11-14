@@ -22,6 +22,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # The quality-read environment holds QUALITY_APP_KEY, and its branch policy admits main alone: a pull request
+    # run, even one that edits this file, cannot load it. Other runs use no environment.
+    environment: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && 'quality-read' || '' }}
     # The metrics marked needs gh read this repo's pull requests, checks, issues and Pages deployments with the
     # workflow token; a read refused is not measured.
     permissions:
@@ -61,10 +64,10 @@ jobs:
       - name: Public config
         run: node quality/public.mjs
 
-      # The claudius-quality-read App's one-hour token, read-only and installed on this repo alone, for the metrics
+      # The claudius-quality-reader App's one-hour token, read-only and installed on this repo alone, for the metrics
       # marked needs github-admin (settings, scanning and alert state). Main only: a pull request builds without it,
       # and those metrics read not measured there. Its key went from the App's manifest conversion straight into the
-      # secret (Git Crafter guard route key-issuer-to-store); no one holds it.
+      # quality-read environment secret (Git Crafter guard route key-issuer-to-store); no one holds it.
       - id: admin-app
         if: github.ref == 'refs/heads/main' && vars.QUALITY_APP_CLIENT_ID != ''
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
