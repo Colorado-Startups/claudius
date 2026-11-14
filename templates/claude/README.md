@@ -36,10 +36,13 @@ No hooks sit in the repo's `settings.json`: a hook that points at a guard the ma
 
 | Setting | Set | Why |
 |---|---|---|
+| Permission mode (prompt box) | Auto | A classifier checks each action, so a build runs without prompts. A committed settings file cannot set it: use the selector or `~/.claude/settings.json` |
 | Worktree (prompt box row) | on | Parallel sessions never share a checkout |
 | Branch prefix | `claude/` | Matches Git Crafter's branch rule |
 | Auto-archive after PR merge or close | on | Done sessions leave the sidebar |
-| Auto-fix (a PR's ⋮ menu) | on per PR | The app wakes the session on CI failures and review comments |
-| Merge when ready | off | Merges go through the `merging` skill's verdict |
+| Auto-fix (a PR's ⋮ menu) | on per PR | The app wakes the session on CI failures and review comments. Needs `gh` signed in |
+| Merge when ready | off | It turns on GitHub auto-merge; merges go through the `merging` skill's verdict |
+| Output style | Default | Explanatory and Learning add Insights to replies, and Learning stops for you to write code |
+| Effort | medium | Git Crafter `skills/merging/orchestrating.md`: Opus at medium runs sessions |
 
-Sources: code.claude.com/docs/en/desktop, /memory, /code-review-customize, /github-actions, read 2026-11-13.
+Sources: code.claude.com/docs/en/desktop, /permission-modes, /settings, /output-styles, /memory, /code-review-customize, /github-actions, read 2026-11-13.
