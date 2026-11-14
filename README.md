@@ -24,6 +24,19 @@ flowchart LR
 | 4 | Add `{ "use": "guard" }` and `{ "use": "decide" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
 | 5 | Run the one local command for the numbers CI never sees | below |
 
+## Build an app
+
+```mermaid
+flowchart LR
+  O[Outline] --> Q[Up to 4 vision questions] --> A[Plan Artifact] --> OK[Approve]
+  OK --> S[One session per step] --> PR[PR in one push] --> R[Review and merge] --> L[Live]
+  R -. BLOCK .-> S
+```
+
+| Owner | Claude |
+|---|---|
+| Outlines the app in a Code tab session, answers up to 4 questions, approves the plan | The rest, by the `product-plan` skill in [templates/claude](templates/claude/README.md) |
+
 ## What it is
 
 | Part | Is |

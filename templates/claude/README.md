@@ -16,6 +16,7 @@ flowchart LR
 |---|---|---|
 | `.claude/settings.json` | Claude Code, every session | Denies reads of `.env`, keys and `~/.ssh` (`security.claude_deny_coverage` scores it) |
 | `.claude/agents/reviewer.md` | the `merging` skill's reviews | One reviewer per PR, a 120-word MERGE or BLOCK verdict. Copied from Git Crafter `.claude/agents/reviewer.md` |
+| `.claude/skills/product-plan/SKILL.md` | Claude, when the owner outlines a product | Outline to a visual plan Artifact, one issue per PR, one session per step |
 | `.claude/skills/bump-pins/SKILL.md` | Claude, on demand | Moves the engine and pack pins to their latest tags |
 | `REVIEW.md` | Code Review service only | Review rules. Needs a Team or Enterprise plan; billed per review |
 
