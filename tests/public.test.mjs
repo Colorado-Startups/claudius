@@ -33,7 +33,7 @@ test('public: each metric that needs local files is dropped but the repo-file on
   assert.equal(dropped.length, 46);
   const files = readdirSync(join(ROOT, 'targets')).filter((f) => f.endsWith('.json')).sort();
   assert.deepEqual(readdirSync(join(root, 'quality', 'public', 'targets')).sort(), [...files, DROPS].sort(), 'every targets file, so no collector runs without its targets, and the drops');
-  assert.deepEqual(read(join(root, 'quality', 'public', 'targets', DROPS)), pub.drop.map((id) => ({ id, drop: true })));
+  assert.deepEqual(read(join(root, 'quality', 'public', 'targets', DROPS)), [...pub.drop.map((id) => ({ id, drop: true })), ...Object.entries(pub.params_for ?? {}).map(([id, params]) => ({ id, params }))]);
   for (const f of files) {
     const mine = read(join(ROOT, 'targets', f));
     const scoped = mine.some((d) => pub.ids.includes(d.id));

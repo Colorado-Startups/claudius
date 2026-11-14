@@ -120,8 +120,10 @@ export function writePublic(root = '.') {
       if (!ownTabs.has(tab) || liveTabs.has(tab)) writeFileSync(join(out, 'ideals', f), readFileSync(join(root, config.ideals, f)));
     }
   }
-  // Git Crafter metrics that cannot apply here, dropped on the public page only: targets/ is the pack adopters load.
-  if (pub.drop?.length) writeFileSync(join(out, 'targets', DROPS), json(pub.drop.map((id) => ({ id, drop: true }))));
+  // Git Crafter metrics that cannot apply here, dropped, and this repo's params for others (params_for), on the
+  // public page only: targets/ is the pack adopters load, beside the template, never over it.
+  const overrides = [...(pub.drop ?? []).map((id) => ({ id, drop: true })), ...Object.entries(pub.params_for ?? {}).map(([id, params]) => ({ id, params }))];
+  if (overrides.length) writeFileSync(join(out, 'targets', DROPS), json(overrides));
   writeFileSync(join(out, 'config.json'), json(publicConfig(config, liveTabs)));
   const processFile = join(root, 'quality/process/config.json');
   if (existsSync(processFile)) writeFileSync(join(out, 'process.json'), json(publicProcess(JSON.parse(readFileSync(processFile, 'utf8')), packMaps(root), new Set(dropped))));
