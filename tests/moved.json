@@ -30,7 +30,9 @@
   "collectors/instructions/instructions.mjs",
   "collectors/instructions/instructions.test.mjs",
   "collectors/simplicity/simplicity.mjs",
-  "collectors/simplicity/simplicity.test.mjs"
+  "collectors/simplicity/simplicity.test.mjs",
+  "collectors/guards/guards.mjs",
+  "targets/guards.json"
  ],
  "files": [
   [
@@ -288,6 +290,14 @@
   [
    ".claude/agents/reviewer.md",
    "templates/claude/.claude/agents/reviewer.md"
+  ],
+  [
+   "config/quality/collectors/guard-speed.mjs",
+   "collectors/guards/guards.mjs"
+  ],
+  [
+   "config/quality/targets/guard-speed.json",
+   "targets/guards.json"
   ]
  ]
 }
