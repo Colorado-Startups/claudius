@@ -86,10 +86,10 @@ The rows are Claude Code's rounded estimates (`claude plugin details`, plugin 0.
 | Largest plugin's always-on tokens (chars ÷ 4) | 309 | 500 | Best practices tab |
 | Plugin skills with fewer than three eval cases | 0 | 0 | Best practices tab |
 | Plugin skills not shown to beat no plugin | 0 | 0 | Best practices tab |
-| Directory portal: blocking findings | 0 | 0 | Validate at 116d655 (plugin 0.2.2) |
-| Directory portal: policy holds | 0 | 0 | Validate at 116d655 (plugin 0.2.2) |
+| Directory portal: blocking findings | 0 | 0 | scan passed at 1d57131 (plugin 0.3.0) |
+| Directory portal: policy holds | 0 | 0 | scan passed at 1d57131 (plugin 0.3.0) |
 
-The two portal rows are for plugin 0.2.2, which passed its scan and is in Anthropic's review. The portal had not scanned 0.3.0 when this was written. Every other figure on this page is for 0.3.0.
+Plugin 0.3.0 passed the directory's scan on 2026-11-15, with warnings only, and is ready to publish. Publishing is requested and waits for an Anthropic reviewer. Nothing is listed yet.
 
 </details>
 
