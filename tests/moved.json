@@ -291,10 +291,6 @@
    "fixtures/claude/projects/-Users-someone-Developer-acme-site/session-fixture-three.jsonl"
   ],
   [
-   ".claude/agents/reviewer.md",
-   "templates/claude/.claude/agents/reviewer.md"
-  ],
-  [
    "config/quality/collectors/guard-speed.mjs",
    "collectors/guards/guards.mjs"
   ],

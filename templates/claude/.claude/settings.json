@@ -1,5 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "enabledPlugins": {
+    "feature-dev@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "session-report@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true
+  },
   "permissions": {
     "deny": [
       "Read(./.env)",
@@ -8,7 +15,14 @@
       "Read(./**/*.pem)",
       "Read(./**/*.key)",
       "Read(~/.ssh/**)",
-      "Read(~/.aws/**)"
+      "Read(~/.aws/**)",
+      "Bash(rm -rf ~ *)",
+      "Bash(rm -rf ~/ *)",
+      "Bash(rm -rf $HOME *)",
+      "Bash(git push --force *)",
+      "Bash(git push --force-with-lease *)",
+      "Bash(git push -f *)",
+      "Bash(git reset --hard *)"
     ]
   }
 }
