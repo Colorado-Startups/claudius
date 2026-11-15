@@ -56,7 +56,7 @@
     "chart": "table",
     "defined": "2026-11-13",
     "params": {
-      "setup_files": ["AGENTS.md", "CLAUDE.md", ".claude/settings.json", ".claude/skills/product-plan/SKILL.md", ".claude/skills/bump-pins/SKILL.md"]
+      "setup_files": ["AGENTS.md", "CLAUDE.md", ".claude/settings.json", ".claude/skills/bump-pins/SKILL.md"]
     }
   },
   {

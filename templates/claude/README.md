@@ -16,11 +16,11 @@ flowchart LR
 | Copy to your repo root | Read by | Does |
 |---|---|---|
 | `.claude/settings.json` | Claude Code, every session | Turns on 5 Anthropic plugins ([Plugins](#plugins)). Denies reads of `.env`, keys and `~/.ssh` (`claude_settings.deny_coverage` scores it). Denies the one-way doors `rm -rf ~`, `git push --force`, `git reset --hard` in their common spellings |
-| `.claude/skills/product-plan/SKILL.md` | Claude, when the owner outlines a product | Outline to a visual plan Artifact, one issue per PR, one session per step |
+| The `claudius` plugin (enabled by `.claude/settings.json`) | Claude, every session | `plan`: outline to a visual plan Artifact, one issue per PR, one session per step. `merge`: review at the head SHA, then merge only that commit. `equip`: lean plugin setup. Source: [plugin/](../../plugin/) |
 | `.claude/skills/bump-pins/SKILL.md` | Claude, on demand | Moves the engine and pack pins to their latest tags |
 | `REVIEW.md` | Code Review service only | Review rules. Needs a Team or Enterprise plan; billed per review |
 
-The deny list is a backstop, not a full blocklist. Claude Code's built-in check already prompts before `rm -rf ~` in every mode, bypass included (code.claude.com/docs/en/permission-modes); the rules name only the home folder itself, since `*` is a wildcard and `~/*` would match every path under home. Deny rules block in every mode: a Bash rule matches the command text, so `/bin/rm` or `bash -c '...'` gets past it.
+The deny list is a backstop, not a full blocklist. Claude Code's built-in check already prompts before `rm -rf ~`, bypass mode included (code.claude.com/docs/en/permission-modes); the rules name only the home folder itself, since `*` is a wildcard and `~/*` would match every path under home. Deny rules block in every mode, bypass included, but a Bash rule matches the command text, so `/bin/rm` or `bash -c '...'` gets past it.
 
 ## Steps
 
