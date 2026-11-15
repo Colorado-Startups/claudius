@@ -11,5 +11,8 @@ Ideas only, no text copied:
 - The issue-per-step flow in skills/plan draws on the to-spec and to-tickets ideas in
   mattpocock/skills (https://github.com/mattpocock/skills).
 
+The icon (.claude-plugin/icon.png) is the Colorado Startups shield, copied from the brand repo
+(https://github.com/Colorado-Startups/brand, baseline/v2/cs-logo-1500.png).
+
 Referenced, not included: obra/superpowers (https://github.com/obra/superpowers) and
 Anthropic's plugins in claude-plugins-official, which Claudius expects to be installed.

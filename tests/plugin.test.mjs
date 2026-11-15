@@ -29,14 +29,16 @@ test('plugin: manifest, README of 40+ words, and a license, as the directory req
   assert.ok(existsSync(join(ROOT, 'LICENSE')));
 });
 
-test('plugin: nothing that gets held for review: no hooks, MCP servers, bin, symlinks, system files, or files over 256 KiB', () => {
+test('plugin: nothing that gets held for review: no hooks, MCP servers, bin, symlinks, system files, or non-image files over 256 KiB', () => {
   for (const p of ['hooks', '.mcp.json', 'bin']) assert.ok(!existsSync(join(ROOT, p)), p);
   const files = walk(ROOT);
   assert.ok(files.length <= 512);
   for (const f of files) {
     assert.ok(!lstatSync(f).isSymbolicLink(), f);
     assert.ok(!/(\.DS_Store|Thumbs\.db|desktop\.ini)$/.test(f), f);
-    assert.ok(lstatSync(f).size < 256 * 1024, f);
+    // Images and fonts are exempt from the 256 KiB limit; the icon must be under 2 MB.
+    const image = /\.(png|jpe?g|gif|webp|svg|woff2?|ttf|otf)$/i.test(f);
+    assert.ok(lstatSync(f).size < (image ? 2 * 1024 * 1024 : 256 * 1024), f);
   }
 });
 
