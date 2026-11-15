@@ -52,6 +52,6 @@ An Anthropic-first workflow for the Claude desktop app. Claudius adds only what 
 | `merge` | `gh`, `git` | A PR comment and a merge, at the reviewed commit only |
 | `equip` | `claude plugin` | Installed and enabled plugins, and repo `.claude/settings.json`, only after you say yes to its change table |
 
-Claudius sends no data anywhere and stores none. It reads your local Claude Code plugin records and transcripts only when you ask the `equip` skill to measure use. Details: [PRIVACY.md](https://github.com/Colorado-Startups/claudius/blob/main/PRIVACY.md).
+The plugin itself collects nothing, makes no network calls and keeps no files. Its skills run `gh` commands that write to GitHub under your account, and `plan` saves its plan as an Artifact in your claude.ai account. It reads your local Claude Code plugin records and transcripts only when you ask the `equip` skill to measure use. Details: [PRIVACY.md](https://github.com/Colorado-Startups/claudius/blob/main/PRIVACY.md).
 
 Claudius is not an Anthropic product and is not affiliated with Anthropic. Source: [Colorado-Startups/claudius](https://github.com/Colorado-Startups/claudius). Credits: [NOTICE](NOTICE).
