@@ -15,10 +15,12 @@ flowchart LR
 
 | Copy to your repo root | Read by | Does |
 |---|---|---|
-| `.claude/settings.json` | Claude Code, every session | Turns on 5 Anthropic plugins ([Plugins](#plugins)). Denies reads of `.env`, keys and `~/.ssh` (`claude_settings.deny_coverage` scores it). Denies the one-way doors `rm -rf ~`, `git push --force`, `git reset --hard`. A deny rule stops the form Claude usually writes, not every spelling; Auto mode checks the rest |
+| `.claude/settings.json` | Claude Code, every session | Turns on 5 Anthropic plugins ([Plugins](#plugins)). Denies reads of `.env`, keys and `~/.ssh` (`claude_settings.deny_coverage` scores it). Denies the one-way doors `rm -rf ~`, `git push --force`, `git reset --hard` in their common spellings |
 | `.claude/skills/product-plan/SKILL.md` | Claude, when the owner outlines a product | Outline to a visual plan Artifact, one issue per PR, one session per step |
 | `.claude/skills/bump-pins/SKILL.md` | Claude, on demand | Moves the engine and pack pins to their latest tags |
 | `REVIEW.md` | Code Review service only | Review rules. Needs a Team or Enterprise plan; billed per review |
+
+The deny list is a backstop under Auto mode, not a full blocklist: a Bash rule matches the command text, so `/bin/rm` or `bash -c '...'` gets past it.
 
 ## Steps
 
@@ -103,6 +105,10 @@ The committed `enabledPlugins` turns them on but does not download them. Once pe
 ```bash
 for p in feature-dev code-review pr-review-toolkit session-report claude-md-management; do claude plugin install "$p@claude-plugins-official" --scope project; done
 ```
+
+| `/plugin` Errors tab says | Do |
+|---|---|
+| `Plugin "<name>" is enabled in project settings but isn't installed here` | `claude plugin install <name>@claude-plugins-official --scope project` once in this clone, then `/reload-plugins` |
 
 On a machine that has never run an interactive `claude`, add the marketplace first: `claude plugin marketplace add anthropics/claude-plugins-official`. Cloud sessions load none of these.
 
