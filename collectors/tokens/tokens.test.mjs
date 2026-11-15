@@ -126,11 +126,28 @@ test('a plan read stamped after the run is refused', async () => {
 });
 
 
+test('the tightest weekly window counts: a full per-model window beats an all-models one with room', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'plan-'));
+  try {
+    write(path.join(dir, 'plan-usage.json'), JSON.stringify({ read_at: '2026-11-03T11:00:00Z', windows: [
+      { label: 'Weekly · all models', percentUsed: 86, resetsAt: '2026-11-05T11:00:00Z' },
+      { label: 'Weekly · Fable', percentUsed: 100, resetsAt: '2026-11-05T11:00:00Z' },
+      { label: 'Current session', percentUsed: 100, resetsAt: '2026-11-03T13:00:00Z' },
+    ] }));
+    const plan = (await collect({ ...base, exec: fakeExec(), params: { ...params, plan_file: '' }, data: dir }))['tokens.plan_used'];
+    assert.equal(plan.value, 100);
+    assert.match(plan.source, /\(Weekly · Fable\)/);
+    assert.deepEqual(plan.detail.map((d) => [d.label, d.value]), [['Weekly · all models', 86], ['Weekly · Fable', 100], ['days until the tightest resets', 2]], 'the 5-hour window is not weekly and is left out');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('the plan reads as the state the app reports: percent used now, no pace', async () => {
   const got = await collect({ ...base, exec: fakeExec() });
   const plan = got['tokens.plan_used'];
   assert.equal(plan.value, 82);
-  assert.deepEqual(plan.detail.map((d) => [d.label, d.unit]), [['used now', '%'], ['days until it resets', 'days']]);
+  assert.deepEqual(plan.detail.map((d) => [d.label, d.unit]), [['Weekly · all models', '%'], ['days until the tightest resets', 'days']]);
   assert.match(plan.source, /^state: /);
   assert.doesNotMatch(plan.source, /week gone|pace/);
   assert.ok(!metricIds.includes('tokens.plan_week_use'), 'the pace ratio is gone');

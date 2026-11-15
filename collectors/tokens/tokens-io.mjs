@@ -212,16 +212,19 @@ function pullQuery(repo, chunk) {
 // ------------------------------------------------------------------- plan
 
 // The weekly plan as a session last read it from the app (get_usage), written
-// to params.plan_file; older than a day, or absent, it is not measured.
+// to params.plan_file; older than a day, or absent, it is not measured. The
+// tightest weekly window counts: a per-model window (Fable, say) can run out
+// while the all-models one has room, and the full one is what stops work.
 export function readPlan(root, now, PLAN_FILE) {
   try {
     const doc = JSON.parse(fs.readFileSync(path.join(root, PLAN_FILE), 'utf8'));
-    const w = (doc.windows ?? []).find((x) => /weekly/i.test(x.label) && /all models/i.test(x.label));
+    const weekly = (doc.windows ?? []).filter((x) => /weekly/i.test(x.label) && Number.isFinite(x.percentUsed) && Number.isFinite(Date.parse(x.resetsAt)));
+    const w = weekly.reduce((a, b) => (b.percentUsed > a.percentUsed ? b : a), weekly[0]);
     const readAt = Date.parse(doc.read_at);
-    if (!w || !Number.isFinite(w.percentUsed) || !Number.isFinite(Date.parse(w.resetsAt))) return { error: `${PLAN_FILE} has no weekly all-models window` };
+    if (!w) return { error: `${PLAN_FILE} has no weekly window` };
     if (readAt > now.getTime()) return { error: `${PLAN_FILE} says it was read after this run started; a clock or a hand edit is wrong` };
     if (!(now.getTime() - readAt <= PLAN_FRESH_MS)) return { error: `${PLAN_FILE} was read over a day ago; a session refreshes it from get_usage` };
-    return { used: w.percentUsed, resetsAt: Date.parse(w.resetsAt), readAt, label: w.label };
+    return { used: w.percentUsed, resetsAt: Date.parse(w.resetsAt), readAt, label: w.label, windows: weekly.map((x) => ({ label: x.label, used: x.percentUsed })) };
   } catch (err) {
     return { error: `${PLAN_FILE}: ${err.code === 'ENOENT' ? 'absent; a session writes it from get_usage before a local run' : err.message}` };
   }
