@@ -87,8 +87,8 @@ async function gather({ root = '.', mode, home = os.homedir(), now = new Date(),
     else usageMetrics(latest, usage, params, { val, cnc });
   } else for (const id of LISTING_IDS) cnc(id, 'the newest desktop session holds no listing attachment', self);
   const inv = attempt(() => inventory({ home, root, params }));
-  if (inv.error) for (const id of ['plugins_untrusted', 'plugins_replaceable', 'plugins_stale']) cnc(id, inv.error, self);
-  else pluginMetrics(inv, params, now, { val, cnc });
+  const pluginError = inv.error ?? attempt(() => pluginMetrics(inv, params, now, { val, cnc }))?.error;
+  if (pluginError) for (const id of ['plugins_untrusted', 'plugins_replaceable', 'plugins_stale']) cnc(id, pluginError, self);
   workMetrics(sessions, params, now, { val, cnc });
   subagentMetric(sessions, params, now, { val, cnc });
   return Object.fromEntries(metricIds.map((id) => [id, out[id] ?? { could_not_check: 'collector produced no value', source: self }]));
@@ -137,6 +137,21 @@ function stateMetrics(latest, params, val) {
   val('listing_tokens', parts.reduce((n, p) => n + p.value, 0), 'state: bytes / 4 of the four listings of the newest desktop session, every delta added up', parts);
 }
 
+// The entrypoint named in a transcript's head, or null.
+const HEAD_BYTES = 65536;
+function headEntrypoint(file) {
+  let fd;
+  try {
+    fd = fs.openSync(file, 'r');
+    const buf = Buffer.alloc(HEAD_BYTES);
+    return /"entrypoint":"([^"]+)"/.exec(buf.subarray(0, fs.readSync(fd, buf, 0, HEAD_BYTES, 0)).toString('utf8'))?.[1] ?? null;
+  } catch {
+    return null;
+  } finally {
+    if (fd !== undefined) fs.closeSync(fd);
+  }
+}
+
 // The Cowork transcript folders under params.cowork_dir: <account>/<org>/local_<id>/<claude_dir_name>/projects.
 function coworkProjectDirs(cowork, params) {
   const sub = (d) => (fs.existsSync(d) ? fs.readdirSync(d, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => path.join(d, e.name)) : []);
@@ -153,33 +168,37 @@ function accountUsage(params, home, root, upTo) {
   const entrypoints = new Set(params.usage_entrypoints ?? [params.entrypoint]);
   const calls = emptyCalls();
   let read = 0;
+  let unreadable = 0;
   for (const session of all) {
     if (read >= usageWindow(params)) break;
-    let entrypoint = null;
-    const lines = [];
-    for (const line of fs.readFileSync(session.file, 'utf8').split('\n')) {
-      if (entrypoint === null) entrypoint = /"entrypoint":"([^"]+)"/.exec(line)?.[1] ?? null;
-      if (line.includes('"tool_use"') || line.includes('<command-name>')) lines.push(line);
-    }
-    if (!entrypoints.has(entrypoint)) continue;
+    // The entrypoint sits in a transcript's first records, so a session that
+    // does not count is skipped before its body is read.
+    if (!entrypoints.has(headEntrypoint(session.file))) continue;
     read += 1;
-    for (const file of [null, ...session.subagents]) {
-      const source = file === null ? lines : fs.readFileSync(file, 'utf8').split('\n').filter((l) => l.includes('"tool_use"'));
-      for (const line of source) {
+    for (const file of [session.file, ...session.subagents]) {
+      let text;
+      try {
+        text = fs.readFileSync(file, 'utf8');
+      } catch {
+        unreadable += 1;
+        continue;
+      }
+      for (const line of text.split('\n')) {
+        if (!line.includes('"tool_use"') && !line.includes('<command-name>')) continue;
         try {
           tallyCalls(calls, JSON.parse(line), params);
         } catch {}
       }
     }
   }
-  return { calls, read, folders: dirsToRead.length };
+  return { calls, read, unreadable, folders: dirsToRead.length };
 }
 
 // The two readings that set the newest session's listings against what the
 // account's last N sessions called.
 function usageMetrics(latest, usage, params, { val, cnc }) {
   const n = Number(params.usage_sessions);
-  const source = `state: the newest desktop session's listings against the calls of the account's last ${n} sessions (entrypoint in params.usage_entrypoints) across every project folder and Cowork session, with their subagents; N = ${n} sessions, ${usage.read} read`;
+  const source = `state: the newest desktop session's listings against the calls of the account's last ${n} sessions (entrypoint in params.usage_entrypoints) across every project folder and Cowork session, with their subagents; N = ${n} sessions, ${usage.read} read${usage.unreadable ? `, ${usage.unreadable} files unreadable` : ''}`;
   if (!(n >= 1)) {
     for (const id of ['plugins_unused', 'connectors_unused']) cnc(id, 'params.usage_sessions must be at least one session', source);
     return;
