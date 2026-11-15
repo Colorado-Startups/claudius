@@ -2,7 +2,7 @@
   {
     "id": "desktop_app.connectors_broken",
     "params": {
-      "comment": "projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root. project_match (default the repo's own project folder) names no path here. entrypoint: the transcript value that marks a desktop app session; a terminal session is not this tab's. usage_sessions: N, the docs' own window for Not used recently. app_servers: servers the desktop app adds itself, which its connector list does not show and a user cannot switch off as connectors; an entry ending in _ is a prefix, any other a whole name. human_origin: the origin kind of a record a person typed. plan_tool, recap_tool, session_tool and archive_tool: the app's tools for the task list, the closing recap, starting a session and archiving one. session_id_pattern: how a started session's id reads in the tool's result. idle_hours: a session whose last record is newer may still be running, so its open last turn and unarchived sub-sessions are left out; it is no measuring window. kept_kinds: kinds of server (plugin servers, account connectors, other servers) a repo's owner keeps on for other work; they are set aside from desktop_app.connectors_unused and still count in desktop_app.listing_tokens. None by default. usage_sessions: N for plugins_unused and connectors_unused, read across the account's project folders and Cowork sessions; the docs mark a plugin Not used recently after 14 days and 10 sessions, and with parallel sessions the 14 days bind (373 desktop sessions in 14 days on one account, measured 2026-11-14), so N is held at 200 sessions, not a calendar window. usage_entrypoints: the entrypoints whose calls count as use: the desktop app's Code sessions and its Cowork sessions. cowork_dir: where the desktop app keeps Cowork sessions and its plugin manifest. plugins_dir: Claude Code's plugins root. official_marketplaces and community_marketplaces: the reserved names in code.claude.com/docs/en/plugins/security; directory_marketplaces: the name the desktop app's manifest gives Anthropic's directory on claude.ai, whose versions Anthropic reviews before publishing (plugins/publish). own_marketplaces: marketplaces the repo owner publishes, besides those from the repo's own GitHub account, which count as the owner's on their own. kept_plugins: plugin id to the reason it stays though community or third-party. stale_days: an enabled plugin with no upstream update in this many days counts as stale. claude_dir_name, settings_files and plugin_manifest_dir: the folder and file names Claude Code uses for settings, skills, agents and plugin manifests.",
+      "comment": "projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root. project_match (default the repo's own project folder) names no path here. entrypoint: the transcript value that marks a desktop app session; a terminal session is not this tab's. usage_sessions: N, the docs' own window for Not used recently. app_servers: servers the desktop app adds itself, which its connector list does not show and a user cannot switch off as connectors; an entry ending in _ is a prefix, any other a whole name. human_origin: the origin kind of a record a person typed. plan_tool, recap_tool, session_tool and archive_tool: the app's tools for the task list, the closing recap, starting a session and archiving one. session_id_pattern: how a started session's id reads in the tool's result. idle_hours: a session whose last record is newer may still be running, so its open last turn and unarchived sub-sessions are left out; it is no measuring window. kept_kinds: kinds of server (plugin servers, account connectors, other servers) a repo's owner keeps on for other work; they are set aside from desktop_app.connectors_unused and still count in desktop_app.listing_tokens. None by default. usage_sessions: N for plugins_unused and connectors_unused, read across the account's project folders and Cowork sessions; the docs mark a plugin Not used recently after 14 days and 10 sessions, and with parallel sessions the 14 days bind (373 desktop sessions in 14 days on one account, measured 2026-11-14), so N is held at 200 sessions, not a calendar window. usage_entrypoints: the entrypoints whose calls count as use: the desktop app's Code sessions and its Cowork sessions. cowork_dir: where the desktop app keeps Cowork sessions and its plugin manifest. plugins_dir: Claude Code's plugins root. official_marketplaces and community_marketplaces: the reserved names in code.claude.com/docs/en/plugins/security; directory_marketplaces: the name the desktop app's manifest gives Anthropic's directory on claude.ai, whose versions Anthropic reviews before publishing (plugins/publish). own_marketplaces: marketplaces the repo owner publishes, besides those from the repo's own GitHub account, which count as the owner's on their own. kept_plugins: plugin id to the reason it stays though community or third-party. stale_days: an enabled plugin with no upstream update in this many days counts as stale. claude_dir_name, settings_files and plugin_manifest_dir: the folder and file names Claude Code uses for settings, skills, agents and plugin manifests. maintainer_author: the catalog author whose plugins are maintained with Claude Code itself, so their age alone never makes them stale.",
       "projects_dir": "~/.claude/projects",
       "subagents_dir": "subagents",
       "entrypoint": "claude-desktop",
@@ -85,14 +85,17 @@
         "healthcare"
       ],
       "own_marketplaces": [],
-      "kept_plugins": {},
+      "kept_plugins": {
+        "comfy-cloud@comfy-skills": "Claudius's own exception: Comfy-Org's own plugin for Comfy Cloud, used in 16 sessions in 30 days, no official equivalent (2026-11-14); a repo replaces this map with its own"
+      },
       "stale_days": 180,
       "claude_dir_name": ".claude",
       "settings_files": [
         "settings.json",
         "settings.local.json"
       ],
-      "plugin_manifest_dir": ".claude-plugin"
+      "plugin_manifest_dir": ".claude-plugin",
+      "maintainer_author": "Anthropic"
     },
     "tab": "desktop-app",
     "kind": "quality",
@@ -298,7 +301,7 @@
     "near": 2,
     "direction": "lower",
     "goal_source": "goal from the plugin docs: remove a plugin you no longer use or trust, and a delisted one is flagged (code.claude.com/docs/en/plugins/security and /plugins/loading, read 2026-11-14), so none is left behind",
-    "source": "state: install records no settings source enables, plugins in flagged-plugins.json, and enabled plugins whose last_updated in plugin-catalog-cache.json is older than params.stale_days (180)",
+    "source": "state: install records no settings source enables, plugins in flagged-plugins.json, and enabled plugins whose last_updated in plugin-catalog-cache.json is older than params.stale_days (180), plugins by params.maintainer_author set aside",
     "needs": "local-files",
     "chart": "table"
   }
