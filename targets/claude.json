@@ -170,13 +170,31 @@
     "group": "Use",
     "label": "Subagent share of cost",
     "params": {
-      "comment": "Dollars per million tokens, from the source page, read 2026-11-03. long is the price over long_context_tokens of prompt (input plus cache). A model's own cache_read_x overrides the default. A model missing here is left out of both sides and counted. project_match (unset: the repo's own project folder) and last (N per kind of event) may be set on any target in this file. projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root.",
+      "comment": "Dollars per million tokens, from the source page, read 2026-11-14. long is the price over long_context_tokens of prompt (input plus cache). A model's own cache_read_x overrides the default. A model missing here is left out of both sides and counted. project_match (unset: the repo's own project folder) and last (N per kind of event) may be set on any target in this file. projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root.",
       "source": "https://platform.claude.com/docs/en/about-claude/pricing",
       "prices": {
+        "claude-fable-5-2": {
+          "input": 8,
+          "output": 40,
+          "cache_read_x": 0.025
+        },
+        "claude-fable-5-1": {
+          "input": 10,
+          "output": 50,
+          "cache_read_x": 0.025
+        },
         "claude-opus-5-5": {
           "input": 4,
           "output": 20,
           "cache_read_x": 0.05
+        },
+        "claude-opus-5": {
+          "input": 5,
+          "output": 25
+        },
+        "claude-opus-4-8": {
+          "input": 5,
+          "output": 25
         },
         "claude-sonnet-5-5": {
           "input": 2,

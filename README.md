@@ -82,6 +82,7 @@ flowchart LR
 
 | Command | Writes | Uploaded |
 | --- | --- | --- |
+| First, in a desktop app session: call `get_usage`, write its `plan` block plus `read_at` (ISO time) to `quality/data/plan-usage.json` | the plan windows `tokens.plan_used` reads; older than a day, not measured | Never |
 | `node <git-crafter>/quality/collect.mjs --config quality/config.json --local` | `quality/data/local.json` and `quality/history/`, both in `.gitignore`: the full page, every metric | Never |
 
 ## Privacy gate

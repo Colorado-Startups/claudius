@@ -188,14 +188,14 @@ function baseModel({ t, folders, now, last, TRANSCRIPTS }) {
   };
 }
 
-// The weekly plan, as the app last reported it: the percent used now.
+// The weekly plan, as the app last reported it: the tightest weekly window's percent used now.
 function planMetric({ val, cnc }, plan, planFile) {
-  const planSource = `state: ${planFile}, the app's get_usage weekly all-models window as a session last read it: percent of the plan used now`;
+  const planSource = `state: ${planFile}, the app's get_usage weekly windows as a session last read them: percent used now of the tightest one`;
   if (plan.error) return cnc('tokens.plan_used', plan.error, planSource);
-  val('tokens.plan_used', plan.used, `${planSource}, read ${new Date(plan.readAt).toISOString().slice(0, 16)}Z`, {
+  val('tokens.plan_used', plan.used, `${planSource} (${plan.label}), read ${new Date(plan.readAt).toISOString().slice(0, 16)}Z`, {
     detail: [
-      { label: 'used now', value: plan.used, unit: '%' },
-      { label: 'days until it resets', value: round((plan.resetsAt - plan.readAt) / DAY), unit: 'days' },
+      ...plan.windows.map((w) => ({ label: w.label, value: w.used, unit: '%' })),
+      { label: 'days until the tightest resets', value: round((plan.resetsAt - plan.readAt) / DAY), unit: 'days' },
     ],
   });
 }

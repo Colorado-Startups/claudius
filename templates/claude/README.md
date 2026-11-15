@@ -45,5 +45,17 @@ No hooks sit in the repo's `settings.json`: a hook that points at a guard the ma
 | Merge when ready | off | It turns on GitHub auto-merge; merges go through the `merging` skill's verdict |
 | Output style | Default | Explanatory and Learning add Insights to replies, and Learning stops for you to write code |
 | Effort | medium | Git Crafter `skills/merging/orchestrating.md`: Opus at medium runs sessions |
+| Plugins and connectors | only the ones the repo calls | Each one's tools, skills and instructions go out again on every turn (chart below). `desktop_app.plugins_unused`, `connectors_unused` and `listing_tokens` score it |
+
+What one turn carries before any message, in an example session with many plugins on (the app's `get_usage` context categories, read 2026-11-14). The MCP and skill slices shrink as unused plugins come off:
+
+```mermaid
+pie title Fixed context per turn, tokens
+  "MCP server instructions" : 18946
+  "MCP tools" : 18383
+  "System tools" : 16653
+  "Skills" : 12619
+  "System prompt" : 10697
+```
 
 Sources: code.claude.com/docs/en/desktop, /permission-modes, /settings, /output-styles, /memory, /code-review-customize, /github-actions, read 2026-11-13.
