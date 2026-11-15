@@ -6,6 +6,12 @@ Brand: [Colorado Startups brand guide](https://colorado-startups.github.io/brand
 
 [Live Quality and Process pages](https://colorado-startups.github.io/claudius/)
 
+| [Best practices tab](https://colorado-startups.github.io/claudius/#practices): 10 of 10 at goal | [Publish map](https://colorado-startups.github.io/claudius/process.html#map-publish): 6 of 6 steps |
+|---|---|
+| ![Best practices tab: quality, speed and consumption all 100](docs/best-practices-tab.jpg) | ![Publish map: Write, Trim, Test, Measure, Validate, Clear, all at goal](docs/publish-map.jpg) |
+
+Live page, 2026-11-15, commit 116d655.
+
 Claudius is not an Anthropic product and is not affiliated with Anthropic.
 
 ## Quickstart
