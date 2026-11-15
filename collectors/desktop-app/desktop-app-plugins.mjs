@@ -4,7 +4,7 @@
 // settings files, the desktop app's plugin manifest, marketplace catalogs,
 // and the names of custom skills, agents and hook commands.
 //   desktop_app.plugins_untrusted    enabled plugins from community or third-party marketplaces
-//   desktop_app.plugins_replaceable  enabled plugins, custom skills, agents or hooks with an Anthropic equivalent
+//   desktop_app.plugins_replaceable  custom skills, agents or hooks with an Anthropic equivalent, and third-party plugins an official marketplace also lists
 //   desktop_app.plugins_stale        install records turned off, delisted plugins, plugins with no upstream update in params.stale_days
 // Tiers follow code.claude.com/docs/en/plugins/security: a marketplace's name
 // places it, and Claude Code accepts the official and community names only
@@ -160,11 +160,10 @@ export function pluginMetrics(inv, params, now, { val, cnc }) {
     const official = inv.catalog[p.name];
     const tier = tierOf(p.marketplace, params);
     if ((tier === 'community' || tier === 'third-party') && official && !inv.own.has(p.marketplace)) swaps.push([p.id, `${p.name}@${official.marketplace}`]);
-    for (const e of EQUIVALENTS) if (e.kind === 'plugin' && e.re.test(p.name) && !kept(p, params, inv.own)) swaps.push([p.id, e.use]);
   }
   for (const c of inv.custom) for (const e of EQUIVALENTS) if (e.kind === c.kind && e.re.test(c.name)) swaps.push([`${c.kind} ${c.name}`, e.use]);
   const replaceable = [...new Map(swaps.map(([what, use]) => [what, use])).entries()].sort();
-  val('plugins_replaceable', replaceable.length, `state: enabled plugins and the custom skills, agents and hook commands in the user\'s and this repo\'s params.claude_dir_name folders, against anthropic-equivalents.json${badEquivalents ? ` (${badEquivalents} rows left out: no valid match)` : ''} and against the official-tier catalogs Claude Code has cloned (a community or third-party plugin whose name an official marketplace also lists)`, replaceable.map(([what, use]) => ({ ...item(what, 1, 'items'), use })));
+  val('plugins_replaceable', replaceable.length, `state: the custom skills, agents and hook commands in the user\'s and this repo\'s params.claude_dir_name folders, against anthropic-equivalents.json${badEquivalents ? ` (${badEquivalents} rows left out: no valid match)` : ''} and against the official-tier catalogs Claude Code has cloned (a community or third-party plugin whose name an official marketplace also lists)`, replaceable.map(([what, use]) => ({ ...item(what, 1, 'items'), use })));
   const stale = new Map();
   for (const p of inv.plugins) if (p.origin.startsWith('cli') && !p.enabled && !enabled.some((e) => e.id === p.id)) stale.set(p.id, p.gone ? 'installed for a folder that is gone' : 'installed, turned off');
   for (const id of Object.keys(inv.flagged)) stale.set(id, 'delisted by its marketplace');
