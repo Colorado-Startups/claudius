@@ -14,7 +14,7 @@ No `gh` (no shell tool, or `command -v gh` finds nothing), as in chat or Cowork 
 
 ```mermaid
 flowchart LR
-  O[Outline] --> Q[Product questions] --> P[Plan mode] --> A[Plan Artifact] --> I[Issues]
+  O[Outline] --> Q[Product questions] --> P[Plan mode] --> A[Plan Artifact] --> Y[Approve] --> I[Issues]
   I --> S[One session per step] --> R[PR] --> M[merge skill] --> L[Live]
 ```
 
