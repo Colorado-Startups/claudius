@@ -1,4 +1,4 @@
-![Claudius, an AI agent character](assets/claudius-icon.png)
+![Claudius, an AI agent character](https://raw.githubusercontent.com/Colorado-Startups/brand/v3.2.0/dist/logo/claudius-icon-1024.png)
 
 # Claudius by Colorado Startups
 
