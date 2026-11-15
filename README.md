@@ -6,6 +6,12 @@ Brand: [Colorado Startups brand guide](https://colorado-startups.github.io/brand
 
 [Live Quality and Process pages](https://colorado-startups.github.io/claudius/)
 
+| 🧩 With Claudius | ⬜ Without | 📈 Lift | 🪙 Cost per turn |
+|---|---|---|---|
+| **59%** of graded tasks passed | 10% | **+50 points**, ± 14 at 95% | 465 tokens |
+
+[Scorecard](SCORECARD.md): 15 tasks on three models, measured 2026-11-15.
+
 | [Best practices tab](https://colorado-startups.github.io/claudius/#practices): 10 of 10 at goal | [Publish map](https://colorado-startups.github.io/claudius/process.html#map-publish): 6 of 6 steps |
 |---|---|
 | ![Best practices tab: quality, speed and consumption all 100](docs/best-practices-tab.jpg) | ![Publish map: Write, Trim, Test, Measure, Validate, Clear, all at goal](docs/publish-map.jpg) |

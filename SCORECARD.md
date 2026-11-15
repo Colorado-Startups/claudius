@@ -1,0 +1,119 @@
+# Claudius Scorecard
+
+<img src="https://raw.githubusercontent.com/Colorado-Startups/brand/v3.2.0/dist/logo/claudius-icon-1024.png" width="96" alt="Claudius, an AI agent character">
+
+Measured 2026-11-15 · plugin 0.3.0 · Haiku 5.5, Sonnet 5.5, Opus 5.5 · judged by Sonnet 5.5
+
+| | 🧩 With Claudius | ⬜ Without | 📈 Lift |
+|---|---|---|---|
+| **Graded tasks Claude got right** | **59%** | 10% | **+50 points**, ± 14 at 95% |
+
+| 📈 Got better | ➖ Same | 📉 Got worse | 🪙 Cost per turn | ✅ Anthropic's checks |
+|---|---|---|---|---|
+| **26** of 45 | 19 | **0** | **465** tokens (goal 500) | **12** of 12 |
+
+## 📈 Quality
+
+```mermaid
+xychart-beta
+  title "Tasks passed by skill, percent: bars with Claudius, line without"
+  x-axis ["plain-voice", "find-plugin", "plan", "merge", "equip"]
+  y-axis "Pass rate" 0 --> 100
+  bar [78, 67, 67, 52, 33]
+  line [30, 0, 11, 7, 0]
+```
+
+| Skill | ⬜ Without | 🧩 With | Lift | Haiku | Sonnet | Opus |
+|---|---|---|---|---|---|---|
+| `plain-voice` | 30% | **78%** | +48 | +33 | +67 | +44 |
+| `find-plugin` | 0% | **67%** | +67 | +67 | +67 | +67 |
+| `plan` | 11% | **67%** | +56 | +67 | +33 | +67 |
+| `merge` | 7% | **52%** | +44 | +22 | +89 | +22 |
+| `equip` | 0% | **33%** | +33 | +33 | +33 | +33 |
+
+Lift is in points: the pass rate with Claudius minus the pass rate without it, on the same task and model.
+
+## 🔀 GitHub
+
+```mermaid
+flowchart LR
+  P[13 pull requests] --> R[13 reviewed at a named commit]
+  R --> B[4 blocked, fixed first]
+  R --> M[13 merged at the reviewed commit]
+  B --> M
+```
+
+| Measure | Value | Compared with |
+|---|---|---|
+| Graded merge tasks passed | **52%** with Claudius | 7% without |
+| Merges pinned to a review verdict | **13 of 13** | observed, no comparison group |
+| Defects blocked and fixed before merge | **4** pull requests | observed, no comparison group |
+
+Observed on two repos on 2026-11-15: `claudius` #68 to #73 and `git-crafter` #134 to #140.
+
+## 🪙 Consumption
+
+| Measure | Value | Reference |
+|---|---|---|
+| Always-on tokens, five skills | **465** | goal 500 · Claude Code flags a plugin at 2,000 |
+| Right skill picked with 102 plugins on | **8 of 8** | skills listed by name only |
+| Skill listing at that setting | **12,300** tokens | 107,616 with every description shown |
+
+| Skill | Always on | When used |
+|---|---|---|
+| `plan` | ~80 | ~1,200 |
+| `merge` | ~100 | ~1,000 |
+| `equip` | ~100 | ~1,600 |
+| `find-plugin` | ~80 | ~720 |
+| `plain-voice` | ~100 | ~540 |
+
+## ✅ Standards
+
+<details><summary>12 of 12 of Anthropic's published checks at goal</summary>
+
+| Check | Now | Goal | Read from |
+|---|---|---|---|
+| Findings that block a directory submission | 0 | 0 | Best practices tab |
+| Findings held for an Anthropic reviewer | 0 | 0 | Best practices tab |
+| Directory warnings | 0 | 0 | Best practices tab |
+| Directory listing fields missing | 0 | 0 | Best practices tab |
+| Skill authoring rules broken | 0 | 0 | Best practices tab |
+| Skill files past the size and layout rules | 0 | 0 | Best practices tab |
+| Skills that run tools they do not name | 0 | 0 | Best practices tab |
+| Largest plugin's always-on tokens (chars ÷ 4) | 309 | 500 | Best practices tab |
+| Plugin skills with fewer than three eval cases | 0 | 0 | Best practices tab |
+| Plugin skills not shown to beat no plugin | 0 | 0 | Best practices tab |
+| Directory portal: blocking findings | 0 | 0 | Validate at 116d655, version 0.2.2 |
+| Directory portal: policy holds | 0 | 0 | Validate at 116d655, version 0.2.2 |
+
+</details>
+
+## 🔬 Method
+
+| What | How |
+|---|---|
+| Tasks | 15, three per skill, in [plugin/evals](plugin/evals) |
+| Runs | 162 agent runs: `merge` and `plain-voice` tasks 3 per arm, the rest 1 |
+| Tool | `claude plugin eval`, each task with the plugin and without it |
+| Scores | [quality/evals](quality/evals), one file per model |
+| Interval | 1.96 standard errors of the 45 paired differences |
+| Token cost | `claude plugin details claudius` and the [Best practices tab](https://colorado-startups.github.io/claudius/#practices) |
+
+| Not shown | Why |
+|---|---|
+| Time or tokens per task, with and without | not measured yet |
+| What people using it think | no survey |
+| GitHub figures against a comparison group | none exists; they are observed counts |
+| The listing test on other accounts | one account, Opus 5.5 |
+
+## 📚 Built to these rules
+
+| Source (read 2026-11-15) | Rule followed |
+|---|---|
+| [Anthropic: plugin evals](https://code.claude.com/docs/en/plugin-evals) | show with against without, never a score alone |
+| [Anthropic: a statistical approach to model evals](https://www.anthropic.com/research/statistical-approach-to-model-evals) | error bars at 95%, paired differences on the same tasks |
+| [Anthropic: measure plugin cost](https://code.claude.com/docs/en/plugins/measure) | always-on tokens, with the 2,000 flag |
+| [GitHub: engineering system success playbook](https://github.com/resources/insights/engineering-system-success-playbook) | quality and velocity together |
+| [OpenSSF Scorecard](https://github.com/ossf/scorecard) | named checks, each pass or fail |
+| [Microsoft: Power BI scorecards](https://learn.microsoft.com/en-us/power-bi/create-reports/service-goals-introduction) | every metric shows a value against a target |
+| [Microsoft Research: SPACE](https://www.microsoft.com/en-us/research/publication/the-space-of-developer-productivity-theres-more-to-it-than-you-think/) | never a single metric |
