@@ -1,5 +1,5 @@
 {
-  "ideal": "Each session loads only the plugins, skills and connectors it uses, from Anthropic's marketplaces, plans its work, delegates in parallel, and gets short summaries.",
+  "ideal": "Each session loads only the plugins, skills and connectors it uses, from Anthropic's marketplaces or reviewed directory, delegates in parallel, and gets short summaries.",
   "sources": [
     {
       "title": "Desktop application",

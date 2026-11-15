@@ -311,6 +311,11 @@ test('guard_blocks_per_100_calls: with no guard log, Claude Code permission refu
     assert.equal(r.value, 50, '2 refusals over the 4 tool calls');
     assert.match(r.source, /permission refusals \(Auto mode, deny rules and built-in safety checks\), as no guard log is at/);
     assert.deepEqual(r.detail.map((d) => d.label).sort(), ['built-in safety check', 'permission rules']);
+    // With a guard log present (here empty), the refusals still count beside its blocks.
+    write(path.join(dir, 'empty.log'), '');
+    const withLog = (await collect({ ...base, projectsDir: dir, guardLog: path.join(dir, 'empty.log'), gh: fakeGh() }))['blockers.guard_blocks_per_100_calls'];
+    assert.equal(withLog.value, 50);
+    assert.match(withLog.source, /0 guard blocks, 2 refusals/);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

@@ -36,9 +36,14 @@ export function guardRateMetric(c) {
   if (log.error) return cnc(id, `${GUARD_LOG}: ${log.error}`, logSource);
   if (!haveFiles) return cnc(id, filesReason, logSource);
   if (!calls.length) return cnc(id, noCalls, logSource);
+  // Claude Code's own refusals block calls too, so they count beside the guard's.
+  const refusals = c.blocks.filter((b) => b.kind === 'permission');
   const ruleNames = [...new Set(logInSpan.flatMap((e) => e.rules))];
-  const detail = ruleNames.map((r) => item(r, round(per(logInSpan.filter((e) => e.rules.includes(r)).length), 3))).sort((a, b) => b.value - a.value);
-  val(id, round(per(logInSpan.length), 3), `${logSource}; ${logInSpan.length} blocks`, detail);
+  const detail = [
+    ...ruleNames.map((r) => item(r, round(per(logInSpan.filter((e) => e.rules.includes(r)).length), 3))),
+    ...[...new Set(refusals.map((b) => b.label))].map((l) => item(l, round(per(refusals.filter((b) => b.label === l).length), 3))),
+  ].sort((a, b) => b.value - a.value);
+  val(id, round(per(logInSpan.length + refusals.length), 3), `${logSource}, plus Claude Code permission refusals (Auto mode, deny rules and built-in safety checks) in this repo's transcripts; ${logInSpan.length} guard blocks, ${refusals.length} refusals`, detail);
 }
 
 // The share of the last bash guard blocks that were false alarms, with a
