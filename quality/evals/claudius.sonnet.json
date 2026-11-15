@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "plugin": "claudius",
+  "model": "sonnet",
+  "judgeModel": "sonnet",
+  "date": "2026-11-15",
+  "claudeVersion": "2.1.314",
+  "partial": false,
+  "note": "merge-* cases: 3 runs per arm after the 0.2.1 description fix; other cases: 1 run per arm. claude plugin eval, schemaVersion 1, scores only.",
+  "costUsd": 1.58,
+  "aggregates": {
+    "overallScore": 0.5925925925925926,
+    "meanDelta": 0.48148148148148145,
+    "casesTotal": 9
+  },
+  "cases": [
+    {
+      "name": "equip-asks-first",
+      "runs": 1,
+      "aggregates": {
+        "score": 0,
+        "delta": 0
+      }
+    },
+    {
+      "name": "equip-chat-checklist",
+      "runs": 1,
+      "aggregates": {
+        "score": 0,
+        "delta": 0
+      }
+    },
+    {
+      "name": "merge-a-pr",
+      "runs": 3,
+      "aggregates": {
+        "score": 0.6666666666666666,
+        "delta": 0.6666666666666666
+      }
+    },
+    {
+      "name": "merge-after-fix",
+      "runs": 3,
+      "aggregates": {
+        "score": 1,
+        "delta": 1
+      }
+    },
+    {
+      "name": "merge-pasted-diff",
+      "runs": 3,
+      "aggregates": {
+        "score": 0.6666666666666666,
+        "delta": 0.6666666666666666
+      }
+    },
+    {
+      "name": "plan-a-feature",
+      "runs": 1,
+      "aggregates": {
+        "score": 1,
+        "delta": 0
+      }
+    },
+    {
+      "name": "plan-an-app",
+      "runs": 1,
+      "aggregates": {
+        "score": 1,
+        "delta": 1
+      }
+    },
+    {
+      "name": "plan-in-chat",
+      "runs": 1,
+      "aggregates": {
+        "score": 0,
+        "delta": 0
+      }
+    },
+    {
+      "name": "slow-sessions",
+      "runs": 1,
+      "aggregates": {
+        "score": 1,
+        "delta": 1
+      }
+    }
+  ]
+}

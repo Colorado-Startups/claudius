@@ -2,7 +2,7 @@
   "name": "claudius",
   "displayName": "Claudius by Colorado Startups",
   "description": "Anthropic-first workflow for the Claude desktop app: plan a build into PR-sized steps and sessions, review and merge only the reviewed commit, and keep a lean plugin setup.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": {
     "name": "Colorado Startups",
     "url": "https://github.com/Colorado-Startups"

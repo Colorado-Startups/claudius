@@ -1,6 +1,6 @@
 ---
 name: merge
-description: Reviews a pull request with Anthropic's pr-review-toolkit at the right model, posts a MERGE or BLOCK verdict pinned to the head commit, and merges only that commit. Use when a PR is open and its checks are running or green.
+description: Reviews a pull request with Anthropic's pr-review-toolkit at the right model, posts a MERGE or BLOCK verdict pinned to the head commit, and merges only that commit. Use when asked to review or merge a pull request, or when someone pastes a diff and asks whether to merge it.
 compatibility: Needs the gh CLI signed in and the pr-review-toolkit plugin from claude-plugins-official. Without a shell it reviews a diff the person pastes and gives the verdict.
 ---
 
@@ -10,7 +10,7 @@ One review per PR, pinned to a commit, so what merges is what was reviewed.
 
 Requires `gh` signed in (`gh auth status`) and `pr-review-toolkit` from `claude-plugins-official` (`claude plugin install pr-review-toolkit@claude-plugins-official`).
 
-No `gh` (no shell tool, or `command -v gh` finds nothing), as in chat or Cowork without the tool: ask the person to paste the diff. Review it in the two passes of step 3, give `MERGE <sha>` or `BLOCK <sha>` with fixes, and leave the merge to them.
+No `gh` (no shell tool, or `command -v gh` finds nothing), as in chat or Cowork without the tool: give the steps below with the exact commands for the person to run at the head SHA. Review any pasted diff in the two passes of step 3 and reply `MERGE <sha>` or `BLOCK <sha>` with fixes as file, problem, replacement. After a fix, review only the delta from the blocked SHA and give a new verdict for the new head. Leave posting and merging to the person.
 
 ```mermaid
 flowchart LR
