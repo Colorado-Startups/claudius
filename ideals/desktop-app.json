@@ -1,5 +1,5 @@
 {
-  "ideal": "Each session loads only the plugins, skills and connectors it uses, plans its work, delegates independent pieces in parallel, and gets short summaries back.",
+  "ideal": "Each session loads only the plugins, skills and connectors it uses, from Anthropic's own marketplaces or its reviewed directory, plans its work, delegates independent pieces in parallel, and gets short summaries back.",
   "sources": [
     {
       "title": "Desktop application",
@@ -40,6 +40,21 @@
       "title": "Claude Code changelog",
       "url": "https://code.claude.com/docs/en/changelog",
       "date": "2026-11-10"
+    },
+    {
+      "title": "Plugin security and trust",
+      "url": "https://code.claude.com/docs/en/plugins/security",
+      "date": "2026-11-14"
+    },
+    {
+      "title": "Anthropic's marketplaces",
+      "url": "https://code.claude.com/docs/en/plugins/anthropic-marketplaces",
+      "date": "2026-11-14"
+    },
+    {
+      "title": "Publish and distribute a plugin",
+      "url": "https://code.claude.com/docs/en/plugins/publish",
+      "date": "2026-11-14"
     }
   ],
   "quality": "Every connector works, every plugin and connector loaded gets used, and each work turn keeps a task list and ends with a recap.",

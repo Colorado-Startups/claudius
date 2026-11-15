@@ -1,0 +1,13 @@
+{
+  "comment": "Custom or third-party pieces that an Anthropic plugin or a built-in Claude Code feature already covers. kind: plugin (matched on the plugin name), skill, agent or hook (matched on the skill folder, agent file or hook script name). match is a regular expression. Read by desktop_app.plugins_replaceable. Add a row by PR, with the doc that shows the equivalent.",
+  "equivalents": [
+    { "kind": "plugin", "match": "^superpowers$", "use": "feature-dev@claude-plugins-official and plan mode", "doc": "https://code.claude.com/docs/en/plugins/anthropic-marketplaces" },
+    { "kind": "plugin", "match": "^ralph-(loop|wiggum)$", "use": "the built-in /loop command", "doc": "https://code.claude.com/docs/en/commands" },
+    { "kind": "plugin", "match": "^commit-commands$", "use": "the desktop app's commit and pull request buttons", "doc": "https://code.claude.com/docs/en/desktop" },
+    { "kind": "agent", "match": "^(code-)?reviewer$", "use": "pr-review-toolkit@claude-plugins-official (code-reviewer agent)", "doc": "https://code.claude.com/docs/en/plugins/anthropic-marketplaces" },
+    { "kind": "hook", "match": "^bash_guard", "use": "Auto mode and permissions.deny rules", "doc": "https://code.claude.com/docs/en/permission-modes" },
+    { "kind": "hook", "match": "^write_guard", "use": "a hookify@claude-plugins-official rule", "doc": "https://code.claude.com/docs/en/plugins/anthropic-marketplaces" },
+    { "kind": "hook", "match": "^turn_check", "use": "the desktop app's own task list and recap", "doc": "https://code.claude.com/docs/en/desktop" },
+    { "kind": "skill", "match": "^(usage|cost|session)-report$", "use": "session-report@claude-plugins-official", "doc": "https://code.claude.com/docs/en/plugins/measure" }
+  ]
+}
