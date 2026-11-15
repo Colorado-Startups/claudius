@@ -43,10 +43,12 @@ write(path.join(home, '.claude', 'settings.json'), {
 });
 write(path.join(plugins, 'known_marketplaces.json'), { 'acme-tools': { source: { source: 'github', repo: 'acme/tools' } }, cloudflare: { source: { source: 'github', repo: 'cloudflare/skills' } } });
 write(path.join(plugins, 'marketplaces', 'claude-plugins-official', '.claude-plugin', 'marketplace.json'), { plugins: [{ name: 'cloudflare', author: { name: 'Cloudflare' } }, { name: 'feature-dev', author: { name: 'Anthropic' } }] });
-write(path.join(plugins, 'plugin-catalog-cache.json'), { fetchedAt: '2026-11-01T00:00:00Z', catalog: { plugins: { 'feature-dev@claude-plugins-official': { last_updated: '2026-10-01T00:00:00Z' }, 'superpowers@claude-plugins-official': { last_updated: '2025-12-01T00:00:00Z' } } } });
+write(path.join(plugins, 'plugin-catalog-cache.json'), { fetchedAt: '2026-11-01T00:00:00Z', catalog: { plugins: { 'feature-dev@claude-plugins-official': { last_updated: '2025-01-01T00:00:00Z' }, 'superpowers@claude-plugins-official': { last_updated: '2025-12-01T00:00:00Z' } } } });
 write(path.join(plugins, 'flagged-plugins.json'), { 'retired@claude-plugins-official': { reason: 'delisted' } });
 // The desktop app's own plugins: Anthropic's directory and an official topic marketplace.
-write(desktopManifest, { lastUpdated: 1, plugins: [{ name: 'brand-voice', marketplaceName: 'anthropic-plugin-directory', installationPreference: 'available' }, { name: 'legal-x', marketplaceName: 'claude-for-legal', installationPreference: 'available' }] });
+write(desktopManifest, { lastUpdated: 1, plugins: [{ id: 'plugin_01', name: '0d5e4efa-bd29-4a82-8efe-1e3f053e048f', marketplaceName: 'anthropic-plugin-directory', installationPreference: 'available' }, { name: 'legal-x', marketplaceName: 'claude-for-legal', installationPreference: 'available' }] });
+// The directory entry's real name is in its own plugin.json.
+write(path.join(path.dirname(desktopManifest), 'plugin_01', '.claude-plugin', 'plugin.json'), { name: 'brand-voice' });
 // Custom pieces: a reviewer agent and a usage-report skill have Anthropic equivalents; a comfy skill has none.
 write(path.join(home, '.claude', 'agents', 'reviewer.md'), '---\nname: reviewer\n---\n');
 write(path.join(home, '.claude', 'skills', 'usage-report', 'SKILL.md'), '---\nname: usage-report\n---\n');
@@ -116,7 +118,7 @@ test('plugins_stale: turned off, folder gone, delisted, and no upstream update i
   assert.equal(rows['explanatory-output-style@claude-plugins-official'], 'installed for a folder that is gone');
   assert.equal(rows['retired@claude-plugins-official'], 'delisted by its marketplace');
   assert.equal(rows['superpowers@claude-plugins-official'], 'no upstream update in 180 days');
-  assert.equal(rows['feature-dev@claude-plugins-official'], undefined, 'updated 44 days ago');
+  assert.equal(rows['feature-dev@claude-plugins-official'], undefined, 'by Anthropic, whose catalog plugins are never stale by age');
   assert.equal(r.value, 4);
   assert.match(r.source, /fetched 2026-11-01/);
 });
@@ -143,4 +145,9 @@ test('plugin and connector use is read across the account: another project folde
   assert.equal(r.value, 1, r.source);
   assert.deepEqual(r.detail.filter((d) => d.unit === 'calls').map((d) => d.label), ['tau'], 'only the terminal session called tau');
   assert.match(r.source, /across every project folder and Cowork session/);
+});
+
+test('desktop directory plugins go by their own plugin.json name', () => {
+  const ids = inventory(opts).plugins.filter((p) => p.origin === 'desktop').map((p) => p.id).sort();
+  assert.deepEqual(ids, ['brand-voice@anthropic-plugin-directory', 'legal-x@claude-for-legal']);
 });

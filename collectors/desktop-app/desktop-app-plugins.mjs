@@ -105,11 +105,15 @@ export function inventory({ home, root, params }) {
   const cowork = resolvePath(params.cowork_dir, { home, root });
   for (const account of dirs(cowork)) {
     for (const org of dirs(path.join(cowork, account))) {
-      const list = readJson(path.join(cowork, account, org, 'rpm', 'manifest.json'))?.plugins;
+      const store = path.join(cowork, account, org, 'rpm');
+      const list = readJson(path.join(store, 'manifest.json'))?.plugins;
       for (const p of Array.isArray(list) ? list : Object.values(list ?? {})) {
         if (!p?.name) continue;
+        // A directory plugin's manifest entry may carry an id for its name; the
+        // name it loads under (and its @synced key) is its own plugin.json's.
+        const name = String(readJson(path.join(store, String(p.id ?? ''), params.plugin_manifest_dir, 'plugin.json'))?.name || p.name);
         const marketplace = String(p.marketplaceName ?? '');
-        plugins.push({ id: `${p.name}@${marketplace}`, name: p.name, marketplace, origin: 'desktop', enabled: desktopOff[`${p.name}@synced`] !== false && p.installationPreference !== 'unavailable' });
+        plugins.push({ id: `${name}@${marketplace}`, name, marketplace, origin: 'desktop', enabled: desktopOff[`${name}@synced`] !== false && p.installationPreference !== 'unavailable' });
       }
     }
   }
@@ -164,6 +168,8 @@ export function pluginMetrics(inv, params, now, { val, cnc }) {
   for (const id of Object.keys(inv.flagged)) stale.set(id, 'delisted by its marketplace');
   const days = Number(params.stale_days);
   for (const p of enabled) {
+    // A plugin Anthropic maintains in its own catalog is stable, not abandoned.
+    if (inv.catalog[p.name]?.author === params.maintainer_author) continue;
     const updated = Date.parse(inv.cache[p.id]?.last_updated ?? '');
     if (days > 0 && Number.isFinite(updated) && now.getTime() - updated > days * DAY) stale.set(p.id, `no upstream update in ${days} days`);
   }
