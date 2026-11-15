@@ -10,6 +10,10 @@ Adapted, in its own words:
 Ideas only, no text copied:
 - The issue-per-step flow in skills/plan draws on the to-spec and to-tickets ideas in
   mattpocock/skills (https://github.com/mattpocock/skills).
+- skills/plain-voice draws on ideas in blader/humanizer (https://github.com/blader/humanizer), MIT License.
+  Its rules are written fresh.
+- skills/find-plugin draws on the idea of a skill finder, as in vercel-labs/skills find-skills
+  (https://github.com/vercel-labs/skills). It searches Anthropic's catalog first.
 
 Referenced, not included: obra/superpowers (https://github.com/obra/superpowers) and
 Anthropic's plugins in claude-plugins-official, which Claudius expects to be installed.

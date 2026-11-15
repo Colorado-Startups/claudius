@@ -50,7 +50,7 @@ flowchart LR
 | Part | Is |
 | --- | --- |
 | Templates | `templates/claude/`: the Claude-only files a repo commits. This repo runs copies of them (`tests/templates.test.mjs`) |
-| Plugin | `plugin/`: the `claudius` Claude Code plugin (skills `plan`, `merge`, `equip`). Install: `claude plugin marketplace add Colorado-Startups/claudius`, then `claude plugin install claudius@claudius` |
+| Plugin | `plugin/`: the `claudius` Claude Code plugin (skills `plan`, `merge`, `equip`, `find-plugin`, `plain-voice`). Install: `claude plugin marketplace add Colorado-Startups/claudius`, then `claude plugin install claudius@claudius` |
 | Pack | 7 tabs: Claude, Claude settings, Claude desktop app, Blockers, Tokens, Instructions, Best practices. Maps: Guard, Decide, Equip, Publish |
 | Engine | Git Crafter's `actions/pages` and CI standard, pinned by full commit SHA. No engine code lives here |
 | Public pages | Built in CI from `quality/public/`. The Quality page shows only metrics read from GitHub and the repo's files. Each metric that needs local files is dropped: not shown, counted or listed. The exceptions are the ones `quality/public-params.json` reads from committed files alone. A tab left with no metric, Tokens and Claude desktop app, is left off; it shows on a `--local` page (Git Crafter v7.0.1 or later). The Process page shows each map step such a metric does not score |

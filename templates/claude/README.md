@@ -16,7 +16,7 @@ flowchart LR
 | Copy to your repo root | Read by | Does |
 |---|---|---|
 | `.claude/settings.json` | Claude Code, every session | Turns on 5 Anthropic plugins ([Plugins](#plugins)). Denies reads of `.env`, keys and `~/.ssh` (`claude_settings.deny_coverage` scores it). Denies the one-way doors `rm -rf ~`, `git push --force`, `git reset --hard` in their common spellings |
-| The `claudius` plugin (enabled by `.claude/settings.json`) | Claude, every session | `plan`: outline to a visual plan Artifact, one issue per PR, one session per step. `merge`: review at the head SHA, then merge only that commit. `equip`: lean plugin setup. Source: [plugin/](../../plugin/) |
+| The `claudius` plugin (enabled by `.claude/settings.json`) | Claude, every session | `plan`: outline to a visual plan Artifact, one issue per PR, one session per step. `merge`: review at the head SHA, then merge only that commit. `equip`: keep Anthropic plugins on and in use, drop dead ones. `find-plugin`: Anthropic-first plugin finder. `plain-voice`: plain, tell-free writing. Source: [plugin/](../../plugin/) |
 | `.claude/skills/bump-pins/SKILL.md` | Claude, on demand | Moves the engine and pack pins to their latest tags |
 | `REVIEW.md` | Code Review service only | Review rules. Needs a Team or Enterprise plan; billed per review |
 
@@ -57,7 +57,7 @@ No hooks sit in the repo's `settings.json`: a hook that points at a guard the ma
 
 Run the four checks in a terminal session in the repo (`claude`): it reads the same settings files as the app.
 
-What one turn carries before any message, in an example session with many plugins on (the app's `get_usage` context categories, read 2026-11-14). The MCP and skill slices shrink as unused plugins come off:
+What one turn carries before any message, in an example session with many plugins on (the app's `get_usage` context categories, read 2026-11-14). The MCP and skill slices shrink as dead or unreviewed plugins are removed:
 
 ```mermaid
 pie title Fixed context per turn, tokens
@@ -67,6 +67,32 @@ pie title Fixed context per turn, tokens
   "Skills" : 12619
   "System prompt" : 10697
 ```
+
+## Whole app and one project
+
+Three layers decide what a session loads. A plugin turned off in user settings is off in every folder, and a project's `true` beats the user's `false`.
+
+```mermaid
+flowchart TD
+  A[Account: claude.ai Customize,<br/>Plugins and Connectors] --> S[Session]
+  U[This machine: ~/.claude/settings.json<br/>enabledPlugins, false = off everywhere] --> S
+  P[One project: .claude/settings.json<br/>enabledPlugins true beats the user's false] --> S
+```
+
+| Piece | Loads at start | Loads when needed |
+|---|---|---|
+| Connector tools | name list only, by default | the tool's schema, when a task calls it |
+| Skill bodies | no | when the skill is used |
+| Skill descriptions | yes, up to a listing budget of 1% of the context window; past it, the least-used skills' descriptions are dropped (`skillListingBudgetFraction` raises it, at a token cost per turn) | no |
+| Plugins | their skill descriptions and server instructions | their skill bodies and tools |
+
+| Scope | Belongs there |
+|---|---|
+| Account (Customize pages) | Anthropic-built and Anthropic-reviewed plugins and connectors you keep on, signed in once |
+| This machine (`~/.claude/settings.json`) | what you use in every folder; `false` for a plugin you want off everywhere |
+| One project (`.claude/settings.json`) | the plugins that project needs, set `true`, so an unused Anthropic plugin is put to work there, not dropped |
+
+Sources: code.claude.com/docs/en/skills, /plugins/loading and /mcp, read 2026-11-15.
 
 ## Plugins
 

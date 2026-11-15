@@ -46,7 +46,7 @@ flowchart LR
 | Swap | A custom skill, agent, hook or plugin gives way to Anthropic's | `desktop_app.plugins_replaceable` |
 | Scope | Domain plugins on in the repos that use them | `desktop_app.listing_tokens` |
 | Connect | Every listed connector signed in before the first prompt | `desktop_app.connectors_pending` |
-| Use | Every enabled plugin called in the account's recent sessions | `desktop_app.plugins_unused` |
+| Use | An Anthropic or reviewed plugin that goes unused is put to work in the project that needs it, not dropped | `desktop_app.plugins_unused` |
 | Prune | Turned-off, orphaned, delisted, unmaintained installs uninstalled | `desktop_app.plugins_stale` |
 
 | Tier | Marketplace name | Rule |

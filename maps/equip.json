@@ -2,7 +2,7 @@
  "id": "equip",
  "name": "Equip",
  "why": "A capability a session needs, from Anthropic's plugins to a lean session that loads only what it uses",
- "ideal": "Plugins come from Anthropic's marketplaces or reviewed directory, Anthropic's replace custom copies, each repo enables its own, and unused or stale ones go.",
+ "ideal": "Anthropic-built and reviewed plugins stay on and get used, replace custom copies, and dead installs go.",
  "sources": [
   {
    "title": "Claude Code: plugin security and trust",
@@ -81,7 +81,7 @@
     "/skill-doctor",
     "/usage"
    ],
-   "rule": "Every enabled plugin is called within the account's recent sessions; one that is not comes off.",
+   "rule": "An Anthropic or reviewed plugin that goes unused is put to work in the project that needs it, not dropped.",
    "rule_ref": "https://code.claude.com/docs/en/plugins/measure",
    "metric": "desktop_app.plugins_unused"
   },
