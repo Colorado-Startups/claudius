@@ -1,0 +1,15 @@
+Claudius plugin
+Copyright 2026 Colorado Startups. Licensed under the Apache License, Version 2.0 (LICENSE).
+
+Claudius is not an Anthropic product and is not affiliated with Anthropic.
+
+Adapted, in its own words:
+- skills/plan and skills/merge: from Claudius's own templates and Git Crafter's merging skill
+  (https://github.com/SoulCraft-Org/git-crafter), Apache License 2.0.
+
+Ideas only, no text copied:
+- The issue-per-step flow in skills/plan draws on the to-spec and to-tickets ideas in
+  mattpocock/skills (https://github.com/mattpocock/skills).
+
+Referenced, not included: obra/superpowers (https://github.com/obra/superpowers) and
+Anthropic's plugins in claude-plugins-official, which Claudius expects to be installed.
