@@ -102,14 +102,14 @@ test('plugins_replaceable: an official listing of a third-party plugin, the equi
   const r = run().plugins_replaceable;
   const rows = Object.fromEntries(r.detail.map((d) => [d.label, d.use]));
   assert.equal(rows['cloudflare@cloudflare'], 'cloudflare@claude-plugins-official');
-  assert.match(rows['superpowers@claude-plugins-official'], /feature-dev/);
+  assert.equal(rows['superpowers@claude-plugins-official'], undefined, 'superpowers is listed in the official marketplace and kept');
   assert.match(rows['agent reviewer'], /pr-review-toolkit/);
   assert.match(rows['skill usage-report'], /session-report/);
   assert.match(rows['hook bash_guard.py'], /Auto mode/);
   assert.match(rows['hook turn_check.py'], /recap/);
   assert.equal(rows['skill comfy'], undefined, 'no equivalent, not flagged');
   assert.equal(rows['ralph-loop@claude-plugins-official'], undefined, 'turned off, so not flagged here');
-  assert.equal(r.value, 6);
+  assert.equal(r.value, 5);
 });
 
 test('plugins_stale: turned off, folder gone, delisted, and no upstream update in 180 days', () => {
