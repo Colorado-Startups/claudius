@@ -1,0 +1,100 @@
+{
+ "id": "equip",
+ "name": "Equip",
+ "why": "A capability a session needs, from Anthropic's plugins to a lean session that loads only what it uses",
+ "ideal": "Plugins come from Anthropic's marketplaces or its reviewed directory, custom copies give way to Anthropic's, each repo enables only its own, and unused or stale ones go.",
+ "sources": [
+  {
+   "title": "Claude Code: plugin security and trust",
+   "url": "https://code.claude.com/docs/en/plugins/security",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Claude Code: Anthropic's marketplaces",
+   "url": "https://code.claude.com/docs/en/plugins/anthropic-marketplaces",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Claude Code: measure plugin cost and usage",
+   "url": "https://code.claude.com/docs/en/plugins/measure",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Claude Code: plugin loading reference",
+   "url": "https://code.claude.com/docs/en/plugins/loading",
+   "date": "2026-11-14"
+  }
+ ],
+ "critical_path": [
+  "source",
+  "scope",
+  "prune"
+ ],
+ "steps": [
+  {
+   "id": "source",
+   "name": "Source",
+   "tools": [
+    "/plugin Discover",
+    "claude.com/marketplace"
+   ],
+   "rule": "Install from Anthropic's official marketplaces or its reviewed directory; anything else needs a named reason.",
+   "rule_ref": "https://code.claude.com/docs/en/plugins/security",
+   "metric": "desktop_app.plugins_untrusted"
+  },
+  {
+   "id": "swap",
+   "name": "Swap",
+   "tools": [
+    "anthropic-equivalents.json"
+   ],
+   "rule": "A custom skill, agent, hook or plugin gives way to the Anthropic one that does the same job.",
+   "rule_ref": "https://code.claude.com/docs/en/plugins/anthropic-marketplaces",
+   "metric": "desktop_app.plugins_replaceable"
+  },
+  {
+   "id": "scope",
+   "name": "Scope",
+   "tools": [
+    "enabledPlugins in .claude/settings.json",
+    "claude plugin details"
+   ],
+   "rule": "Domain plugins are enabled in the repos that use them, so every session lists only its own.",
+   "rule_ref": "https://code.claude.com/docs/en/plugins/loading",
+   "metric": "desktop_app.listing_tokens"
+  },
+  {
+   "id": "connect",
+   "name": "Connect",
+   "tools": [
+    "Settings, Connectors"
+   ],
+   "rule": "Every connector a session lists is signed in and ready before the first prompt.",
+   "rule_ref": "https://code.claude.com/docs/en/mcp",
+   "metric": "desktop_app.connectors_pending"
+  },
+  {
+   "id": "use",
+   "name": "Use",
+   "tools": [
+    "/plugin Installed, Not used recently",
+    "/skill-doctor",
+    "/usage"
+   ],
+   "rule": "Every enabled plugin is called within the account's recent sessions; one that is not comes off.",
+   "rule_ref": "https://code.claude.com/docs/en/plugins/measure",
+   "metric": "desktop_app.plugins_unused"
+  },
+  {
+   "id": "prune",
+   "name": "Prune",
+   "tools": [
+    "claude plugin uninstall",
+    "/doctor"
+   ],
+   "rule": "Turned-off, orphaned, delisted and long-unmaintained installs are uninstalled.",
+   "rule_ref": "https://code.claude.com/docs/en/plugins/security",
+   "metric": "desktop_app.plugins_stale"
+  }
+ ]
+}

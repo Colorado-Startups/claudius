@@ -295,3 +295,23 @@ test('the transcript folder is params.projects_dir, and the source names it', as
 });
 
 // ---- held or false alarm: what came after a block
+
+test('guard_blocks_per_100_calls: with no guard log, Claude Code permission refusals are the blocks', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'blockers-noguard-'));
+  const folder = path.join(dir, '-Users-someone-Developer-acme-site');
+  write(path.join(folder, 's9.jsonl'), jsonl([
+    asst(0, 'n1', 10, [bash('b1', 'ls')]), result(0, 'b1', 'ok'),
+    asst(1, 'n2', 10, [bash('b2', 'rm -rf ~')]), result(1, 'b2', 'Permission to use Bash with command rm -rf ~ has been denied.', true),
+    asst(2, 'n3', 10, [bash('b3', 'git push --force')]), result(2, 'b3', 'Permission for this command was denied by a built-in Claude Code safety check.', true),
+    asst(3, 'n4', 10, [bash('b4', 'git status')]), result(3, 'b4', 'clean'),
+  ]));
+  try {
+    const got = await collect({ ...base, projectsDir: dir, guardLog: path.join(dir, 'no-such.log'), gh: fakeGh() });
+    const r = got['blockers.guard_blocks_per_100_calls'];
+    assert.equal(r.value, 50, '2 refusals over the 4 tool calls');
+    assert.match(r.source, /permission refusals \(Auto mode, deny rules and built-in safety checks\), as no guard log is at/);
+    assert.deepEqual(r.detail.map((d) => d.label).sort(), ['built-in safety check', 'permission rules']);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
