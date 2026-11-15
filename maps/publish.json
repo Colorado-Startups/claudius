@@ -1,0 +1,25 @@
+{
+ "id": "publish",
+ "name": "Publish",
+ "why": "A plugin or skill, from its first SKILL.md to a listing in Anthropic's directory",
+ "ideal": "Skills follow Anthropic's authoring rules, beat no plugin on Haiku, Sonnet and Opus, stay cheap always-on, and the portal blocks or holds nothing.",
+ "sources": [
+  {"title": "Claude: plugin pre-submission checklist", "url": "https://claude.com/docs/plugins/pre-submission-checklist", "date": "2026-11-15"},
+  {"title": "Claude Code: plugin manifest reference", "url": "https://code.claude.com/docs/en/plugins/manifest-reference", "date": "2026-11-15"},
+  {"title": "Claude: skill authoring best practices", "url": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices", "date": "2026-11-15"},
+  {"title": "Agent Skills specification", "url": "https://agentskills.io/specification", "date": "2026-11-15"},
+  {"title": "Claude Code: extend Claude with skills", "url": "https://code.claude.com/docs/en/skills", "date": "2026-11-15"},
+  {"title": "Claude Code: measure plugin cost and usage", "url": "https://code.claude.com/docs/en/plugins/measure", "date": "2026-11-15"},
+  {"title": "Claude Code: test plugins with evals", "url": "https://code.claude.com/docs/en/plugin-evals", "date": "2026-11-15"},
+  {"title": "Claude: connector pre-submission checklist", "url": "https://claude.com/docs/connectors/building/review-criteria", "date": "2026-11-15"}
+ ],
+ "critical_path": ["write", "validate", "clear"],
+ "steps": [
+  {"id": "write", "name": "Write", "tools": ["SKILL.md frontmatter", "skills-ref validate"], "rule": "Skill names and descriptions follow Anthropic's authoring rules: third person, and saying when to use the skill.", "rule_ref": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices", "metric": "practices.skill_rules"},
+  {"id": "trim", "name": "Trim", "tools": ["claude plugin details", "/skill-doctor"], "rule": "Names and descriptions that load every session stay short, so the plugin's always-on cost stays low.", "rule_ref": "https://code.claude.com/docs/en/plugins/measure", "metric": "practices.listing_tokens"},
+  {"id": "test", "name": "Test", "tools": ["claude plugin eval init", "tool_used Skill grader"], "rule": "Each skill has three eval cases whose Skill grader proves the skill fired.", "rule_ref": "https://code.claude.com/docs/en/plugin-evals", "metric": "practices.skills_under_three_evals"},
+  {"id": "measure", "name": "Measure", "tools": ["claude plugin eval --model", "aggregate-result.json"], "rule": "Each skill scores above the no-plugin baseline on Haiku, Sonnet and Opus in claude plugin eval.", "rule_ref": "https://code.claude.com/docs/en/plugin-evals", "metric": "practices.skills_without_lift"},
+  {"id": "validate", "name": "Validate", "tools": ["claude plugin validate", "Developer portal Validate"], "rule": "The developer portal's validation finds nothing that blocks submission or stops it.", "rule_ref": "https://claude.com/docs/plugins/pre-submission-checklist", "metric": "practices.directory_blocks"},
+  {"id": "clear", "name": "Clear", "tools": ["Developer portal Validate", "Policy hold findings"], "rule": "Nothing is held for a reviewer, so a new version goes live without waiting.", "rule_ref": "https://claude.com/docs/plugins/pre-submission-checklist#choices-a-reviewer-always-checks", "metric": "practices.directory_holds"}
+ ]
+}

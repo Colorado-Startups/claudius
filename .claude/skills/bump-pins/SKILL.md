@@ -1,6 +1,7 @@
 ---
 name: bump-pins
-description: Move the Git Crafter engine pin and the Claudius pack pin to their latest release tags, in one pull request.
+description: Moves the Git Crafter engine pin and the Claudius pack pin to their latest release tags, in one pull request. Use when either repo publishes a new release.
+compatibility: Requires gh signed in and git.
 ---
 
 # Bump pins

@@ -1,6 +1,7 @@
 ---
 name: scout
 description: Finds fast-growing community skill and plugin repos on GitHub, checks each one's license and its overlap with installed Anthropic and Anthropic-reviewed plugins, and proposes only the gaps worth writing as your own skill. Use when asked what's trending or worth adopting.
+compatibility: Requires gh signed in and the Claude Code CLI (claude plugin).
 ---
 
 # Scout
