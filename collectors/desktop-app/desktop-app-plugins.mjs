@@ -109,9 +109,11 @@ export function inventory({ home, root, params }) {
       const list = readJson(path.join(store, 'manifest.json'))?.plugins;
       for (const p of Array.isArray(list) ? list : Object.values(list ?? {})) {
         if (!p?.name) continue;
-        // A directory plugin's manifest entry may carry an id for its name; the
-        // name it loads under (and its @synced key) is its own plugin.json's.
-        const name = String(readJson(path.join(store, String(p.id ?? ''), params.plugin_manifest_dir, 'plugin.json'))?.name || p.name);
+        // The name a plugin loads under (and its @synced key) is its own
+        // plugin.json's; a directory entry's manifest name may be an id. Only a
+        // plain folder id is read, so no entry reaches outside the store.
+        const own = /^[\w-]+$/.test(String(p.id ?? '')) ? readJson(path.join(store, p.id, params.plugin_manifest_dir, 'plugin.json'))?.name : null;
+        const name = String(own || p.name);
         const marketplace = String(p.marketplaceName ?? '');
         plugins.push({ id: `${name}@${marketplace}`, name, marketplace, origin: 'desktop', enabled: desktopOff[`${name}@synced`] !== false && p.installationPreference !== 'unavailable' });
       }
@@ -169,7 +171,7 @@ export function pluginMetrics(inv, params, now, { val, cnc }) {
   const days = Number(params.stale_days);
   for (const p of enabled) {
     // A plugin Anthropic maintains in its own catalog is stable, not abandoned.
-    if (inv.catalog[p.name]?.author === params.maintainer_author) continue;
+    if (params.maintainer_author && inv.catalog[p.name]?.author === params.maintainer_author) continue;
     const updated = Date.parse(inv.cache[p.id]?.last_updated ?? '');
     if (days > 0 && Number.isFinite(updated) && now.getTime() - updated > days * DAY) stale.set(p.id, `no upstream update in ${days} days`);
   }

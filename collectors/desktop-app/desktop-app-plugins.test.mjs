@@ -46,7 +46,8 @@ write(path.join(plugins, 'marketplaces', 'claude-plugins-official', '.claude-plu
 write(path.join(plugins, 'plugin-catalog-cache.json'), { fetchedAt: '2026-11-01T00:00:00Z', catalog: { plugins: { 'feature-dev@claude-plugins-official': { last_updated: '2025-01-01T00:00:00Z' }, 'superpowers@claude-plugins-official': { last_updated: '2025-12-01T00:00:00Z' } } } });
 write(path.join(plugins, 'flagged-plugins.json'), { 'retired@claude-plugins-official': { reason: 'delisted' } });
 // The desktop app's own plugins: Anthropic's directory and an official topic marketplace.
-write(desktopManifest, { lastUpdated: 1, plugins: [{ id: 'plugin_01', name: '0d5e4efa-bd29-4a82-8efe-1e3f053e048f', marketplaceName: 'anthropic-plugin-directory', installationPreference: 'available' }, { name: 'legal-x', marketplaceName: 'claude-for-legal', installationPreference: 'available' }] });
+write(desktopManifest, { lastUpdated: 1, plugins: [{ id: 'plugin_01', name: '0d5e4efa-bd29-4a82-8efe-1e3f053e048f', marketplaceName: 'anthropic-plugin-directory', installationPreference: 'available' }, { name: 'legal-x', marketplaceName: 'claude-for-legal', installationPreference: 'available' }, { id: '../../escape', name: 'stays-put', marketplaceName: 'claude-for-legal', installationPreference: 'unavailable' }] });
+write(path.join(path.dirname(desktopManifest), '..', '..', 'escape', '.claude-plugin', 'plugin.json'), { name: 'escaped' });
 // The directory entry's real name is in its own plugin.json.
 write(path.join(path.dirname(desktopManifest), 'plugin_01', '.claude-plugin', 'plugin.json'), { name: 'brand-voice' });
 // Custom pieces: a reviewer agent and a usage-report skill have Anthropic equivalents; a comfy skill has none.
@@ -149,5 +150,11 @@ test('plugin and connector use is read across the account: another project folde
 
 test('desktop directory plugins go by their own plugin.json name', () => {
   const ids = inventory(opts).plugins.filter((p) => p.origin === 'desktop').map((p) => p.id).sort();
-  assert.deepEqual(ids, ['brand-voice@anthropic-plugin-directory', 'legal-x@claude-for-legal']);
+  assert.deepEqual(ids, ['brand-voice@anthropic-plugin-directory', 'legal-x@claude-for-legal', 'stays-put@claude-for-legal'], 'an id that is no plain folder name is never read');
+});
+
+test('plugins_stale: with no maintainer_author set, no plugin is exempt from the age rule', () => {
+  const out = {};
+  pluginMetrics(inventory(opts), { ...PARAMS, maintainer_author: '' }, now, { val: (id, value, source, detail) => (out[id] = detail), cnc: () => {} });
+  assert.ok(out.plugins_stale.some((d) => d.label === 'feature-dev@claude-plugins-official'));
 });
