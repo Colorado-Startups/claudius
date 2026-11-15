@@ -48,7 +48,7 @@
    "tools": [
     "anthropic-equivalents.json"
    ],
-   "rule": "A custom skill, agent, hook or plugin gives way to the Anthropic one that does the same job.",
+   "rule": "A custom skill, agent or hook gives way to the Anthropic one that does the same job.",
    "rule_ref": "https://code.claude.com/docs/en/plugins/anthropic-marketplaces",
    "metric": "desktop_app.plugins_replaceable"
   },

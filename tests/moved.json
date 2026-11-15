@@ -37,9 +37,7 @@
   "collectors/instructions/instructions.mjs",
   "collectors/instructions/instructions.test.mjs",
   "collectors/simplicity/simplicity.mjs",
-  "collectors/simplicity/simplicity.test.mjs",
-  "collectors/guards/guards.mjs",
-  "targets/guards.json"
+  "collectors/simplicity/simplicity.test.mjs"
  ],
  "files": [
   [
@@ -293,14 +291,6 @@
   [
    "quality/fixtures/claude/projects/-Users-someone-Developer-acme-site/session-fixture-three.jsonl",
    "fixtures/claude/projects/-Users-someone-Developer-acme-site/session-fixture-three.jsonl"
-  ],
-  [
-   "config/quality/collectors/guard-speed.mjs",
-   "collectors/guards/guards.mjs"
-  ],
-  [
-   "config/quality/targets/guard-speed.json",
-   "targets/guards.json"
   ]
  ]
 }

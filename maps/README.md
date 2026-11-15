@@ -43,7 +43,7 @@ flowchart LR
 | Step | Ideal | Metric |
 |---|---|---|
 | Source | 🅰 official marketplaces or 🅱 Anthropic's reviewed directory; anything else named | `desktop_app.plugins_untrusted` |
-| Swap | A custom skill, agent, hook or plugin gives way to Anthropic's | `desktop_app.plugins_replaceable` |
+| Swap | A custom skill, agent or hook gives way to Anthropic's | `desktop_app.plugins_replaceable` |
 | Scope | Domain plugins on in the repos that use them | `desktop_app.listing_tokens` |
 | Connect | Every listed connector signed in before the first prompt | `desktop_app.connectors_pending` |
 | Use | An Anthropic or reviewed plugin that goes unused is put to work in the project that needs it, not dropped | `desktop_app.plugins_unused` |
