@@ -292,6 +292,8 @@ export const DIRECTORY_RULES = [
 ];
 
 // -------------------------------------------------------------------- skills
+// Plugin skills load in chat too, where only these keys are allowed and others hard-error (code.claude.com/docs/en/skills,
+// read 2026-11-15). Repo .claude/skills are Claude Code only and may also use when_to_use.
 const SKILL_FIELDS = new Set(['name', 'description', 'license', 'compatibility', 'metadata', 'allowed-tools']);
 const TOOLS = ['gh', 'git', 'claude', 'npm', 'npx', 'node', 'python', 'python3', 'pip', 'uv', 'uvx', 'docker', 'wrangler', 'jq', 'curl'];
 const SHELL_FENCE = /^(|bash|sh|shell|zsh|console|terminal)$/i;
@@ -321,7 +323,7 @@ export const SKILL_RULES = [
   { id: 'skill_desc_length', metric: 'skill_rules', title: 'a skill description that is not 1 to 1,024 characters of text', doc: AUTHORING, check: (s) => { const d = str(s.fields.description); return d && d.length <= 1024 ? [] : [find(s.file, d === null ? 'no description' : `${d.length} characters`)]; } },
   { id: 'skill_desc_xml', metric: 'skill_rules', title: 'a skill description with XML tags', doc: AUTHORING, check: (s) => (/<\/?[A-Za-z][\w:-]*(\s[^<>]*)?\/?>/.test(str(s.fields.description) ?? '') ? [find(s.file)] : []) },
   { id: 'skill_desc_person', metric: 'skill_rules', title: 'a skill description not in the third person', doc: AUTHORING, check: (s) => (/\bI (?:can|will)\b|\bI'll\b|(?:^|[.!?]\s+)You (?:can|should|will)\b/.test(str(s.fields.description) ?? '') ? [find(s.file)] : []) },
-  { id: 'skill_desc_when', metric: 'skill_rules', title: 'a skill description that does not say when to use it', doc: AUTHORING, check: (s) => { const d = str(s.fields.description); return d && !/\bwhen\b|\buse for\b/i.test(d) ? [find(s.file)] : []; } },
+  { id: 'skill_desc_when', metric: 'skill_rules', title: 'a skill description that does not say when to use it', doc: AUTHORING, check: (s) => { const d = str(s.fields.description); return d && !str(s.fields.when_to_use) && !/\b(when(ever)?|if|before|after|use (this|to|for))\b/i.test(d) ? [find(s.file)] : []; } },
   { id: 'skill_listing_cap', metric: 'skill_rules', title: 'a description and when_to_use over the 1,536-character listing cap', doc: SKILLS, check: (s) => { const n = (str(s.fields.description) ?? '').length + (str(s.fields.when_to_use) ? 1 + s.fields.when_to_use.length : 0); return n > 1536 ? [find(s.file, `${n} characters`)] : []; } },
   { id: 'skill_fields', metric: 'skill_rules', title: 'a plugin skill field claude.ai and the Skills API do not accept', doc: SKILLS, check: (s) => { const extra = s.plugin ? Object.keys(s.fields).filter((k) => !SKILL_FIELDS.has(k)) : []; return extra.length ? [find(s.file, extra.join(', '))] : []; } },
   { id: 'skill_body_lines', metric: 'skill_size', title: 'a SKILL.md body of 500 lines or more', doc: AUTHORING, check: (s) => { const n = s.body.replace(/\n$/, '').split('\n').length; return n >= 500 ? [find(s.file, `${n} lines`)] : []; } },

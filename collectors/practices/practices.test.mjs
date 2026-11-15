@@ -86,6 +86,9 @@ const good = path.join(tmp, 'good');
 goodPlugin(path.join(good, 'plugin'));
 reports(good, 'acme-notes');
 skill(path.join(good, '.claude', 'skills', 'tidy-up'), 'name: tidy-up\ndescription: Tidies a notes folder. Use when the notes folder is messy.\nwhen_to_use: After a long week of meetings.');
+skill(path.join(good, '.claude', 'skills', 'review-pr'), 'name: review-pr\ndescription: Reviews a pull request. Use whenever the user asks to review a pull request.');
+skill(path.join(good, '.claude', 'skills', 'rebase-check'), 'name: rebase-check\ndescription: Checks a branch. Use before merging or after a rebase.');
+skill(path.join(good, '.claude', 'skills', 'listed-later'), 'name: listed-later\ndescription: Lists notes by date.\nwhen_to_use: When someone asks what was decided.');
 index(good);
 
 // ------------------------------------------------------------------- bad
