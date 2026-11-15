@@ -2,7 +2,7 @@
  "id": "equip",
  "name": "Equip",
  "why": "A capability a session needs, from Anthropic's plugins to a lean session that loads only what it uses",
- "ideal": "Plugins come from Anthropic's marketplaces or its reviewed directory, custom copies give way to Anthropic's, each repo enables only its own, and unused or stale ones go.",
+ "ideal": "Plugins come from Anthropic's marketplaces or reviewed directory, Anthropic's replace custom copies, each repo enables its own, and unused or stale ones go.",
  "sources": [
   {
    "title": "Claude Code: plugin security and trust",
