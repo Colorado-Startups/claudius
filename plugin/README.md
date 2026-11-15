@@ -31,13 +31,13 @@ An Anthropic-first workflow for the Claude desktop app. Claudius adds only what 
 
 ## Measured
 
-| Skill | Sonnet 5.5 with | Sonnet 5.5 without | Change | Haiku 5.5 | Opus 5.5 |
-|---|---|---|---|---|---|
-| `merge` | 1.00 | 0.00 | +1.00 | pending | pending |
-| `equip` | 1.00 | 0.00 | +1.00 | pending | pending |
-| `plan` | 0.33 | 0.00 | +0.33 | pending | pending |
+| Lift | Haiku 5.5 | Sonnet 5.5 | Opus 5.5 |
+|---|---|---|---|
+| `plan` | ✅ +0.67 | ✅ +0.33 | ✅ +1.00 |
+| `merge` | ✅ +0.22 | ✅ +0.89 | ✅ +0.22 |
+| `equip` | ✅ +0.33 | ✅ +0.33 | ✅ +0.33 |
 
-`claude plugin eval`, 3 runs per arm, judged by Sonnet 5.5 (2026-11-15). Those Sonnet figures cover the first three cases, one per skill. All 9 cases (three per skill, in [evals/](evals/)) run on all three models after the weekly usage reset on 2026-11-19. A skill that doesn't beat the no-plugin baseline is left out.
+Lift is the mean score with Claudius minus without it, over each skill's three cases in [evals/](evals/). Measured with `claude plugin eval`, judged by Sonnet 5.5, on 2026-11-15: `merge` cases ran 3 times per arm, the others once. Scores: [quality/evals](https://github.com/Colorado-Startups/claudius/tree/main/quality/evals). A skill that doesn't beat the no-plugin baseline is left out.
 
 ## What it runs and changes
 

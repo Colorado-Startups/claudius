@@ -1,16 +1,16 @@
 ---
 name: merge
-description: Reviews a pull request with Anthropic's pr-review-toolkit at the right model, posts a MERGE or BLOCK verdict pinned to the head commit, and merges only that commit. Use when a PR is open and its checks are running or green.
+description: Reviews a pull request with Anthropic's pr-review-toolkit at the right model, posts a MERGE or BLOCK verdict pinned to the head commit, and merges only that commit. Use when asked to merge a pull request, or when someone pastes a diff and asks whether to merge it.
 compatibility: Needs the gh CLI signed in and the pr-review-toolkit plugin from claude-plugins-official. Without a shell it reviews a diff the person pastes and gives the verdict.
 ---
 
 # Merge
 
-One review per PR, pinned to a commit, so what merges is what was reviewed.
+One review per PR, pinned to a commit, so what merges is what was reviewed. A review-only request gets the verdict in chat.
 
 Requires `gh` signed in (`gh auth status`) and `pr-review-toolkit` from `claude-plugins-official` (`claude plugin install pr-review-toolkit@claude-plugins-official`).
 
-No `gh` (no shell tool, or `command -v gh` finds nothing), as in chat or Cowork without the tool: ask the person to paste the diff. Review it in the two passes of step 3, give `MERGE <sha>` or `BLOCK <sha>` with fixes, and leave the merge to them.
+No `gh` (no shell tool, or `command -v gh` finds nothing), as in chat or Cowork without the tool: give the steps below with the exact commands for the person to run at the head SHA. Review any pasted diff in the two passes of step 3 and reply `MERGE <sha>` or `BLOCK <sha>` with fixes as file, problem, replacement. After a fix, review only the delta from the blocked SHA and give a new verdict for the new head. Leave posting and merging to the person.
 
 ```mermaid
 flowchart LR
@@ -24,7 +24,7 @@ flowchart LR
 | 2 | Pick the reviewer | `pr-review-toolkit:code-reviewer` as a fresh subagent. Model: Haiku for docs, data and code under about 200 lines; Sonnet for settings, workflows, permissions, rules or anything larger |
 | 3 | Brief | The PR number, head SHA (`gh pr view N --json headRefOid -q .headRefOid`) and intent in a few lines; the reviewer reads `gh pr diff N`. Two passes: mechanical (it does what it says, every check passed), then judgment (what breaks). Reply in at most 120 words: `MERGE <sha>` or `BLOCK <sha>` plus fixes as file, problem, replacement |
 | 4 | Fix | On BLOCK, fix on the branch and push. Send the same reviewer only the delta from the reviewed SHA |
-| 5 | Verdict | Post a PR comment whose first line is exactly `Review: MERGE at <40-hex sha>` (`BLOCK` in place of `MERGE` for a blocked commit). One account that authors and merges leaves no GitHub review, so this line is the record |
+| 5 | Verdict | Post and merge only after the person's yes, unless they asked to merge. Post a PR comment whose first line is exactly `Review: MERGE at <40-hex sha>` (`BLOCK` in place of `MERGE` for a blocked commit). One account that authors and merges leaves no GitHub review, so this line is the record |
 | 6 | Merge | `gh pr merge N --squash --match-head-commit <sha>` with the literal SHA that passed. Use a method the repo allows (`gh api repos/{owner}/{repo}`) |
 | 7 | After | If the merge deploys, load the live page once |
 

@@ -10,7 +10,7 @@ The owner outlines the product. Claude plans it visually, and the desktop app ru
 
 Requires `gh` signed in (`gh auth status`), and the desktop app's Code tab for sessions and Artifacts.
 
-No `gh` (no shell tool, or `command -v gh` finds nothing), as in chat or Cowork without the tool: ask the step 1 questions in chat and skip the `gh` and session steps. Write the plan as a table (step, files, depends on, metric it moves) and list each session brief for the person to start.
+No `gh` (no shell tool, or `command -v gh` finds nothing), as in chat or Cowork without the tool: skip the `gh` and session steps, and never say issues were filed or sessions started. Give the step 3 table in the reply, then one brief per independent step for the person to paste into a session.
 
 ```mermaid
 flowchart LR
@@ -20,9 +20,9 @@ flowchart LR
 
 | # | Step | Do | Tool |
 |---|---|---|---|
-| 1 | Define | Read the outline and the repo. Ask only product, vision or billing questions: one AskUserQuestion call, at most 4, each with a recommended default. Decide engineering, security and settings questions yourself from current docs | AskUserQuestion |
+| 1 | Define | Read the outline and the repo. Ask only product, vision or billing questions: one AskUserQuestion call, at most 4, each with a recommended default. No AskUserQuestion, or no answer: plan on the defaults and list them above the plan; never stop at the questions. Decide engineering, security and settings questions yourself from current docs | AskUserQuestion |
 | 2 | Split | In plan mode, cut the work into steps. Each step is one PR of at most 200 changed lines, with its test, touching files no other step touches. If superpowers is installed, its `writing-plans` is the method for design and step-by-step plans | Plan mode |
-| 3 | Show | Publish the plan as an Artifact: a flow diagram, then one row per step (step, files, depends on, metric it moves). Labels, not paragraphs | Artifacts |
+| 3 | Show | Publish the plan as an Artifact: a flow diagram, then one row per step (step, issue title, files, test, runs with or after, metric it moves). Labels, not paragraphs | Artifacts |
 | 4 | Approve | ExitPlanMode with the steps and the Artifact link. On a yes, file the issues (step 5), then start one session per independent step on a brief under 150 words; steps that share files run in order | Sessions, worktrees |
 | 5 | File | After the yes, one issue per step: `gh issue create`, its body the step's row and the Artifact link. Add `--type Task` only when `gh api orgs/<owner>/issue-types` lists Task; a 404 or no Task means plain | `gh` |
 | 6 | Build | A worker branches, tests, pushes once, and opens a PR that says `Closes #<issue>` with a table body. It stops at the open PR | Auto-fix |

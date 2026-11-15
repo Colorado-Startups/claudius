@@ -1,6 +1,6 @@
 ---
 name: equip
-description: Audits and trims the Claude desktop app's plugins, skills and connectors - keep Anthropic-built and Anthropic-reviewed ones, scope domain plugins per repo, remove unused and stale installs, and measure tokens saved. Use when sessions feel slow or heavy, or when setting up an account.
+description: Audits and trims Claude's plugins, skills and connectors in the desktop app, chat and Cowork - keep Anthropic-built and Anthropic-reviewed ones, scope domain plugins per repo, remove unused and stale installs, and measure tokens saved. Use when sessions feel slow or heavy, or when setting up an account.
 compatibility: Needs the Claude Code CLI (claude plugin). Without a shell it gives a checklist for Customize > Plugins. It shows a change table and acts only after a yes.
 ---
 
@@ -10,7 +10,7 @@ Every enabled plugin adds its skill and agent descriptions and server instructio
 
 Requires the Claude Code CLI (`claude plugin`).
 
-No `claude` (no shell tool, or `command -v claude` finds nothing), as in chat or Cowork without the tool: give a checklist for Customize > Plugins, one row per plugin the person names (keep, turn off, or scope to a repo), for them to click through.
+No `claude` (no shell tool, or `command -v claude` finds nothing), as in chat or Cowork without the tool: give the step 3 table as a checklist for Customize > Plugins, one row per plugin the person names, filled with what they told you and `?` where use is unknown, for them to click through. Change nothing yourself.
 
 ```mermaid
 flowchart LR
