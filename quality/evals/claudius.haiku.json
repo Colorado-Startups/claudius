@@ -6,11 +6,11 @@
   "date": "2026-11-15",
   "claudeVersion": "2.1.314",
   "partial": false,
-  "note": "merge-* cases: 3 runs per arm after the 0.2.1 description fix; other cases: 1 run per arm. claude plugin eval, schemaVersion 1, scores only.",
+  "note": "merge-* cases: 3 runs per arm on the 0.2.1 text; other cases: 1 run per arm. claude plugin eval, schemaVersion 1, scores only.",
   "costUsd": 0.34,
   "aggregates": {
-    "overallScore": 0.4444444444444444,
-    "meanDelta": 0.4444444444444444,
+    "overallScore": 0.4074074074074074,
+    "meanDelta": 0.4074074074074074,
     "casesTotal": 9
   },
   "cases": [
@@ -34,8 +34,8 @@
       "name": "merge-a-pr",
       "runs": 3,
       "aggregates": {
-        "score": 0.3333333333333333,
-        "delta": 0.3333333333333333
+        "score": 0,
+        "delta": 0
       }
     },
     {

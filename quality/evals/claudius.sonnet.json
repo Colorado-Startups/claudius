@@ -6,11 +6,11 @@
   "date": "2026-11-15",
   "claudeVersion": "2.1.314",
   "partial": false,
-  "note": "merge-* cases: 3 runs per arm after the 0.2.1 description fix; other cases: 1 run per arm. claude plugin eval, schemaVersion 1, scores only.",
-  "costUsd": 1.58,
+  "note": "merge-* cases: 3 runs per arm on the 0.2.1 text; other cases: 1 run per arm. claude plugin eval, schemaVersion 1, scores only.",
+  "costUsd": 1.59,
   "aggregates": {
-    "overallScore": 0.5925925925925926,
-    "meanDelta": 0.48148148148148145,
+    "overallScore": 0.6296296296296295,
+    "meanDelta": 0.5185185185185185,
     "casesTotal": 9
   },
   "cases": [
@@ -50,8 +50,8 @@
       "name": "merge-pasted-diff",
       "runs": 3,
       "aggregates": {
-        "score": 0.6666666666666666,
-        "delta": 0.6666666666666666
+        "score": 1,
+        "delta": 1
       }
     },
     {
