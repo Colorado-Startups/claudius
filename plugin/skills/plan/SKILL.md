@@ -10,6 +10,8 @@ The owner outlines the product. Claude plans it visually, and the desktop app ru
 
 Requires `gh` signed in (`gh auth status`), and the desktop app's Code tab for sessions and Artifacts.
 
+When `mattpocock-skills` (from `claude-plugins-official`) is installed, its `to-spec` writes the PRD and its `to-tickets` files the issues in place of steps 3 and 5 as written; otherwise follow the steps as written.
+
 No `gh` (no shell tool, or `command -v gh` finds nothing), as in chat or Cowork without the tool: skip the `gh` and session steps, and never say issues were filed or sessions started. Give the step 3 table in the reply, then one brief per independent step for the person to paste into a session.
 
 ```mermaid
