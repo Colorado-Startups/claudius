@@ -1,0 +1,48 @@
+{
+  "ideal": "Every plugin and skill passes Anthropic's directory checks and authoring rules, beats no plugin in evals, and costs little always-on.",
+  "sources": [
+    {
+      "title": "Plugin pre-submission checklist",
+      "url": "https://claude.com/docs/plugins/pre-submission-checklist",
+      "date": "2026-11-15"
+    },
+    {
+      "title": "Plugin manifest reference",
+      "url": "https://code.claude.com/docs/en/plugins/manifest-reference",
+      "date": "2026-11-15"
+    },
+    {
+      "title": "Skill authoring best practices",
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices",
+      "date": "2026-11-15"
+    },
+    {
+      "title": "Agent Skills specification",
+      "url": "https://agentskills.io/specification",
+      "date": "2026-11-15"
+    },
+    {
+      "title": "Extend Claude with skills",
+      "url": "https://code.claude.com/docs/en/skills",
+      "date": "2026-11-15"
+    },
+    {
+      "title": "Measure plugin cost and usage",
+      "url": "https://code.claude.com/docs/en/plugins/measure",
+      "date": "2026-11-15"
+    },
+    {
+      "title": "Test plugins with evals",
+      "url": "https://code.claude.com/docs/en/plugin-evals",
+      "date": "2026-11-15"
+    },
+    {
+      "title": "Connector pre-submission checklist",
+      "url": "https://claude.com/docs/connectors/building/review-criteria",
+      "date": "2026-11-15"
+    }
+  ],
+  "quality": "The portal finds nothing to block, every skill follows the authoring rules, and three evals per skill show it beats no plugin on each model.",
+  "speed": "Nothing waits for a reviewer, so each new version goes live as soon as it is scanned.",
+  "consumption": "Skill, command and agent descriptions stay short always-on, and each SKILL.md stays under 500 lines."
+}
