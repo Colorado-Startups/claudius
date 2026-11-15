@@ -1,0 +1,15 @@
+{
+  "name": "claudius",
+  "description": "Claudius by Colorado Startups: one Claude Code plugin for an Anthropic-first desktop app workflow.",
+  "owner": {
+    "name": "Colorado Startups",
+    "url": "https://github.com/Colorado-Startups"
+  },
+  "plugins": [
+    {
+      "name": "claudius",
+      "source": "./plugin",
+      "description": "Anthropic-first workflow for the Claude desktop app: plan, merge at the reviewed commit, and a lean plugin setup."
+    }
+  ]
+}
