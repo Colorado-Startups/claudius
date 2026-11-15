@@ -8,9 +8,9 @@ Measured 2026-11-15 · plugin 0.3.0 · Haiku 5.5, Sonnet 5.5, Opus 5.5 · judged
 |---|---|---|---|
 | **Graded tasks Claude got right** | **59%** | 10% | **+50 points**, ± 14 at 95% |
 
-| 📈 Got better | ➖ Same | 📉 Got worse | 🪙 Cost per turn | ✅ Anthropic's checks |
+| 📈 Got better | ➖ Same | 📉 Got worse | 🪙 Always-on tokens | ✅ Anthropic's checks |
 |---|---|---|---|---|
-| **26** of 45 | 19 | **0** | **465** tokens (goal 500) | **12** of 12 |
+| **26** of 45 | 19 | **0** | **465** (goal 500) | **12** of 12 |
 
 ## 📈 Quality
 
@@ -66,6 +66,9 @@ Observed on two repos on 2026-11-15: `claudius` #68 to #73 and `git-crafter` #13
 | `equip` | ~100 | ~1,600 |
 | `find-plugin` | ~80 | ~720 |
 | `plain-voice` | ~100 | ~540 |
+| **All five** | **465** | |
+
+The rows are Claude Code's rounded estimates (`claude plugin details`, plugin 0.3.0); its own total is 465. The Best practices tab estimates the same listing at 309, by characters ÷ 4.
 
 ## ✅ Standards
 
@@ -83,8 +86,10 @@ Observed on two repos on 2026-11-15: `claudius` #68 to #73 and `git-crafter` #13
 | Largest plugin's always-on tokens (chars ÷ 4) | 309 | 500 | Best practices tab |
 | Plugin skills with fewer than three eval cases | 0 | 0 | Best practices tab |
 | Plugin skills not shown to beat no plugin | 0 | 0 | Best practices tab |
-| Directory portal: blocking findings | 0 | 0 | Validate at 116d655, version 0.2.2 |
-| Directory portal: policy holds | 0 | 0 | Validate at 116d655, version 0.2.2 |
+| Directory portal: blocking findings | 0 | 0 | Validate at 116d655 (plugin 0.2.2) |
+| Directory portal: policy holds | 0 | 0 | Validate at 116d655 (plugin 0.2.2) |
+
+The two portal rows are for plugin 0.2.2, which passed its scan and is in Anthropic's review. The portal had not scanned 0.3.0 when this was written. Every other figure on this page is for 0.3.0.
 
 </details>
 

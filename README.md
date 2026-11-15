@@ -6,9 +6,9 @@ Brand: [Colorado Startups brand guide](https://colorado-startups.github.io/brand
 
 [Live Quality and Process pages](https://colorado-startups.github.io/claudius/)
 
-| 🧩 With Claudius | ⬜ Without | 📈 Lift | 🪙 Cost per turn |
+| 🧩 With Claudius | ⬜ Without | 📈 Lift | 🪙 Always-on tokens |
 |---|---|---|---|
-| **59%** of graded tasks passed | 10% | **+50 points**, ± 14 at 95% | 465 tokens |
+| **59%** of graded tasks passed | 10% | **+50 points**, ± 14 at 95% | 465 |
 
 [Scorecard](SCORECARD.md): 15 tasks on three models, measured 2026-11-15.
 
