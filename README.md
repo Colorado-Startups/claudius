@@ -37,7 +37,7 @@ flowchart LR
 
 | Owner | Claude |
 |---|---|
-| Outlines the app in a Code tab session, answers up to 4 questions, approves the plan | The rest, by the `product-plan` skill in [templates/claude](templates/claude/README.md) |
+| Outlines the app in a Code tab session, answers up to 4 questions, approves the plan | The rest, by the Claudius plugin's `plan` skill ([plugin/](plugin/README.md)) |
 
 ## What it is
 

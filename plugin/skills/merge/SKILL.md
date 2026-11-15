@@ -7,6 +7,8 @@ description: Reviews a pull request with Anthropic's pr-review-toolkit at the ri
 
 One review per PR, pinned to a commit, so what merges is what was reviewed.
 
+Requires `pr-review-toolkit` from `claude-plugins-official` (`claude plugin install pr-review-toolkit@claude-plugins-official`).
+
 ```mermaid
 flowchart LR
   C[Checks green] --> R[Reviewer at the head SHA] -->|BLOCK| F[Fix, push] --> D[Review the delta] --> R

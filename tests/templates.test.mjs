@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const COPIES = ['.claude/settings.json', '.claude/skills/bump-pins/SKILL.md', '.claude/skills/product-plan/SKILL.md'];
+const COPIES = ['.claude/settings.json', '.claude/skills/bump-pins/SKILL.md'];
 
 test('templates: each root copy matches templates/claude byte for byte', () => {
   for (const file of COPIES) assert.equal(readFileSync(file, 'utf8'), readFileSync(`templates/claude/${file}`, 'utf8'), file);
@@ -15,10 +15,13 @@ test('templates: the settings template parses and denies the credential paths', 
   for (const rule of ['Read(./.env)', 'Read(./.env.*)', 'Read(./**/*.pem)', 'Read(./**/*.key)', 'Read(~/.ssh/**)']) assert.ok(deny.includes(rule), rule);
 });
 
-test('templates: the settings template enables only claude-plugins-official plugins', () => {
-  const ids = Object.keys(JSON.parse(readFileSync('templates/claude/.claude/settings.json', 'utf8')).enabledPlugins);
+test('templates: the settings template enables claude-plugins-official plugins, plus this repo\'s own claudius plugin', () => {
+  const settings = JSON.parse(readFileSync('templates/claude/.claude/settings.json', 'utf8'));
+  const ids = Object.keys(settings.enabledPlugins);
   assert.ok(ids.length > 0, 'enabledPlugins is empty');
-  for (const id of ids) assert.match(id, /@claude-plugins-official$/, id);
+  // claudius is published from this repo (plugin/, .claude-plugin/marketplace.json) until Anthropic's directory lists it.
+  for (const id of ids) assert.match(id, /@claude-plugins-official$|^claudius@claudius$/, id);
+  assert.equal(settings.extraKnownMarketplaces?.claudius?.source?.repo, 'Colorado-Startups/claudius');
 });
 
 // A Bash rule matches the whole command text, and each * matches any text, empty included
@@ -31,7 +34,7 @@ const denies = (rules, cmd) => rules.some((rule) => {
 
 test('templates: the one-way-door deny rules catch each common spelling and leave everyday commands alone', () => {
   const deny = JSON.parse(readFileSync('templates/claude/.claude/settings.json', 'utf8')).permissions.deny;
-  const doors = ['rm -rf ~', 'rm -rf ~/', 'rm -fr ~', 'rm -fr ~/', 'rm -r -f ~', 'rm -rf ~ /tmp/x', 'rm -rf $HOME', 'rm -rf $HOME/', 'rm -rf "$HOME"',
+  const doors = ['rm -rf ~', 'rm -rf ~/', 'rm -fr ~', 'rm -fr ~/', 'rm -r -f ~', 'rm -rf ~ /tmp/x', 'rm -rf $HOME', 'rm -rf $HOME/', 'rm -rf $HOME /tmp/x', 'rm -rf "$HOME"', 'rm -rf "$HOME" x',
     'git push --force', 'git push --force origin main', 'git push origin main --force', 'git push --force-with-lease origin x',
     'git push -f origin x', 'git push origin x -f', 'git reset --hard', 'git reset --hard origin/main', 'git reset HEAD~1 --hard'];
   for (const cmd of doors) assert.ok(denies(deny, cmd), cmd);
