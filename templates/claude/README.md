@@ -20,7 +20,7 @@ flowchart LR
 | `.claude/skills/bump-pins/SKILL.md` | Claude, on demand | Moves the engine and pack pins to their latest tags |
 | `REVIEW.md` | Code Review service only | Review rules. Needs a Team or Enterprise plan; billed per review |
 
-The deny list is a backstop under Auto mode, not a full blocklist: a Bash rule matches the command text, so `/bin/rm` or `bash -c '...'` gets past it.
+The deny list is a backstop, not a full blocklist. Claude Code's built-in check already prompts before `rm -rf ~` in every mode, bypass included (code.claude.com/docs/en/permission-modes); the rules name only the home folder itself, since `*` is a wildcard and `~/*` would match every path under home. Deny rules block in every mode: a Bash rule matches the command text, so `/bin/rm` or `bash -c '...'` gets past it.
 
 ## Steps
 

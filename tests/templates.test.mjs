@@ -31,9 +31,9 @@ const denies = (rules, cmd) => rules.some((rule) => {
 
 test('templates: the one-way-door deny rules catch each common spelling and leave everyday commands alone', () => {
   const deny = JSON.parse(readFileSync('templates/claude/.claude/settings.json', 'utf8')).permissions.deny;
-  const doors = ['rm -rf ~', 'rm -rf ~/', 'rm -fr ~', 'rm -r -f ~', 'rm -rf $HOME', 'rm -rf "$HOME"',
+  const doors = ['rm -rf ~', 'rm -rf ~/', 'rm -fr ~', 'rm -fr ~/', 'rm -r -f ~', 'rm -rf ~ /tmp/x', 'rm -rf $HOME', 'rm -rf $HOME/', 'rm -rf "$HOME"',
     'git push --force', 'git push --force origin main', 'git push origin main --force', 'git push --force-with-lease origin x',
     'git push -f origin x', 'git push origin x -f', 'git reset --hard', 'git reset --hard origin/main', 'git reset HEAD~1 --hard'];
   for (const cmd of doors) assert.ok(denies(deny, cmd), cmd);
-  for (const cmd of ['rm -rf build/', 'git push origin main', 'git push -u origin claude/fix-force', 'git push --follow-tags', 'git reset --soft HEAD~1']) assert.ok(!denies(deny, cmd), cmd);
+  for (const cmd of ['rm -rf build/', 'rm -rf ~/proj/build', 'rm -rf ~/.cache/x', 'rm -fr ~/Downloads/old', 'git push origin main', 'git push -u origin claude/fix-force', 'git push --follow-tags', 'git reset --soft HEAD~1']) assert.ok(!denies(deny, cmd), cmd);
 });
