@@ -22,12 +22,28 @@ export function guardRateMetric(c) {
   const { log, haveFiles, calls, logInSpan, cfg, GUARD_LOG, RATE, per, filesReason, noCalls, val, cnc } = c;
   const id = 'blockers.guard_blocks_per_100_calls';
   const logSource = `${GUARD_LOG}: ts, cwd and rules of blocks run in this repo's checkout (${cfg.checkout}), ${RATE}`;
+  // With no guard log on the machine, the repo relies on Claude Code's own
+  // checks (Auto mode, deny rules, built-in safety checks): their refusals in
+  // the transcripts are the blocks, at the same rate.
+  if (log.error && /ENOENT|no such file/.test(String(log.error))) {
+    const refusalSource = `${c.TRANSCRIPTS}: Claude Code permission refusals (Auto mode, deny rules and built-in safety checks), as no guard log is at ${GUARD_LOG}, ${RATE}`;
+    if (!haveFiles) return cnc(id, filesReason, refusalSource);
+    if (!calls.length) return cnc(id, noCalls, refusalSource);
+    const refusals = c.blocks.filter((b) => b.kind === 'permission');
+    const labels = [...new Set(refusals.map((b) => b.label))];
+    return val(id, round(per(refusals.length), 3), `${refusalSource}; ${refusals.length} refusals`, labels.map((l) => item(l, round(per(refusals.filter((b) => b.label === l).length), 3))).sort((x, y) => y.value - x.value));
+  }
   if (log.error) return cnc(id, `${GUARD_LOG}: ${log.error}`, logSource);
   if (!haveFiles) return cnc(id, filesReason, logSource);
   if (!calls.length) return cnc(id, noCalls, logSource);
+  // Claude Code's own refusals block calls too, so they count beside the guard's.
+  const refusals = c.blocks.filter((b) => b.kind === 'permission');
   const ruleNames = [...new Set(logInSpan.flatMap((e) => e.rules))];
-  const detail = ruleNames.map((r) => item(r, round(per(logInSpan.filter((e) => e.rules.includes(r)).length), 3))).sort((a, b) => b.value - a.value);
-  val(id, round(per(logInSpan.length), 3), `${logSource}; ${logInSpan.length} blocks`, detail);
+  const detail = [
+    ...ruleNames.map((r) => item(r, round(per(logInSpan.filter((e) => e.rules.includes(r)).length), 3))),
+    ...[...new Set(refusals.map((b) => b.label))].map((l) => item(l, round(per(refusals.filter((b) => b.label === l).length), 3))),
+  ].sort((a, b) => b.value - a.value);
+  val(id, round(per(logInSpan.length + refusals.length), 3), `${logSource}, plus Claude Code permission refusals (Auto mode, deny rules and built-in safety checks) in this repo's transcripts; ${logInSpan.length} guard blocks, ${refusals.length} refusals`, detail);
 }
 
 // The share of the last bash guard blocks that were false alarms, with a

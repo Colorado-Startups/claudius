@@ -14,7 +14,7 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 flowchart LR
   GC[1 Git Crafter templates:<br/>CI, open-repo files, AGENTS.md] --> T[2 templates/claude:<br/>settings, reviewer, skill]
   T --> P[3 Pack pin in quality/config.json:<br/>six Claude tabs]
-  P --> M[4 Process maps:<br/>Guard, Decide]
+  P --> M[4 Process maps:<br/>Guard, Decide, Equip]
   P --> L[5 --local run:<br/>your private full page]
 ```
 
@@ -23,7 +23,7 @@ flowchart LR
 | 1 | Adopt Git Crafter: CI, open-repo files, `AGENTS.md` and `CLAUDE.md` | Git Crafter `templates/ci/README.md`, `templates/agents/` |
 | 2 | Copy the Claude files and set the desktop app | [templates/claude/README.md](templates/claude/README.md) |
 | 3 | Add the pack (table below) | `quality/config.json` |
-| 4 | Add `{ "use": "guard" }` and `{ "use": "decide" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
+| 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }` and `{ "use": "equip" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
 | 5 | Run the one local command for the numbers CI never sees | below |
 
 ## Build an app
@@ -56,9 +56,9 @@ flowchart LR
 | --- | --- |
 | `templates/claude/` | the Claude templates; `AGENTS.md`, `CLAUDE.md` and `.claude/` at the root are this repo's own |
 | `pack.json` | the six tabs |
-| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard and Decide maps |
+| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard, Decide and Equip maps |
 | `collectors/<tab>/`, `fixtures/` | the collectors, their tests and test fixtures |
-| `quality/process/config.json` | the Process page: the Guard and Decide maps, named by `use` |
+| `quality/process/config.json` | the Process page: the Guard, Decide and Equip maps, named by `use` |
 | `quality/public.mjs`, `quality/public-params.json` | write `quality/public/`, the configs CI builds the public pages from. Each metric that needs local files is dropped but the repo-file ones. Each map is written out in full without the steps those metrics score |
 | `tests/moved.json` | where each file came from in Git Crafter |
 | `tests/engine-tests.sh` | CI: each file matches its source or is listed as edited, then the tests run beside the pinned engine |
@@ -98,3 +98,4 @@ flowchart LR
 | --- | --- | --- |
 | Guard | `change` only | its other four steps read local-only metrics |
 | Decide | none, so the public page leaves it out | all four steps read local-only metrics |
+| Equip | none, so the public page leaves it out | all six steps read local-only metrics |
