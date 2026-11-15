@@ -45,7 +45,7 @@
     "kind": "quality",
     "group": "Quality",
     "label": "Claudius files in place",
-    "means": "Share of the Claudius setup files the repo commits: AGENTS.md, CLAUDE.md, settings, the reviewer agent, the skills.",
+    "means": "Share of the Claudius setup files the repo commits: AGENTS.md, CLAUDE.md, settings, the skills.",
     "unit": "%",
     "goal": 100,
     "near": 80,
@@ -56,7 +56,7 @@
     "chart": "table",
     "defined": "2026-11-13",
     "params": {
-      "setup_files": ["AGENTS.md", "CLAUDE.md", ".claude/settings.json", ".claude/agents/reviewer.md", ".claude/skills/product-plan/SKILL.md", ".claude/skills/bump-pins/SKILL.md"]
+      "setup_files": ["AGENTS.md", "CLAUDE.md", ".claude/settings.json", ".claude/skills/product-plan/SKILL.md", ".claude/skills/bump-pins/SKILL.md"]
     }
   },
   {

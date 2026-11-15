@@ -12,7 +12,7 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 
 ```mermaid
 flowchart LR
-  GC[1 Git Crafter templates:<br/>CI, open-repo files, AGENTS.md] --> T[2 templates/claude:<br/>settings, reviewer, skill]
+  GC[1 Git Crafter templates:<br/>CI, open-repo files, AGENTS.md] --> T[2 templates/claude:<br/>settings, plugins, skills]
   T --> P[3 Pack pin in quality/config.json:<br/>six Claude tabs]
   P --> M[4 Process maps:<br/>Guard, Decide, Equip]
   P --> L[5 --local run:<br/>your private full page]

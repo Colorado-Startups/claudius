@@ -21,7 +21,7 @@ flowchart LR
 | 4 | File | One issue per step: `gh issue create --type Task`, its body the step's row and the Artifact link | GitHub |
 | 5 | Approve | Call ExitPlanMode with the steps and the Artifact link. On approval, start one session per independent step, each on a brief under 150 words | Sessions, worktrees |
 | 6 | Build | A worker branches, tests one file at a time, pushes once and opens a PR that says `Closes #<issue>` with a body table. It stops at the open PR | Auto-fix |
-| 7 | Merge | The orchestrator reviews each PR with the `reviewer` agent and merges it by the `merging` skill | Reviewer agent |
+| 7 | Merge | The orchestrator reviews each PR with `pr-review-toolkit:code-reviewer` and merges it by the `merging` skill | `pr-review-toolkit` plugin |
 | 8 | Live | Load the live page in the app's browser. Mark the step done in the Artifact and republish it | Browser, Artifacts |
 
 | Keep usage low | Rule |

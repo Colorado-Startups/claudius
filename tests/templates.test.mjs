@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const COPIES = ['.claude/settings.json', '.claude/agents/reviewer.md', '.claude/skills/bump-pins/SKILL.md', '.claude/skills/product-plan/SKILL.md'];
+const COPIES = ['.claude/settings.json', '.claude/skills/bump-pins/SKILL.md', '.claude/skills/product-plan/SKILL.md'];
 
 test('templates: each root copy matches templates/claude byte for byte', () => {
   for (const file of COPIES) assert.equal(readFileSync(file, 'utf8'), readFileSync(`templates/claude/${file}`, 'utf8'), file);
@@ -13,4 +13,27 @@ test('templates: each root copy matches templates/claude byte for byte', () => {
 test('templates: the settings template parses and denies the credential paths', () => {
   const deny = JSON.parse(readFileSync('templates/claude/.claude/settings.json', 'utf8')).permissions.deny;
   for (const rule of ['Read(./.env)', 'Read(./.env.*)', 'Read(./**/*.pem)', 'Read(./**/*.key)', 'Read(~/.ssh/**)']) assert.ok(deny.includes(rule), rule);
+});
+
+test('templates: the settings template enables only claude-plugins-official plugins', () => {
+  const ids = Object.keys(JSON.parse(readFileSync('templates/claude/.claude/settings.json', 'utf8')).enabledPlugins);
+  assert.ok(ids.length > 0, 'enabledPlugins is empty');
+  for (const id of ids) assert.match(id, /@claude-plugins-official$/, id);
+});
+
+// A Bash rule matches the whole command text, and each * matches any text, empty included
+// (code.claude.com/docs/en/permissions; checked with claude -p on echo, 2026-11-15). These rules
+// end in no ' *', so the docs' bare-command case for a trailing ' *' does not arise.
+const denies = (rules, cmd) => rules.some((rule) => {
+  const m = /^Bash\((.*)\)$/s.exec(rule);
+  return m !== null && new RegExp(`^${m[1].split('*').map((part) => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*')}$`, 's').test(cmd);
+});
+
+test('templates: the one-way-door deny rules catch each common spelling and leave everyday commands alone', () => {
+  const deny = JSON.parse(readFileSync('templates/claude/.claude/settings.json', 'utf8')).permissions.deny;
+  const doors = ['rm -rf ~', 'rm -rf ~/', 'rm -fr ~', 'rm -fr ~/', 'rm -r -f ~', 'rm -rf ~ /tmp/x', 'rm -rf $HOME', 'rm -rf $HOME/', 'rm -rf "$HOME"',
+    'git push --force', 'git push --force origin main', 'git push origin main --force', 'git push --force-with-lease origin x',
+    'git push -f origin x', 'git push origin x -f', 'git reset --hard', 'git reset --hard origin/main', 'git reset HEAD~1 --hard'];
+  for (const cmd of doors) assert.ok(denies(deny, cmd), cmd);
+  for (const cmd of ['rm -rf build/', 'rm -rf ~/proj/build', 'rm -rf ~/.cache/x', 'rm -fr ~/Downloads/old', 'git push origin main', 'git push -u origin claude/fix-force', 'git push --follow-tags', 'git reset --soft HEAD~1']) assert.ok(!denies(deny, cmd), cmd);
 });

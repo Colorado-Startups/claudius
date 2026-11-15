@@ -112,13 +112,13 @@ test('deny_coverage: the share of credential patterns a Read deny rule covers, b
 
 test('setup_files: the share of the Claudius files the repo has, by presence', async () => {
   const root = path.join(tmp, 'setup');
-  const files = ['AGENTS.md', 'CLAUDE.md', '.claude/settings.json', '.claude/agents/reviewer.md'];
+  const files = ['AGENTS.md', 'CLAUDE.md', '.claude/settings.json', '.claude/skills/product-plan/SKILL.md'];
   for (const f of files.slice(0, 3)) {
     fs.mkdirSync(path.dirname(path.join(root, f)), { recursive: true });
     fs.writeFileSync(path.join(root, f), f.endsWith('.json') ? '{}' : '# filled in\n');
   }
   const out = (await collect({ root, mode: 'ci', home: tmp, params: { setup_files: files } }))['claude_settings.setup_files'];
   assert.equal(out.value, 75);
-  assert.deepEqual(out.detail.filter((d) => !d.value).map((d) => d.label), ['.claude/agents/reviewer.md']);
+  assert.deepEqual(out.detail.filter((d) => !d.value).map((d) => d.label), ['.claude/skills/product-plan/SKILL.md']);
   assert.match((await collect({ root, mode: 'ci', home: tmp, params: { setup_files: [] } }))['claude_settings.setup_files'].could_not_check, /setup_files is empty/);
 });
