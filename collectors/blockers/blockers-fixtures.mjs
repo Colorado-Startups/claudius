@@ -1,4 +1,4 @@
-// Shared synthetic inputs for the Blockers collector's tests (blockers.test.mjs, blockers-replay.test.mjs): transcripts, a guard log, instruction files and the GitHub answers, written to a temp folder at run time.
+// Shared synthetic inputs for the Blockers collector's tests (blockers.test.mjs, blockers-replay.test.mjs): transcripts, instruction files and the GitHub answers, written to a temp folder at run time.
 
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -96,26 +96,6 @@ write(path.join(home, '.claude', 'rules', 'notes.txt'), 'x'.repeat(4000));
 // Scoped by paths, so it loads only with matching files: not counted.
 write(path.join(home, '.claude', 'rules', 'scoped.md'), `---\npaths:\n  - "**/*.yml"\n---\n${'x'.repeat(4000)}`);
 
-// ---- guard log: three blocks within the fixture's tool calls (t1, t3, and a
-// rule no transcript shows), one before them, one elsewhere
-
-// The synthetic guard log.
-export const guardLog = path.join(tmp, 'bash_guard.log');
-// The checkout path the guard log names.
-export const checkout = '/Users/someone/Developer/acme site';
-const website = `${checkout}/.claude/worktrees/x`;
-write(
-  guardLog,
-  [
-    JSON.stringify({ ts: '2026-11-02T03:00:36-0700', session: 's1', cwd: website, rules: ['credential-file-read'], command: 'never read' }),
-    JSON.stringify({ ts: '2026-11-02T03:02:06-0700', session: 's1', cwd: website, rules: ['credential-file-read'], command: 'never read' }),
-    JSON.stringify({ ts: '2026-11-02T04:03:00-0600', session: 's2', cwd: website, rules: ['git-push-main'], command: 'never read' }),
-    JSON.stringify({ ts: '2026-10-25T10:00:00-0600', session: 's2', cwd: website, rules: ['git-push-main'], command: 'never read' }),
-    JSON.stringify({ ts: '2026-11-01T10:00:00-0600', session: 's3', cwd: `${checkout}-other`, rules: ['local-heavy-compute'], command: 'never read' }),
-    'not json',
-  ].join('\n'),
-);
-
 // ---- GitHub: PR 7 (found, then confirmed; a flaky lint), PR 8 (clean; a real
 // failure), PR 9 (an old merge, no review, no checks). Fewer than 21 merged,
 // so the walk reads every page.
@@ -180,12 +160,6 @@ export function fakeGh(calls = []) {
 // The collector's own targets file, parsed.
 export const targets = JSON.parse(fs.readFileSync(new URL('../../targets/blockers.json', import.meta.url), 'utf8'));
 // The template's params plus the fixture repo's own, as its quality/targets/blockers.json would give them.
-export const params = { ...Object.assign({}, ...targets.map((d) => d.params ?? {})), project_match: 'acme-site', checkout_path: checkout, repo: 'acme/site', reviewer: 'lead-reviewer' };
-// The current guard, replayed: here it still blocks every command it blocked.
-// A fake replay: each item's rule ids now, and the rules that read the checkout's branch.
-export const verdictsOf = (items, rulesOf, branchRules = []) => ({ verdicts: new Map(items.map((it) => [it.id, rulesOf(it)])), branchRules: new Set(branchRules) });
-const stillBlocks = async (script, items) => verdictsOf(items, () => ['credential-file-read', 'git-push-main']);
+export const params = { ...Object.assign({}, ...targets.map((d) => d.params ?? {})), project_match: 'acme-site', repo: 'acme/site', reviewer: 'lead-reviewer' };
 // The options every collect call shares.
-export const base = { root, mode: 'local', projectsDir, home, guardLog, managedPath, now, params, replay: stillBlocks };
-
-// ---- tests
+export const base = { root, mode: 'local', projectsDir, home, managedPath, now, params };

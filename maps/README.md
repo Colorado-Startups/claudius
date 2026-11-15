@@ -7,15 +7,14 @@ Four maps for an agent-driven repo, each step held to one metric. Use them on yo
 ```mermaid
 flowchart LR
   call["🔒 Call"] --> block["🔒 Block"] --> message["🔒 Message"]
-  block --> fa["🔒 False alarm"] --> change["Change"]
+  block --> change["Change"]
 ```
 
 | Step | Ideal | Metric |
 |---|---|---|
-| Call | Auto mode and deny rules stop one-way doors; with no guard log, their refusals are the count | `blockers.guard_blocks_per_100_calls` |
+| Call | Auto mode and deny rules stop one-way doors; their refusals, and the hooks' blocks, are the count | `blockers.guard_blocks_per_100_calls` |
 | Block | A block names its fix, so the session moves on in seconds | `blockers.latest_block_seconds` |
 | Message | The rule and the fix, nothing more | `blockers.latest_block_tokens` |
-| False alarm | A block on a safe command becomes a guard test | `blockers.guard_false_alarm_share` |
 | Change | A rule change lands with one regression case | `blockers.enforcement_reverts` (public) |
 
 ## Decide: a question or blocker, to Claude's call or the owner's queue
@@ -31,7 +30,7 @@ flowchart LR
 | Arise | Surfaces once with its fix named | `blockers.costly` |
 | Claude decides | Decides within its delegation, records reason and reversal in the PR | `blockers.latest_block_tokens` |
 | Owner's queue | Only questions and human steps reach the owner | `claude_settings.prompts_per_100_calls` |
-| Clear | Each false block becomes a guard fix by PR | `blockers.guard_false_alarm_share` |
+| Clear | Each blocker that costs more than it helps is fixed or removed by PR | `blockers.costly` |
 
 ## Equip: a capability, from Anthropic's plugins to a lean session
 

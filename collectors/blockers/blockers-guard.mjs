@@ -1,87 +1,35 @@
-// The Blockers metrics about the bash guard, tool refusals and git hooks (blockers.mjs).
+// The Blockers metrics about refusals, latest blocks and git hooks (blockers.mjs).
 
 import { percentile } from '../lib/engine.mjs';
-import { LAST_GIT, LAST_GUARD, MARK_MS, iso, item, median, newestFirst, pct, round } from './blockers-core.mjs';
-import { ledgerRow, readable } from './blockers-ledger.mjs';
+import { LAST_GIT, iso, item, median, round } from './blockers-core.mjs';
+import { ledgerRow } from './blockers-ledger.mjs';
 
-// A guard block the log marks a misfire (same rule, within MARK_MS of the
-// block) is a false alarm whatever came after it.
-export function markMisfires(everyBlock, logEntries) {
-  for (const b of everyBlock) {
-    if (b.kind !== 'guard' || b.falseAlarm || b.outcome === 'unread') continue;
-    const end = Number.isFinite(b.resultAt) ? b.resultAt : b.at;
-    if (logEntries.some((e) => e.misfire && e.rules.some((r) => b.rules.includes(r)) && e.at >= b.at - MARK_MS && e.at <= end + MARK_MS)) {
-      b.outcome = 'marked';
-      b.falseAlarm = true;
-    }
-  }
-}
+// Hook labels of the retired bash and write guards. Old transcripts still show
+// them, so the ledger and the latest-block metrics read them; the rate below does not.
+const RETIRED = new Set(['bash guard, no rule named', 'write guard']);
+// A refusal that still happens: a permission rule (deny rules, Auto mode, the
+// built-in safety checks) or a hook (hookify, the app's hooks).
+const isRefusal = (b) => b.kind === 'permission' || (b.kind === 'hook' && !RETIRED.has(b.label));
 
-// Bash guard: fires from its own log, outcomes from the transcripts.
+// Refusals per 100 tool calls, by what refused: deny rules, safety checks and hooks.
 export function guardRateMetric(c) {
-  const { log, haveFiles, calls, logInSpan, cfg, GUARD_LOG, RATE, per, filesReason, noCalls, val, cnc } = c;
+  const { blocks, haveFiles, calls, TRANSCRIPTS, RATE, per, filesReason, noCalls, val, cnc } = c;
   const id = 'blockers.guard_blocks_per_100_calls';
-  const logSource = `${GUARD_LOG}: ts, cwd and rules of blocks run in this repo's checkout (${cfg.checkout}), ${RATE}`;
-  // With no guard log on the machine, the repo relies on Claude Code's own
-  // checks (Auto mode, deny rules, built-in safety checks): their refusals in
-  // the transcripts are the blocks, at the same rate.
-  if (log.error && /ENOENT|no such file/.test(String(log.error))) {
-    const refusalSource = `${c.TRANSCRIPTS}: Claude Code permission refusals (Auto mode, deny rules and built-in safety checks), as no guard log is at ${GUARD_LOG}, ${RATE}`;
-    if (!haveFiles) return cnc(id, filesReason, refusalSource);
-    if (!calls.length) return cnc(id, noCalls, refusalSource);
-    const refusals = c.blocks.filter((b) => b.kind === 'permission');
-    const labels = [...new Set(refusals.map((b) => b.label))];
-    return val(id, round(per(refusals.length), 3), `${refusalSource}; ${refusals.length} refusals`, labels.map((l) => item(l, round(per(refusals.filter((b) => b.label === l).length), 3))).sort((x, y) => y.value - x.value));
-  }
-  if (log.error) return cnc(id, `${GUARD_LOG}: ${log.error}`, logSource);
-  if (!haveFiles) return cnc(id, filesReason, logSource);
-  if (!calls.length) return cnc(id, noCalls, logSource);
-  // Claude Code's own refusals block calls too, so they count beside the guard's.
-  const refusals = c.blocks.filter((b) => b.kind === 'permission');
-  const ruleNames = [...new Set(logInSpan.flatMap((e) => e.rules))];
-  const detail = [
-    ...ruleNames.map((r) => item(r, round(per(logInSpan.filter((e) => e.rules.includes(r)).length), 3))),
-    ...[...new Set(refusals.map((b) => b.label))].map((l) => item(l, round(per(refusals.filter((b) => b.label === l).length), 3))),
-  ].sort((a, b) => b.value - a.value);
-  val(id, round(per(logInSpan.length + refusals.length), 3), `${logSource}, plus Claude Code permission refusals (Auto mode, deny rules and built-in safety checks) in this repo's transcripts; ${logInSpan.length} guard blocks, ${refusals.length} refusals`, detail);
+  const source = `${TRANSCRIPTS}: Claude Code permission refusals (Auto mode, deny rules and built-in safety checks) and hook blocks (hookify and app hooks), ${RATE}`;
+  if (!haveFiles) return cnc(id, filesReason, source);
+  if (!calls.length) return cnc(id, noCalls, source);
+  const refusals = blocks.filter(isRefusal);
+  const labels = [...new Set(refusals.map((b) => b.label))];
+  val(id, round(per(refusals.length), 3), `${source}; ${refusals.length} refusals`, labels.map((l) => item(l, round(per(refusals.filter((b) => b.label === l).length), 3))).sort((x, y) => y.value - x.value));
 }
 
-// The share of the last bash guard blocks that were false alarms, with a
-// breakdown of each held and false-alarm outcome.
-export function guardAlarmMetric(c) {
-  const { everyBlock, replayed, cfg, TRANSCRIPTS, haveFiles, filesReason, val, cnc } = c;
-  const id = 'blockers.guard_false_alarm_share';
-  const lastGuard = everyBlock.filter((b) => b.kind === 'guard').sort(newestFirst).slice(0, LAST_GUARD);
-  const replayNote = replayed.error ? `the replay through the current guard could not run (${replayed.error}), so no block reads as a misfire since fixed` : `${replayed.replayed ?? 0} recent blocks replayed through the current guard (${cfg.guardScript})`;
-  const guardSource = `${TRANSCRIPTS}: the last ${LAST_GUARD} bash guard blocks. Held: no similar command succeeded within 10 minutes, or every one that did ran only the blocked command's own steps, as typed, steps that apply the named fix (params.fix_signals) and write no file, allowlisted read-only steps and, in a call that runs the fix, edits of steps the guard did not block. False alarm: anything else, a veto, the same command run unblocked, a current guard that breaks no rule on the blocked command on replay, or a misfire mark in the guard log (outcomeOf() in blockers.mjs); ${replayNote}`;
-  const judged = readable(lastGuard);
-  if (!haveFiles) return cnc(id, filesReason, guardSource);
-  if (!lastGuard.length) return cnc(id, `no bash guard block in this repo's transcripts`, guardSource);
-  if (!judged.length) return cnc(id, `none of the last ${lastGuard.length} guard blocks has a command that can be read`, guardSource);
-  const count = (o) => lastGuard.filter((b) => b.outcome === o).length;
-  const falseAlarms = judged.filter((b) => b.falseAlarm).length;
-  val(id, pct(falseAlarms, judged.length), `${guardSource}; ${judged.length} judged of ${lastGuard.length}, ${iso(lastGuard.at(-1).at)} to ${iso(lastGuard[0].at)} UTC`, [
-    item('held: the named fix ran', count('fixed'), 'blocks'),
-    item('held: retried without the blocked part', count('dropped'), 'blocks'),
-    item('held: rule since narrowed, still blocked', count('narrowed'), 'blocks'),
-    item('held: not retried', count('none'), 'blocks'),
-    item('false alarm: retried without the fix', count('unfixed'), 'blocks'),
-    item('false alarm: the same command ran', count('same'), 'blocks'),
-    item('false alarm: the current guard allows it', count('replayed'), 'blocks'),
-    item('false alarm: marked a misfire', count('marked'), 'blocks'),
-    ...(count('unread') ? [item('could not tell: no command to read', count('unread'), 'blocks')] : []),
-  ]);
-}
-
-// Ledger rows: one per guard rule, then one per other refusal (tool hooks and
-// permission checks). Git gates join their hook's row in gitMetrics.
+// Ledger rows: one per guard rule in old transcripts, then one per other
+// refusal (tool hooks and permission checks). Git gates join their hook's row in gitMetrics.
 export function refusalRows(c) {
-  const { log, haveFiles, logInSpan, guardBlocks, blocks, ledger } = c;
-  const rules = new Set([...logInSpan.flatMap((e) => e.rules), ...guardBlocks.flatMap((b) => b.rules)]);
-  for (const rule of [...rules].sort()) {
+  const { guardBlocks, blocks, ledger } = c;
+  for (const rule of [...new Set(guardBlocks.flatMap((b) => b.rules))].sort()) {
     const mine = guardBlocks.filter((b) => b.rules.includes(rule));
-    const fires = log.error ? (haveFiles ? mine.length : null) : logInSpan.filter((e) => e.rules.includes(rule)).length;
-    ledger.push(ledgerRow(`guard: ${rule}`, 'Speed', { fires, alarms: mine, ms: mine.map((b) => b.ms), tokens: mine.map((b) => b.tokens) }));
+    ledger.push(ledgerRow(`guard: ${rule}`, 'Speed', { fires: mine.length, alarms: mine, ms: mine.map((b) => b.ms), tokens: mine.map((b) => b.tokens) }));
   }
   const others = blocks.filter((b) => b.kind === 'hook' || b.kind === 'permission');
   for (const label of [...new Set(others.map((b) => b.label))].sort()) {
@@ -105,7 +53,7 @@ const when = (b) => `${b.name}, ${new Date(b.at).toISOString().slice(0, 16).repl
 // Seconds and tokens the latest block cost, beside each blocker's latest.
 export function latestBlockMetrics(c) {
   const { blocks, haveFiles, calls, SPAN, TRANSCRIPTS, noCalls, filesReason, val, cnc } = c;
-  const blockSource = `${TRANSCRIPTS}: refusals by the bash guard, the write guard, app hooks, permission checks and git hooks, over ${SPAN}`;
+  const blockSource = `${TRANSCRIPTS}: refusals by the retired bash and write guards (old transcripts), app hooks, permission checks and git hooks, over ${SPAN}`;
   const on = haveFiles && calls.length;
   const seconds = on ? latestBlock(blocks, 'ms', (ms) => round(ms / 1000, 1)) : null;
   const tokens = on ? latestBlock(blocks, 'tokens', Math.round) : null;

@@ -5,6 +5,7 @@
  "edited": [
   "targets/blockers.json",
   "maps/guard.json",
+  "maps/decide.json",
   "targets/desktop-app.json",
   "ideals/desktop-app.json",
   "targets/claude.json",
@@ -29,6 +30,9 @@
   "collectors/blockers/blockers-fixtures.mjs",
   "collectors/blockers/blockers-github.mjs",
   "collectors/blockers/blockers-guard.mjs",
+  "collectors/blockers/blockers-metrics.mjs",
+  "collectors/blockers/blockers-transcripts.mjs",
+  "collectors/blockers/blockers-outcome.mjs",
   "collectors/blockers/blockers-replay.test.mjs",
   "collectors/blockers/blockers.mjs",
   "collectors/blockers/blockers.test.mjs",

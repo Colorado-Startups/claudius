@@ -1,15 +1,13 @@
 // More tests for the Blockers collector, split out of blockers.test.mjs to keep each file under the Read limit:
-// held or false alarm, what came after a block, and the replay. Shared inputs are in blockers-fixtures.mjs.
+// held or false alarm, and what came after a block. Shared inputs are in blockers-fixtures.mjs.
 // node --test quality/collectors/blockers/blockers-replay.test.mjs
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
-import path from 'node:path';
-import { after, test } from 'node:test';
-import { collect, config, fixSignals, outcomeOf, outputTargets, replayGuard, segments, neutralStep, signalForm, similar, steps, words, writesFile } from './blockers.mjs';
+import { test } from 'node:test';
+import { fixSignals, outcomeOf, outputTargets, segments, neutralStep, signalForm, similar, steps, words, writesFile } from './blockers.mjs';
 import { reviewerTokens } from './blockers-metrics.mjs';
 import { reviewedPrs } from './blockers-transcripts.mjs';
-import { now, tmp, write, jsonl, projectsDir, site, at, bash, asst, result, guardText, guardLog, checkout, run, commit, review, fakeGh, targets, params, verdictsOf, base } from "./blockers-fixtures.mjs";
+import { at, params } from './blockers-fixtures.mjs';
 
 const bashCall = (command, min, block = null) => ({ family: 'Bash', at: Date.parse(at(min)), command, words: words(command), segments: segments(command), steps: steps(command), block, error: Boolean(block) });
 const fixes = fixSignals(params.fix_signals);
@@ -155,117 +153,8 @@ test('false alarm: essentially the same command ran unblocked', () => {
   assert.equal(outcomeOf(push, [bashCall('git push origin main', 20)], { fixes }), 'none', 'past 10 minutes it is not this block\'s retry');
 });
 
-test('false alarm: the current guard allows the blocked command on replay', async () => {
-  const blocked = { ...bashCall('cat site/vitest.config.*', 0, readBlock), allowedNow: true };
-  assert.equal(outcomeOf(blocked, [bashCall('ls site', 1)], { fixes }), 'replayed', 'a misfire since fixed, whatever came after');
-  // Collect replays the recent guard blocks: here the guard now allows t3, the read of ~/.env.local.
-  const allowsT3 = async (script, items) => verdictsOf(items, (it) => (it.command.includes('.env.local') ? [] : ['credential-file-read']));
-  const got = await collect({ ...base, replay: allowsT3, gh: fakeGh() });
-  assert.equal(got['blockers.guard_false_alarm_share'].value, 100, 't1 retried without the fix, t3 allowed now');
-  const failed = await collect({ ...base, replay: async () => { throw new Error('python3: not found'); }, gh: fakeGh() });
-  assert.equal(failed['blockers.guard_false_alarm_share'].value, 50, 'no replay: no block reads as fixed since');
-  assert.match(failed['blockers.guard_false_alarm_share'].source, /the replay through the current guard could not run \(python3: not found\)/);
-});
-
-test('held: the rule the block named stopped firing, but the current guard still blocks the command', async () => {
-  const narrowed = { ...bashCall('cat ~/.env.local', 0, readBlock), narrowed: true };
-  assert.equal(outcomeOf(narrowed, [], { fixes }), 'narrowed', 'not retried, and still blocked today');
-  assert.equal(outcomeOf(narrowed, [bashCall('cat ~/.env.local', 0.3)], { fixes }), 'same', 'its command ran 16 s later: narrowed only replaces a held reading');
-  assert.equal(outcomeOf(narrowed, [bashCall('head ~/.env.local', 1)], { fixes }), 'unfixed');
-  // t3 was blocked as credential-file-read; the current guard blocks it as local-heavy-compute instead.
-  const narrowsT3 = async (script, items) => verdictsOf(items, (it) => (it.command.includes('.env.local') ? ['local-heavy-compute'] : ['credential-file-read']));
-  const got = await collect({ ...base, replay: narrowsT3, gh: fakeGh() });
-  const share = got['blockers.guard_false_alarm_share'];
-  assert.equal(share.value, 50, 't1 retried without the fix; t3 narrowed, held');
-  const rows = Object.fromEntries(share.detail.map((d) => [d.label, d.value]));
-  assert.equal(rows['held: rule since narrowed, still blocked'], 1);
-  assert.equal(rows['false alarm: the current guard allows it'], 0, 'another rule firing is no allow');
-  const both = async (script, items) => verdictsOf(items, (it) => ['credential-file-read', 'local-heavy-compute']);
-  assert.equal(Object.fromEntries((await collect({ ...base, replay: both, gh: fakeGh() }))['blockers.guard_false_alarm_share'].detail.map((d) => [d.label, d.value]))['held: rule since narrowed, still blocked'], 0, 'its own rule still fires: judged by what came after');
-});
-
-test('the replay asks the real guard, the commands on stdin', async () => {
-  // The guard is Git Crafter's: the engine checkout tests/engine-tests.sh names in GIT_CRAFTER.
-  const guard = path.join(process.env.GIT_CRAFTER ?? '', 'tools', 'bash_guard.py');
-  const long = `echo ${'x'.repeat(220)} && git push --force origin x`;
-  const got = await replayGuard(guard, [{ id: 0, command: 'git push --force origin x' }, { id: 1, command: 'ls -la' }, { id: 2, command: long }]);
-  assert.deepEqual([got.verdicts.get(0), got.verdicts.get(1)], [['git-force-push'], []]);
-  assert.deepEqual(got.verdicts.get(2), ['git-force-push'], 'past the guard log\'s 200 characters the full command still blocks');
-  assert.ok(got.branchRules.has('git-push-main'), 'git-push-main reads the checkout\'s branch');
-  await assert.rejects(replayGuard(path.join(tmp, 'no-guard.py'), []), (err) => err.message === 'no guard script', 'no path in the message');
-  const missing = await collect({ ...base, params: { ...params, guard_script: path.join(tmp, 'missing', 'bash_guard.py') }, replay: replayGuard, gh: fakeGh() });
-  const source = missing['blockers.guard_false_alarm_share'].source;
-  assert.match(source, /could not run \(no guard script\)/);
-  assert.ok(!source.includes(tmp), 'the page source holds no local path');
-});
-
-test('the replay survives a guard that prints, and a guard that fails names only its error type', async () => {
-  const guardDir = (name, body) => {
-    const dir = path.join(tmp, name);
-    write(path.join(dir, 'bash_guard_rules.json'), '{"rules": []}');
-    write(path.join(dir, 'bash_guard.py'), body);
-    return path.join(dir, 'bash_guard.py');
-  };
-  const api = 'def load_rules(p):\n    return []\ndef evaluate(c, rules, cwd=None):\n    print("checking")\n    return [("r1", "why", "fix")] if "x" in c else []\n';
-  const chatty = guardDir('chatty', `print("hello")\n${api}`);
-  const got = await replayGuard(chatty, [{ id: 0, command: 'x' }, { id: 1, command: 'ls' }]);
-  assert.deepEqual([got.verdicts.get(0), got.verdicts.get(1)], [['r1'], []], 'its prints go to stderr');
-  const junk = guardDir('junk', `import sys\nsys.__stdout__.write("hello\\n")\n${api}`);
-  await assert.rejects(replayGuard(junk, [{ id: 0, command: 'x' }]), /not JSON/);
-  const broken = guardDir('broken', 'raise RuntimeError("cannot read /Users/someone/secret command")\n');
-  await assert.rejects(replayGuard(broken, []), (err) => err.message === 'the replay exited 1: RuntimeError');
-  const viaCollect = await collect({ ...base, params: { ...params, guard_script: junk }, replay: replayGuard, gh: fakeGh() });
-  assert.equal(viaCollect['blockers.guard_false_alarm_share'].value, 50, 'a replay that cannot be read changes no block');
-  assert.match(viaCollect['blockers.guard_false_alarm_share'].source, /could not run \(the replay printed a line that is not JSON\)/);
-});
-
-test('the replay: the full command and the cwd it ran in; a branch rule only on the same checkout and branch', async () => {
-  const repo = path.join(tmp, 'checkout-feat');
-  execFileSync('git', ['init', '-q', '-b', 'feat/x', repo]);
-  const command = `echo ${'y'.repeat(220)} && git push origin HEAD`;
-  const share = async (name, cwd, gitBranch) => {
-    const dir = path.join(tmp, name);
-    write(path.join(dir, '-Users-someone-Developer-acme-site', 'b.jsonl'), jsonl([asst(0.5, 'b1', 10, [bash('p1', command)], { cwd, gitBranch }), result(0.6, 'p1', guardText('git-push-main'), true)]));
-    const seen = [];
-    const allowsAll = async (script, items) => (seen.push(...items), verdictsOf(items, () => [], ['git-push-main']));
-    const got = await collect({ ...base, projectsDir: dir, replay: allowsAll, gh: fakeGh() });
-    return { value: got['blockers.guard_false_alarm_share'].value, seen };
-  };
-  const same = await share('branch-same', repo, 'feat/x');
-  assert.equal(same.value, 100, 'the same checkout on the same branch: allowed now is a misfire since fixed');
-  assert.deepEqual(same.seen.slice(0, 1).map((it) => [it.command, it.cwd]), [[command, repo]], 'the transcript\'s full command, never the log\'s 200 characters');
-  assert.deepEqual(same.seen.slice(1).map((it) => [it.command, it.cwd]), steps(command).map((step) => [step, repo]), 'then each of its steps alone, in the same folder');
-  assert.equal((await share('branch-moved', repo, 'main')).value, 0, 'the checkout is on another branch now: the replay cannot judge the push');
-  const gone = await share('branch-gone', path.join(tmp, 'removed-worktree'), 'feat/x');
-  assert.equal(gone.value, 0, 'the checkout is gone: no branch to replay against');
-  assert.deepEqual([...new Set(gone.seen.map((it) => it.cwd))], [path.join(tmp, 'removed-worktree')], 'a removed folder still replays with its path, for the path rules, the command and each step');
-});
-
-test('could not read: a block with no command is left out and counted, never a pass or a false alarm', async () => {
+test('could not read: a block with no command is left out, never a pass or a false alarm', () => {
   assert.equal(outcomeOf(bashCall('', 0, resetBlock), [bashCall('ls', 1)], { fixes }), 'unread');
-  const dir = path.join(tmp, 'unread');
-  const empty = { type: 'tool_use', id: 'e1', name: 'Bash', input: {} };
-  write(path.join(dir, '-Users-someone-Developer-acme-site', 'u.jsonl'), jsonl([asst(0.5, 'u1', 10, [empty]), result(0.6, 'e1', guardText('credential-file-read'), true)]));
-  const got = await collect({ ...base, projectsDir: dir, gh: fakeGh() });
-  assert.match(got['blockers.guard_false_alarm_share'].could_not_check, /none of the last 1 guard blocks has a command that can be read/);
-});
-
-test('a block the guard log marks a misfire is a false alarm, whatever came after it', async () => {
-  // t3 (10:02:06 UTC, credential-file-read) was not retried; its log line carries misfire: true.
-  const marked = path.join(tmp, 'marked.log');
-  write(marked, JSON.stringify({ ts: '2026-11-02T10:02:06+0000', cwd: checkout, rules: ['credential-file-read'], misfire: true }));
-  const got = await collect({ ...base, guardLog: marked, gh: fakeGh() });
-  assert.equal(got['blockers.guard_false_alarm_share'].value, 100, 't1 retried without the fix, t3 marked');
-  assert.deepEqual(Object.fromEntries(got['blockers.guard_false_alarm_share'].detail.map((d) => [d.label, d.value])), {
-    'held: the named fix ran': 0,
-    'held: retried without the blocked part': 0,
-    'held: rule since narrowed, still blocked': 0,
-    'held: not retried': 0,
-    'false alarm: retried without the fix': 1,
-    'false alarm: the same command ran': 0,
-    'false alarm: the current guard allows it': 0,
-    'false alarm: marked a misfire': 1,
-  });
 });
 
 test('steps: a heredoc body stays in the step that opened it, never steps of its own (#215)', () => {
@@ -318,53 +207,4 @@ test('reviewerTokens: a reviewer naming PRs is charged to them, split evenly; on
   assert.deepEqual([...got.byPr].sort(), [[7, 500], [8, 500]]);
   assert.equal(got.unnamed, 300);
   assert.equal(got.total, 1300);
-});
-
-// Real blocks of 2026-11-10 that read false alarms though a retry applied the
-// named fix (#618): the retry also edited a step the guard did not block.
-// 21:09's first retry edited with no fix in that call, so it stays unfixed.
-// blockedSteps is what the replay of each step alone reports.
-const testBlock = { kind: 'guard', rules: ['local-test-suite'], fixNamed: true };
-const discardBlock = { kind: 'guard', rules: ['git-discard-all'], fixNamed: true };
-const withSteps = (call, blocked) => ({ ...call, blockedSteps: blocked });
-
-test('held: a retry call that applies the fix holds though it also edits a step the guard did not block', () => {
-  const discard = withSteps(bashCall("git switch -q -C scratch origin/main; python3 -I - <<'EOF' edit(a) EOF; git diff --stat | tail -1; git checkout -q -- .; git status --short", 0, discardBlock), ['git checkout -q -- .']);
-  assert.equal(outcomeOf(discard, [bashCall("git switch -q -C scratch origin/main; python3 -I - <<'EOF' edit(b) EOF; git diff --stat | tail -1; git checkout -q -- rules/a.md skills/b.md; git status --short", 1)], { fixes }), 'fixed', '17:34: the named files, and a new heredoc body');
-  const app = withSteps(bashCall("python3 -I - <<'EOF' sub(a) EOF; node --test quality/app/ 2>&1 | head -20", 0, testBlock), ['node --test quality/app/ 2>&1']);
-  assert.equal(outcomeOf(app, [bashCall("python3 -I - <<'EOF' sub(b) EOF; node --test quality/app/app.test.mjs 2>&1 | head -20", 1)], { fixes }), 'fixed', '17:10: one test file, and a new heredoc body');
-  const render = withSteps(bashCall('sed -i.bak s/a/b/ q/s.mjs; rm q/s.mjs.bak /tmp/q/x.bak; node quality/selftest.mjs | tail -1; node --test quality/render/ 2>&1 | grep -E pass', 0, testBlock), ['node --test quality/render/ 2>&1']);
-  const later = [bashCall('sed -i.bak s/a/b/ q/s.mjs; rm q/s.mjs.bak; node quality/selftest.mjs | tail -1', 1), bashCall('node quality/selftest.mjs | grep FAIL; node --test quality/render/a.test.mjs quality/render/b.test.mjs 2>&1 | grep -E pass', 2)];
-  assert.equal(outcomeOf(render, later.slice(1), { fixes }), 'fixed', '21:09 without its first retry: the named files beside its own step');
-  assert.equal(outcomeOf(render, later, { fixes }), 'unfixed', '21:09: the first retry edited the rm path with no fix in that call, so its edit is a step of its own');
-  assert.equal(outcomeOf({ ...app, blockedSteps: undefined }, [bashCall("python3 -I - <<'EOF' sub(b) EOF; node --test quality/app/app.test.mjs 2>&1 | head -20", 1)], { fixes }), 'unfixed', 'no replay of the steps: read as before');
-});
-
-test('still false alarms: an edited step with no fix, a route-around, the same command run', () => {
-  const discard = withSteps(bashCall("python3 -I - <<'EOF' edit(a) EOF; git checkout -q -- .", 0, discardBlock), ['git checkout -q -- .']);
-  assert.equal(outcomeOf(discard, [bashCall("python3 -I - <<'EOF' edit(b) EOF", 1)], { fixes }), 'unfixed', 'dropped beside an edit: no fix ran');
-  assert.equal(outcomeOf(discard, [bashCall("python3 -I - <<'EOF' edit(b) EOF; git stash push -u -q && git stash drop -q", 1)], { fixes }), 'unfixed', 'routed around: the stash is a step of its own');
-  assert.equal(outcomeOf(discard, [bashCall("python3 -I - <<'EOF' edit(b) EOF; git checkout -q -- a.md; git checkout -f", 1)], { fixes }), 'unfixed', 'the fix beside a new form of the blocked step is no edit');
-  assert.equal(outcomeOf(discard, [bashCall("python3 -I - <<'EOF' import subprocess; subprocess.run(['git', 'checkout', '--', '.']) EOF; git checkout -q -- a.md", 1)], { fixes }), 'unfixed', 'a heredoc that runs the blocked command word is no edit');
-  assert.equal(outcomeOf(discard, [bashCall("python3 -I - <<'EOF' edit(b) EOF", 1), bashCall("python3 -I - <<'EOF' edit(a) EOF; git checkout -q -- a.md", 2)], { fixes }), 'unfixed', "an edit-only call does not ride on another call's fix");
-  const same = withSteps(bashCall('git checkout -q -- . && git status --short', 0, discardBlock), ['git checkout -q -- .']);
-  assert.equal(outcomeOf(same, [bashCall('git checkout -q -- . && git status --short', 1)], { fixes }), 'same');
-});
-
-test('the replay names each blocked command\'s blocked steps, one at a time', async () => {
-  const { replayRecent } = await import('./blockers-outcome.mjs');
-  const call = { ...bashCall("python3 -I - <<'EOF' x EOF; git checkout -q -- .; git status", 0, discardBlock), cwd: '/repo' };
-  const files = [{ calls: [call] }];
-  const only = async (script, items) => verdictsOf(items, (it) => (/checkout -q -- \.( |$)/.test(it.command) ? ['git-discard-all'] : it.command.startsWith('python3') ? null : []));
-  assert.deepEqual(await replayRecent(files, Date.parse(at(5)), '/guard.py', only, async () => ''), { replayed: 1 });
-  assert.deepEqual(call.blockedSteps, ['git checkout -q -- .'], 'the step the guard cannot parse alone is not one');
-  const none = { ...call, blockedSteps: undefined };
-  await replayRecent([{ calls: [none] }], Date.parse(at(5)), '/guard.py', async (s, items) => verdictsOf(items, () => []), async () => '');
-  assert.equal(none.blockedSteps, null, 'no step breaks the rule alone: no step list');
-  const { REPLAY_STEPS } = await import('./blockers-core.mjs');
-  const long = { ...bashCall(Array.from({ length: REPLAY_STEPS + 1 }, (_, k) => `echo ${k}`).join('; ') + '; git checkout -q -- .', 0, discardBlock), cwd: '/repo' };
-  const sent = [];
-  await replayRecent([{ calls: [long] }], Date.parse(at(5)), '/guard.py', async (s, items) => (sent.push(...items), verdictsOf(items, () => ['git-discard-all'])), async () => '');
-  assert.equal(sent.length, 1, 'more than REPLAY_STEPS steps: the command alone, no steps');
-  assert.equal(long.blockedSteps, null);
 });

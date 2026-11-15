@@ -166,7 +166,7 @@ function toolCall(c, at, idx, cwd, branch) {
   const command = bash ? String(c.input?.command ?? '') : '';
   return {
     tool: c.name,
-    // In memory only: matched against fix signals and replayed through the guard, never output.
+    // In memory only: matched against fix signals, never output.
     command,
     ...callMeta(c, cwd, branch),
     at,
