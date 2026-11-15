@@ -16,11 +16,10 @@ export const GITHUB_IDS = TARGETS.filter((t) => t.needs === 'gh').map((t) => t.i
 // This repo's settings are params on quality/targets/blockers.json, each with
 // a default that names no repo, path or person (config(), below).
 export const TEMPLATE = Object.assign({}, ...TARGETS.map((t) => t.params ?? {}));
-export const CI_REASON = 'transcripts and the guard log live on the machine that ran the sessions; refreshed by a --local collect there';
+export const CI_REASON = 'transcripts live on the machine that ran the sessions; refreshed by a --local collect there';
 export const GH_SOURCE = 'gh api graphql: merged pullRequests, 20 to a query, with pinned reviews and every check run attempt of their last 30 commits';
 export const LAST_CALLS = 1000;
 export const PER = 100;
-export const LAST_GUARD = 15;
 export const LAST_GIT = 20;
 export const LAST_PRS = 20;
 // Hook output per session: the last LAST_SESSIONS main sessions by start (56
@@ -30,13 +29,6 @@ export const LAST_SESSIONS = 5;
 export const MIN = 6e4;
 export const HOUR = 36e5;
 export const RETRY_MS = 10 * MIN;
-// How far a guard log line may sit from the block it marks.
-export const MARK_MS = 5000;
-// How long the guard replay may take.
-export const REPLAY_MS = 60_000;
-// The most steps of one blocked command the replay judges alone; the 36 guard
-// blocks in this repo's transcripts to 2026-11-11 04:13 UTC had at most 31.
-export const REPLAY_STEPS = 40;
 export const SIMILAR = 0.6;
 export const PR_PAGE = 20;
 export const MAX_PAGES = 15;
@@ -45,7 +37,7 @@ export const EDIT_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']
 export const HOOK_TYPES = new Set(['hook_success', 'hook_additional_context', 'hook_non_blocking_error', 'hook_blocking_error', 'hook_cancelled']);
 export const RED = new Set(['FAILURE', 'TIMED_OUT', 'STARTUP_FAILURE']);
 export const PUSH_GATES = new Set(['main', 'not-head']);
-// The guard names itself Git Crafter since 2026-11-11, Code-OS from 2026-11-02, Claude-OS before.
+// The retired bash guard named itself Git Crafter from 2026-11-11, Code-OS from 2026-11-02, Claude-OS before; old transcripts keep its blocks, read by this label alone.
 export const GUARD_BLOCK = /^PreToolUse:\S+ hook error: \[[^\]]*bash_guard\.py\]: Blocked by the (?:Git Crafter|Code-OS|Claude-OS) bash guard \(([^)]+)\)/;
 export const HOOK_ERROR = /^PreToolUse:(\S+) hook error: (\[[^\]]*\])?/;
 export const GIT_BLOCK = /BLOCKED \[([\w, -]+)\]/;

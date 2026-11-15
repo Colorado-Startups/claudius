@@ -10,7 +10,7 @@ import { causes, CHARTS, prRefs } from '../lib/engine.mjs';
 import { area, classifyBlock, collect, config, ENFORCEMENT, gitKind, metricIds, pushes, reviewRounds, similar, verdict, words } from './blockers.mjs';
 import { GITHUB_IDS } from './blockers-core.mjs';
 import { managedClaudeMd } from '../claude/claude.mjs';
-import { ownTargets, now, tmp, write, jsonl, projectsDir, site, at, usage, bash, asst, result, guardText, WARN, root, home, managedPath, guardLog, checkout, run, commit, review, PRS, fakeGh, targets, params, base } from "./blockers-fixtures.mjs";
+import { ownTargets, now, tmp, write, jsonl, projectsDir, site, at, usage, bash, asst, result, guardText, WARN, root, home, managedPath, run, commit, review, PRS, fakeGh, targets, params, base } from "./blockers-fixtures.mjs";
 test('targets: valid, on the Blockers tab, every one with means, group and a goal', () => {
   const defs = ownTargets('blockers.json').filter((d) => d.file === 'blockers.json');
   assert.equal(area, 'blockers');
@@ -71,7 +71,7 @@ test('reviewRounds and pushes read rounds, waits and flaky checks', () => {
   assert.deepEqual({ wait: b.waitMin.toFixed(3), red: b.red }, { wait: '0.417', red: 0 });
 });
 
-test('collect: every metric from synthetic transcripts, the guard log and GitHub', async () => {
+test('collect: every metric from synthetic transcripts and GitHub', async () => {
   const calls = [];
   const got = await collect({ ...base, gh: fakeGh(calls) });
   assert.deepEqual(Object.keys(got), metricIds, 'every id, in the targets order');
@@ -84,9 +84,8 @@ test('collect: every metric from synthetic transcripts, the guard log and GitHub
   const v = Object.fromEntries(Object.entries(got).map(([id, e]) => [id.replace('blockers.', ''), e.value ?? e.could_not_check]));
   assert.deepEqual(v, {
     costly: 3, // guard credential-file-read, pinned review and CI checks, each at 50% false alarms
-    guard_false_alarm_share: 50, // t1's retry t2 reads the same file another way, without the fix (ls, test -e or stat): a false alarm; t3 was not retried
     enforcement_reverts: 2, // PR 7 (a workflow) reverted by PR 20; PR 8 (a hook) blamed by bug 31, not by 32 or 33
-    guard_blocks_per_100_calls: 42.857, // 3 log blocks at or after t1, over the 7 tool calls; the Oct 25 one and the other repo's left out
+    guard_blocks_per_100_calls: 14.286, // the subagent's refused task list over the 7 tool calls; the retired guard's t1 and t3 and the git gate t5 are not counted
     latest_block_seconds: 60, // t5, the latest block, 60 s to t6 (t1 and t3 took 60 and 120: no mean)
     git_commit_seconds: 12,
     git_push_seconds: 16.5, // 3 and 30
@@ -95,7 +94,7 @@ test('collect: every metric from synthetic transcripts, the guard log and GitHub
     hook_tokens_per_session: 100 * 6 + Math.ceil(WARN.length / 4) * 2, // s1, its one session: reads stop at the compaction
     review_tokens_per_pr: 16_667, // the review subagent's 50,000 over the 3 merged PRs
   });
-  assert.deepEqual(got['blockers.guard_blocks_per_100_calls'].detail.map((d) => [d.label, d.value]), [['credential-file-read', 28.571], ['git-push-main', 14.286]]);
+  assert.deepEqual(got['blockers.guard_blocks_per_100_calls'].detail.map((d) => [d.label, d.value]), [['app: task list in a subagent', 14.286]]);
   assert.deepEqual(got['blockers.review_tokens_per_pr'].detail.find((d) => d.label === '#7'), { label: '#7', value: 50_000, unit: 'tokens' }, 'its Agent call names PR #7');
   assert.deepEqual(got['blockers.latest_block_seconds'].detail.map((d) => [d.label, d.value]), [['guard: credential-file-read', 120], ['pre-push', 60]], 't3 for the guard, not the 90 s mean of t1 and t3; t5 for the hook');
   assert.match(got['blockers.hook_tokens_per_session'].source, /mean over the last 5 main sessions by start, each with its subagents; 1 read/);
@@ -107,7 +106,6 @@ test('collect: the ledger has one row per blocker, grouped, with a verdict each'
   const by = Object.fromEntries(rows.map((r) => [r.label, r]));
   assert.deepEqual([...new Set(rows.map((r) => r.group))], ['Quality', 'Speed', 'Tokens']);
   assert.deepEqual(by['guard: credential-file-read'], { label: 'guard: credential-file-read', group: 'Speed', fires: 2, false_alarm: 50, hours: 0.05, tokens: 6000, value: 6000, verdict: 'costs' });
-  assert.deepEqual([by['guard: git-push-main'].fires, by['guard: git-push-main'].verdict], [1, 'not-measured'], 'in the log, never in a transcript: no outcome, no cost');
   assert.deepEqual([by['git pre-push hook'].false_alarm, by['git pre-push hook'].verdict], [0, 'helps']);
   assert.equal(by['app: task list in a subagent'].verdict, 'helps', 'the subagent did not call it again');
   assert.deepEqual([by['pinned review'].fires, by['pinned review'].hours, by['pinned review'].verdict], [3, 2.33, 'costs'], 'rounds of the last 20 merged PRs, not halved');
@@ -122,7 +120,7 @@ test('collect: the ledger has one row per blocker, grouped, with a verdict each'
 
 test('collect: missing inputs read as not measured, never as 0', async () => {
   const gone = path.join(tmp, 'gone');
-  const got = await collect({ root: gone, mode: 'local', projectsDir: gone, home: gone, guardLog: path.join(gone, 'log'), managedPath: gone, now, params: { repo: 'acme/site' }, gh: async () => Promise.reject(new Error('gh: not logged in')) });
+  const got = await collect({ root: gone, mode: 'local', projectsDir: gone, home: gone, managedPath: gone, now, params: { repo: 'acme/site' }, gh: async () => Promise.reject(new Error('gh: not logged in')) });
   for (const id of metricIds) assert.ok(got[id].could_not_check, `${id} is not measured`);
   assert.match(got['blockers.pushes_per_merged_pr'].could_not_check, /not logged in/);
 });
@@ -222,7 +220,7 @@ test('hook output per session: the newest 5 main sessions, each with its subagen
   assert.match(none['blockers.hook_tokens_per_session'].could_not_check, /no main session/, 'before any session: not measured, never 0');
 });
 
-test('last N: the newest 15 guard blocks, the newest 20 commits, the newest 1,000 calls', async () => {
+test('last N: the newest 20 commits, the newest 1,000 calls', async () => {
   const dir = path.join(tmp, 'many');
   const lines = [];
   // 1,045 calls a minute apart: 20 guard blocks first (each followed by its retry), then commits.
@@ -240,7 +238,6 @@ test('last N: the newest 15 guard blocks, the newest 20 commits, the newest 1,00
   }
   write(path.join(dir, '-Users-someone-Developer-acme-site', 'many.jsonl'), jsonl(lines));
   const got = await collect({ ...base, projectsDir: dir, now: new Date(at(2000)), gh: fakeGh() });
-  assert.equal(got['blockers.guard_false_alarm_share'].value, 0, 'the last 15 blocks held; the 5 false alarms before them are older');
   assert.equal(got['blockers.git_commit_seconds'].value, 30, 'the newest 20 commits took 30 s; the 985 before them 6 s');
   assert.match(got['blockers.latest_block_seconds'].could_not_check, /no block among the last 1000 tool calls \(1000 wanted\)/, 'every block is older than the newest 1,000 calls');
 });
@@ -248,26 +245,11 @@ test('last N: the newest 15 guard blocks, the newest 20 commits, the newest 1,00
 test('config: each default names no repo, path or person', () => {
   const cfg = config({}, '/Users/someone/Developer/acme site/.claude/worktrees/fix-1');
   assert.equal(cfg.match, '-Users-someone-Developer-acme-site');
-  assert.equal(cfg.checkout, '/Users/someone/Developer/acme site', 'the main checkout, so every worktree counts');
-  assert.equal(cfg.guardLog, '~/.claude/code-os/bash_guard.log');
   assert.equal(cfg.managed, managedClaudeMd());
   assert.equal(cfg.reviewer, '', 'any reviewer');
   assert.deepEqual(cfg.enforcement, []);
   assert.equal(managedClaudeMd('darwin'), '/Library/Application Support/ClaudeCode/CLAUDE.md');
   assert.equal(managedClaudeMd('linux'), '/etc/claude-code/CLAUDE.md');
-});
-
-test('the guard log counts this checkout and its worktrees, never a sibling folder that shares its name', async () => {
-  // Both lines fall inside the fixture's span of tool calls (10:00 to 10:06 UTC).
-  const log = path.join(tmp, 'sibling.log');
-  write(log, [
-    JSON.stringify({ ts: '2026-11-02T10:02:00+0000', cwd: checkout, rules: ['own-rule'] }),
-    JSON.stringify({ ts: '2026-11-02T10:03:00+0000', cwd: `${checkout}/.claude/worktrees/y`, rules: ['own-rule'] }),
-    JSON.stringify({ ts: '2026-11-02T10:04:00+0000', cwd: `${checkout}-other`, rules: ['sibling-rule'] }),
-  ].join('\n'));
-  const got = await collect({ ...base, guardLog: log, gh: fakeGh() });
-  assert.deepEqual(got['blockers.guard_blocks_per_100_calls'].detail.map((d) => d.label), ['own-rule']);
-  assert.equal(got['blockers.guard_blocks_per_100_calls'].value, 28.571, '2 blocks over the 7 tool calls');
 });
 
 test('any reviewer counts when params.reviewer is empty', () => {
@@ -290,32 +272,32 @@ test('with no GitHub repo to read, every metric is not measured', async () => {
 
 test('the transcript folder is params.projects_dir, and the source names it', async () => {
   const got = await collect({ ...base, projectsDir: undefined, params: { ...params, projects_dir: projectsDir }, gh: fakeGh() });
-  assert.equal(got['blockers.guard_false_alarm_share'].value, 50);
-  assert.ok(got['blockers.guard_false_alarm_share'].source.startsWith(`${projectsDir}/*acme-site*/`), got['blockers.guard_false_alarm_share'].source);
+  assert.equal(got['blockers.guard_blocks_per_100_calls'].value, 14.286);
+  assert.ok(got['blockers.guard_blocks_per_100_calls'].source.startsWith(`${projectsDir}/*acme-site*/`), got['blockers.guard_blocks_per_100_calls'].source);
 });
 
 // ---- held or false alarm: what came after a block
 
-test('guard_blocks_per_100_calls: with no guard log, Claude Code permission refusals are the blocks', async () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'blockers-noguard-'));
+test('guard_blocks_per_100_calls: permission refusals and hook blocks count; the retired guards\' blocks do not', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'blockers-refusals-'));
   const folder = path.join(dir, '-Users-someone-Developer-acme-site');
   write(path.join(folder, 's9.jsonl'), jsonl([
     asst(0, 'n1', 10, [bash('b1', 'ls')]), result(0, 'b1', 'ok'),
     asst(1, 'n2', 10, [bash('b2', 'rm -rf ~')]), result(1, 'b2', 'Permission to use Bash with command rm -rf ~ has been denied.', true),
     asst(2, 'n3', 10, [bash('b3', 'git push --force')]), result(2, 'b3', 'Permission for this command was denied by a built-in Claude Code safety check.', true),
-    asst(3, 'n4', 10, [bash('b4', 'git status')]), result(3, 'b4', 'clean'),
+    asst(3, 'n4', 10, [bash('b4', 'git reset --hard')]), result(3, 'b4', 'PreToolUse:Bash hook error: [python3 /x/hookify/pretooluse.py]: blocked by a hookify rule', true),
+    asst(4, 'n5', 10, [bash('b5', 'cat ~/.env')]), result(4, 'b5', guardText('credential-file-read'), true),
+    asst(5, 'n6', 10, [bash('b6', 'echo x > a')]), result(5, 'b6', 'PreToolUse:Write hook error: [python3 -I /x/write_guard.py]: no', true),
+    asst(6, 'n7', 10, [bash('b7', 'git status')]), result(6, 'b7', 'clean'),
   ]));
   try {
-    const got = await collect({ ...base, projectsDir: dir, guardLog: path.join(dir, 'no-such.log'), gh: fakeGh() });
+    const got = await collect({ ...base, projectsDir: dir, gh: fakeGh() });
     const r = got['blockers.guard_blocks_per_100_calls'];
-    assert.equal(r.value, 50, '2 refusals over the 4 tool calls');
-    assert.match(r.source, /permission refusals \(Auto mode, deny rules and built-in safety checks\), as no guard log is at/);
-    assert.deepEqual(r.detail.map((d) => d.label).sort(), ['built-in safety check', 'permission rules']);
-    // With a guard log present (here empty), the refusals still count beside its blocks.
-    write(path.join(dir, 'empty.log'), '');
-    const withLog = (await collect({ ...base, projectsDir: dir, guardLog: path.join(dir, 'empty.log'), gh: fakeGh() }))['blockers.guard_blocks_per_100_calls'];
-    assert.equal(withLog.value, 50);
-    assert.match(withLog.source, /0 guard blocks, 2 refusals/);
+    assert.equal(r.value, 42.857, '3 refusals over the 7 tool calls');
+    assert.match(r.source, /permission refusals \(Auto mode, deny rules and built-in safety checks\) and hook blocks \(hookify and app hooks\), per 100 tool calls/);
+    assert.deepEqual(r.detail.map((d) => d.label).sort(), ['built-in safety check', 'hook on Bash', 'permission rules']);
+    const rows = Object.fromEntries(got['blockers.costly'].detail.map((d) => [d.label, d.fires]));
+    assert.deepEqual([rows['guard: credential-file-read'], rows['write guard']], [1, 1], 'old guard blocks still read as ledger rows');
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

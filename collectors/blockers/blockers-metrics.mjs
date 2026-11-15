@@ -1,24 +1,22 @@
 // The Blockers metrics from what the collector read (blockers.mjs).
 
 import { GH_SOURCE, LAST_CALLS, LAST_PRS, LAST_SESSIONS, MIN, PER, iso, item, metricIds, newestFirst, pct, round, sum } from './blockers-core.mjs';
-import { gitMetrics, guardAlarmMetric, guardRateMetric, latestBlockMetrics, markMisfires, refusalRows } from './blockers-guard.mjs';
+import { gitMetrics, guardRateMetric, latestBlockMetrics, refusalRows } from './blockers-guard.mjs';
 import { blocksOf, lastSessions, notesOf, sessionStart } from './blockers-outcome.mjs';
 import { breaker, pushes, reviewRounds, verdict } from './blockers-github.mjs';
 import { ledgerRow } from './blockers-ledger.mjs';
 
-// Every Blockers metric from the read transcripts, guard log, instructions and GitHub answers.
-export function computeMetrics({ files, log, instructions, github, replayed = {}, now, readAt, cfg }) {
+// Every Blockers metric from the read transcripts, instructions and GitHub answers.
+export function computeMetrics({ files, instructions, github, now, readAt, cfg }) {
   const out = {};
-  const c = spanContext({ files, log, instructions, github, replayed, now, cfg });
+  const c = spanContext({ files, instructions, github, now, cfg });
   c.val = (id, value, source, detail) => {
     out[id] = { value, ...(detail ? { detail } : {}), source, read_at: readAt };
   };
   c.cnc = (id, reason, source) => {
     out[id] = { could_not_check: reason, source };
   };
-  markMisfires(c.everyBlock, c.logEntries);
   guardRateMetric(c);
-  guardAlarmMetric(c);
   refusalRows(c);
   latestBlockMetrics(c);
   gitMetrics(c);
@@ -31,8 +29,8 @@ export function computeMetrics({ files, log, instructions, github, replayed = {}
 
 // What the metrics share: the span of the last LAST_CALLS tool calls (every
 // transcript of this repo, subagents included; calls that tie the oldest one's
-// time count too), its blocks and notes, and the guard log's entries.
-function spanContext({ files, log, instructions, github, replayed, now, cfg }) {
+// time count too), its blocks and notes.
+function spanContext({ files, instructions, github, now, cfg }) {
   const TRANSCRIPTS = cfg.transcripts;
   const haveFiles = !files.error;
   const allCalls = haveFiles ? files.flatMap((f) => f.calls).filter((x) => x.at <= now).sort(newestFirst) : [];
@@ -41,10 +39,8 @@ function spanContext({ files, log, instructions, github, replayed, now, cfg }) {
   const calls = allCalls.filter((x) => inSpan(x.at));
   const SPAN = calls.length ? `the last ${calls.length} tool calls (${LAST_CALLS} wanted), ${iso(cutoff)} to ${iso(calls[0].at)} UTC` : `the last ${LAST_CALLS} tool calls`;
   const everyBlock = haveFiles ? blocksOf(files, now, { fixes: cfg.fixes }) : [];
-  const logEntries = log.error ? [] : log.entries.filter((e) => e.here);
   return {
-    files, log, instructions, github, replayed, now, cfg, TRANSCRIPTS, haveFiles, allCalls, inSpan, calls, SPAN, everyBlock,
-    GUARD_LOG: cfg.guardLog,
+    files, instructions, github, now, cfg, TRANSCRIPTS, haveFiles, allCalls, inSpan, calls, SPAN, everyBlock,
     ledger: [],
     filesReason: `${TRANSCRIPTS}: ${files.error}`,
     per: (x) => (x * PER) / calls.length,
@@ -52,8 +48,6 @@ function spanContext({ files, log, instructions, github, replayed, now, cfg }) {
     noCalls: `no tool call in ${TRANSCRIPTS}`,
     blocks: everyBlock.filter((b) => inSpan(b.at)),
     notes: haveFiles ? notesOf(files, inSpan) : [],
-    logEntries,
-    logInSpan: logEntries.filter((e) => inSpan(e.at)),
     guardBlocks: everyBlock.filter((b) => b.kind === 'guard' && inSpan(b.at)),
   };
 }
@@ -141,12 +135,12 @@ function githubMetrics(c) {
 
 // The ledger: one row per blocker, grouped, costliest first.
 function ledgerMetric(c) {
-  const { files, log, github, ledger, SPAN, LASTN, GUARD_LOG, filesReason, val, cnc } = c;
+  const { files, github, ledger, SPAN, LASTN, filesReason, val, cnc } = c;
   const ORDER = ['Quality', 'Speed', 'Tokens'];
   const rows = ledger.sort((a, b) => ORDER.indexOf(a.group) - ORDER.indexOf(b.group) || (b.tokens ?? -1) - (a.tokens ?? -1) || (b.hours ?? -1) - (a.hours ?? -1));
   const ledgerSource = `every blocker read above: fires, hours and tokens summed over ${SPAN}, the pinned review and CI checks over the ${LASTN}; verdict() in quality/collectors/blockers/blockers.mjs`;
   if (rows.some((r) => r.verdict !== 'not-measured')) return val('blockers.costly', rows.filter((r) => r.verdict === 'costs').length, ledgerSource, rows);
-  cnc('blockers.costly', [files.error && filesReason, log.error && `${GUARD_LOG}: ${log.error}`, github.error].filter(Boolean).join('; ') || 'no blocker fired or cost anything in the span', ledgerSource);
+  cnc('blockers.costly', [files.error && filesReason, github.error].filter(Boolean).join('; ') || 'no blocker fired or cost anything in the span', ledgerSource);
 }
 
 // Review rounds and reviewer tokens per merged PR, plus their ledger row.

@@ -15,7 +15,7 @@
     "needs": "local-files",
     "chart": "ledger",
     "params": {
-      "comment": "Each setting has a default that names no repo, path or person (config() in blockers.mjs): project_match (default the repo's own project folder), checkout_path (default the main checkout), repo (default params, then GITHUB_REPOSITORY, then the origin remote), reviewer (the GitHub login of the pinned review; default any reviewer), guard_log (default ~/.claude/code-os/bash_guard.log), managed_claude_md (default the platform's managed policy CLAUDE.md). enforcement_paths: the paths the revert breaker watches. projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root. fix_signals: rule id to regexes, each tried on each step of a retry as typed; a step that matches one and writes no file applies the fix the block named. One that starts with ! is a veto, a known way around the rule: any command that succeeds in the window and matches it makes the block a false alarm, similar or not. A block holds only when each similar retry runs the blocked command's own steps, fix steps and allowlisted read-only steps (neutralStep() in blockers.mjs), nothing else. They list the commands each rule's fix text in tools/bash_guard_rules.json names, and the compliant ways sessions take (merge --ff-only after reset --hard, wrangler deploy after npm run deploy). A rule with none has no fix to apply. guard_script: the guard each recent block is replayed through; default ~/.claude/code-os/bash_guard.py.",
+      "comment": "Each setting has a default that names no repo, path or person (config() in blockers.mjs): project_match (default the repo's own project folder), repo (default params, then GITHUB_REPOSITORY, then the origin remote), reviewer (the GitHub login of the pinned review; default any reviewer), managed_claude_md (default the platform's managed policy CLAUDE.md). enforcement_paths: the paths the revert breaker watches. projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root. fix_signals: rule id to regexes, each tried on each step of a retry as typed; a step that matches one and writes no file applies the fix the block named. One that starts with ! is a veto, a known way around the rule: any command that succeeds in the window and matches it makes the block a false alarm, similar or not. A block holds only when each similar retry runs the blocked command's own steps, fix steps and allowlisted read-only steps (neutralStep() in blockers.mjs), nothing else. They list the commands each retired guard rule's fix text named, and the compliant ways sessions take (merge --ff-only after reset --hard, wrangler deploy after npm run deploy). A rule with none has no fix to apply. They matter only for the retired guard's blocks in old transcripts.",
       "enforcement_paths": [
         "^\\.github/workflows/",
         "^\\.githooks/",
@@ -194,23 +194,6 @@
     }
   },
   {
-    "id": "blockers.guard_false_alarm_share",
-    "tab": "blockers",
-    "kind": "quality",
-    "group": "Simplicity and drift",
-    "label": "Guard blocks that were false alarms",
-    "means": "Upper bound: a block counts unless each retry ran its own steps, the fix, reads, or with the fix an unblocked edit.",
-    "unit": "%",
-    "goal": 5,
-    "near": 15,
-    "direction": "lower",
-    "goal_source": "template goal, no public benchmark: a guard that blocks commands which then run in another form slows work without stopping anything",
-    "source": "the last 15 bash guard blocks in this repo's transcripts. Held: no similar command succeeded in the same transcript within 10 minutes, or every one that did ran only the blocked command's own steps, as typed, steps that apply the fix the block named (params.fix_signals) and write no file, and allowlisted read-only steps whose every flag is on their list. A retry call that runs the fix may also edit a step the guard did not block: its first two words are an unblocked step's and no blocked step's, by the replay of each step alone (at most REPLAY_STEPS), and it holds no blocked step's command word; on the 15 latest blocks of 2026-11-11 that moved the reading from 53.3% to 40%. A held block the current guard still blocks under another rule reads as narrowed. False alarm: anything else (a misfire, or a route around), a veto, the same command run unblocked, a current guard (params.guard_script) that breaks no rule on the blocked command on replay (a misfire since fixed), or a guard log line with misfire: true. Ambiguities read as false alarm and known workaround families are vetoed; a workaround sharing no words with the blocked command and hitting no veto can still read held. A block whose command cannot be read is left out and counted. N = 15 (LAST_GUARD). Reads above hand labels: 40.4% vs 21.2% on 52 blocks, 2026-11-03. A heredoc's body stays in the step that opened it, and fix signals read a step without a leading timeout, git -C or a discarded redirection (signalForm); on the 12 latest blocks of 2026-11-04 that moved the reading from 50% to 33.3%.",
-    "needs": "local-files",
-    "chart": "bar",
-    "defined": "2026-11-11"
-  },
-  {
     "id": "blockers.enforcement_reverts",
     "tab": "blockers",
     "kind": "quality",
@@ -231,17 +214,17 @@
     "tab": "blockers",
     "kind": "quality",
     "group": "Simplicity and drift",
-    "label": "Guard blocks per 100 tool calls",
-    "means": "Commands the bash guard stopped in this repo's sessions, per hundred of the latest tool calls.",
+    "label": "Permission and hook blocks per 100 tool calls",
+    "means": "Calls a deny rule, a safety check or a hook refused in this repo's sessions, per hundred of the latest tool calls.",
     "unit": "blocks",
     "goal": 0.05,
     "near": 0.1,
     "direction": "lower",
-    "goal_source": "template goal, no public benchmark: one block in 2,000 tool calls; a guard that fires often is in the way more than it protects",
-    "source": "params.guard_log (default ~/.claude/code-os/bash_guard.log): ts, cwd and rules of each block whose cwd is in this repo's checkout (params.checkout_path, default the main checkout), from the oldest of the last 1,000 tool calls in this repo's transcripts to now, per 100 of those calls, plus Claude Code permission refusals (Auto mode, deny rules, built-in safety checks) in those transcripts; with no guard log, the refusals alone. N = 1,000 tool calls (LAST_CALLS in blockers.mjs), so new work replaces old within hours in a busy repo",
+    "goal_source": "template goal, no public benchmark: one refusal in 2,000 tool calls; a rule that fires often is in the way more than it protects",
+    "source": "this repo's transcripts: tool calls that Claude Code refused with a permission error (Auto mode, deny rules, built-in safety checks) or a PreToolUse hook error (hookify, the app's hooks), from the oldest of the last 1,000 tool calls to now, per 100 of those calls. The retired bash and write guards' blocks in old transcripts are not counted. N = 1,000 tool calls (LAST_CALLS in blockers.mjs), so new work replaces old within hours in a busy repo",
     "needs": "local-files",
     "chart": "bar",
-    "defined": "2026-11-14"
+    "defined": "2026-11-15"
   },
   {
     "id": "blockers.latest_block_seconds",
