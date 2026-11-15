@@ -42,4 +42,4 @@ Tiers are enforced by name: Claude Code accepts the official and community names
 |---|---|
 | Change the account's default permission mode | it's the owner's choice |
 | Turn off a plugin used in the last 30 days | measured use beats a guess |
-| Read `~/.claude.json` or credential files to inspect servers | they can hold keys; use `claude mcp list` and `/mcp` |
+| Open files that hold keys to inspect servers | `claude mcp list` and `/mcp` show what is needed |
