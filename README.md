@@ -2,6 +2,8 @@
 
 The Claude pack for [Git Crafter](https://github.com/SoulCraft-Org/git-crafter): Claude Code templates, Quality tabs and Process maps for a GitHub repo that agents drive from the Claude desktop app.
 
+Brand: [Colorado Startups brand guide](https://colorado-startups.github.io/brand/)
+
 [Live Quality and Process pages](https://colorado-startups.github.io/claudius/)
 
 Claudius is not an Anthropic product and is not affiliated with Anthropic.
