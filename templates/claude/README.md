@@ -94,6 +94,14 @@ flowchart TD
 
 Sources: code.claude.com/docs/en/skills, /plugins/loading and /mcp, read 2026-11-15.
 
+### Decided for you
+
+| Question | Decision | Evidence (one account, 2026-11-15) | Change it when |
+|---|---|---|---|
+| Keep every Anthropic and reviewed plugin on, or only what you use? | On for the whole account | Off in user settings is off in every folder, and a new project does not get the plugin back on its own | a plugin is one you will never use |
+| Raise the skill listing budget so every description shows? | No. Keep the 1% default | 102 plugins, 1,081 skills: about 98% list by name only at the default, and the listing costs 12.3k tokens. On 8 requests aimed at plugins never used before, Opus 5.5 picked the right skill 8 of 8 from names alone. Showing every description in full would cost about 108k tokens a turn | a skill you expect is not picked: name it in that project's `CLAUDE.md` first, then try `skillListingBudgetFraction` at `0.02` |
+| Turn connector tools off to save context? | No | 556.8k tokens of connector tools exist and 4.2k load at start; the rest load on demand | a server's instructions are long and you never call it |
+
 ## Plugins
 
 Prefer what Anthropic builds or reviews. A marketplace's name sets its tier, and Claude Code accepts the official and community names only from `github.com/anthropics/`, so the tier can be checked.

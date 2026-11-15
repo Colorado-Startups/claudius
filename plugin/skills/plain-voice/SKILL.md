@@ -1,6 +1,6 @@
 ---
 name: plain-voice
-description: Rewrites or reviews prose to be plain, visual-first and free of AI-writing tells, keeping every claim, figure and name. Use when drafting or editing docs, READMEs, PR descriptions, posts or emails.
+description: Rewrites or reviews prose to be plain, visual-first and free of AI-writing tells, keeping every claim, figure and name. Use when drafting or editing docs, READMEs, PR descriptions, posts or emails, or when asked to make text plainer, shorter or less machine-written.
 compatibility: Works in chat, Cowork and Claude Code with no tool. Reads project files only when asked to edit them.
 ---
 
