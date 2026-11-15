@@ -29,14 +29,16 @@ test('plugin: manifest, README of 40+ words, and a license, as the directory req
   assert.ok(existsSync(join(ROOT, 'LICENSE')));
 });
 
-test('plugin: nothing that gets held for review: no hooks, MCP servers, bin, symlinks, system files, or files over 256 KiB', () => {
+test('plugin: nothing that gets held for review: no hooks, MCP servers, bin, symlinks, system files, or non-image files over 256 KiB', () => {
   for (const p of ['hooks', '.mcp.json', 'bin']) assert.ok(!existsSync(join(ROOT, p)), p);
   const files = walk(ROOT);
   assert.ok(files.length <= 512);
   for (const f of files) {
     assert.ok(!lstatSync(f).isSymbolicLink(), f);
     assert.ok(!/(\.DS_Store|Thumbs\.db|desktop\.ini)$/.test(f), f);
-    assert.ok(lstatSync(f).size < 256 * 1024, f);
+    // The 256 KiB rule is for files that aren't images or fonts; every file stays under 5 MiB (pre-submission checklist, read 2026-11-15).
+    const image = /\.(png|jpe?g|gif|webp)$/i.test(f);
+    assert.ok(lstatSync(f).size < (image ? 5 * 1024 * 1024 : 256 * 1024), f);
   }
 });
 
@@ -51,6 +53,20 @@ test('plugin: each skill has a name and a description of at most 50 words; the l
   }
   // claude plugin details reports ~271 always-on tokens for these three (2026-11-15); characters / 4 is the budget's estimate.
   assert.ok(chars / 4 < 500, `${Math.round(chars / 4)} tokens`);
+});
+
+test('plugin: the directory listing fields point at files that exist, and each skill names what it needs', () => {
+  const manifest = JSON.parse(readFileSync(join(ROOT, '.claude-plugin', 'plugin.json'), 'utf8'));
+  assert.ok(existsSync(join(ROOT, manifest.icon)), 'icon');
+  for (const k of ['documentationUrl', 'supportUrl', 'privacyPolicyUrl', 'termsOfServiceUrl']) assert.match(manifest[k], /^https:\/\//, k);
+  for (const s of skills) {
+    const file = join(ROOT, 'skills', s, 'SKILL.md');
+    const fm = frontmatter(file);
+    assert.ok(fm.compatibility && fm.compatibility.length <= 500, `${s}: compatibility`);
+    assert.ok(/^Requires /m.test(readFileSync(file, 'utf8')), `${s}: a line starting Requires`);
+    const cases = readdirSync(join(ROOT, 'evals')).filter((c) => existsSync(join(ROOT, 'evals', c, 'prompt.md')) && readFileSync(join(ROOT, 'evals', c, 'graders', 'skill-fired.md'), 'utf8').includes(`?${s}"`));
+    assert.ok(cases.length >= 3, `${s}: ${cases.length} evals`);
+  }
 });
 
 test('plugin: no em dash or spaced en dash in what it ships', () => {
