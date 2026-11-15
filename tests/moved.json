@@ -3,6 +3,8 @@
  "source_repo": "SoulCraft-Org/git-crafter",
  "source_commit": "8e284cbaa0c86fcb25473685ec68aea69d9a024b",
  "edited": [
+  "targets/desktop-app.json",
+  "ideals/desktop-app.json",
   "targets/claude.json",
   "targets/tokens.json",
   "collectors/tokens/tokens-io.mjs",

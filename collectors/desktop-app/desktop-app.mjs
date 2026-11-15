@@ -11,6 +11,7 @@
 //   desktop_app.subagents_killed    subagent runs killed or failed
 //   desktop_app.parallel_share      Agent calls sent together
 //   desktop_app.subagent_start_tokens  the context a subagent starts with
+//   desktop_app.plugins_untrusted / plugins_replaceable / plugins_stale  plugin trust (desktop-app-plugins.mjs)
 //
 // Every path, tool name and N is a param on quality/targets/desktop-app.json.
 // Only a transcript whose entrypoint is params.entrypoint counts: a terminal
@@ -29,12 +30,14 @@
 
 import fs from 'node:fs';
 import os from 'node:os';
+import path from 'node:path';
 import { projectMatch, resolvePath } from '../claude/claude.mjs';
 import { attempt, item } from '../instructions/instructions-lib.mjs';
 import { eachLine, mainSessions } from '../instructions/instructions-sessions.mjs';
 import { redact, useLib } from '../lib/engine.mjs';
 import { emptyCalls, pluginsCalled, tallyCalls } from './desktop-app-calls.mjs';
 import { emptyListing, foldListing, hasListing, isAppServer, pluginsIn, serverKind, serversIn } from './desktop-app-listings.mjs';
+import { inventory, pluginMetrics } from './desktop-app-plugins.mjs';
 import { emptyTurns, foldTurn } from './desktop-app-turns.mjs';
 import { subagentMetric, workMetrics } from './desktop-app-work.mjs';
 
@@ -79,8 +82,13 @@ async function gather({ root = '.', mode, home = os.homedir(), now = new Date(),
   const latest = sessions[0].listing;
   if (hasListing(latest)) {
     stateMetrics(latest, params, val);
-    usageMetrics(sessions.slice(0, usageWindow(params)), params, { val, cnc });
+    const usage = attempt(() => accountUsage(params, home, root, now.getTime()));
+    if (usage.error) for (const id of ['plugins_unused', 'connectors_unused']) cnc(id, usage.error, self);
+    else usageMetrics(latest, usage, params, { val, cnc });
   } else for (const id of LISTING_IDS) cnc(id, 'the newest desktop session holds no listing attachment', self);
+  const inv = attempt(() => inventory({ home, root, params }));
+  const pluginError = inv.error ?? attempt(() => pluginMetrics(inv, params, now, { val, cnc }))?.error;
+  if (pluginError) for (const id of ['plugins_untrusted', 'plugins_replaceable', 'plugins_stale']) cnc(id, pluginError, self);
   workMetrics(sessions, params, now, { val, cnc });
   subagentMetric(sessions, params, now, { val, cnc });
   return Object.fromEntries(metricIds.map((id) => [id, out[id] ?? { could_not_check: 'collector produced no value', source: self }]));
@@ -108,7 +116,6 @@ function desktopSessions(projectsDir, params, upTo) {
   for (const session of mainSessions(projectsDir, params.project_match, params.subagents_dir, upTo)) {
     const read = readSession(session.file, params);
     if (read.entrypoint !== params.entrypoint) continue;
-    if (found.length < usageWindow(params)) for (const sub of session.subagents) eachLine(sub, (record) => tallyCalls(read.calls, record, params));
     found.push({ ...read, subagents: session.subagents });
   }
   return found;
@@ -130,18 +137,73 @@ function stateMetrics(latest, params, val) {
   val('listing_tokens', parts.reduce((n, p) => n + p.value, 0), 'state: bytes / 4 of the four listings of the newest desktop session, every delta added up', parts);
 }
 
+// The entrypoint named in a transcript's head, or null.
+const HEAD_BYTES = 65536;
+function headEntrypoint(file) {
+  let fd;
+  try {
+    fd = fs.openSync(file, 'r');
+    const buf = Buffer.alloc(HEAD_BYTES);
+    return /"entrypoint":"([^"]+)"/.exec(buf.subarray(0, fs.readSync(fd, buf, 0, HEAD_BYTES, 0)).toString('utf8'))?.[1] ?? null;
+  } catch {
+    return null;
+  } finally {
+    if (fd !== undefined) fs.closeSync(fd);
+  }
+}
+
+// The Cowork transcript folders under params.cowork_dir: <account>/<org>/local_<id>/<claude_dir_name>/projects.
+function coworkProjectDirs(cowork, params) {
+  const sub = (d) => (fs.existsSync(d) ? fs.readdirSync(d, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => path.join(d, e.name)) : []);
+  return sub(cowork).flatMap(sub).flatMap(sub).filter((d) => path.basename(d).startsWith('local_')).map((d) => path.join(d, params.claude_dir_name, 'projects')).filter((d) => fs.existsSync(d));
+}
+
+// Plugins and connectors belong to the account, so their use is read across
+// every project folder and every Cowork session: the calls of the last N
+// sessions whose entrypoint is in params.usage_entrypoints, with their subagents.
+// Only lines holding a tool call or a typed command are parsed.
+function accountUsage(params, home, root, upTo) {
+  const dirsToRead = [resolvePath(params.projects_dir, { home, root }), ...coworkProjectDirs(resolvePath(params.cowork_dir, { home, root }), params)];
+  const all = dirsToRead.flatMap((d) => mainSessions(d, '', params.subagents_dir, upTo)).sort((a, b) => b.start - a.start);
+  const entrypoints = new Set(params.usage_entrypoints ?? [params.entrypoint]);
+  const calls = emptyCalls();
+  let read = 0;
+  let unreadable = 0;
+  for (const session of all) {
+    if (read >= usageWindow(params)) break;
+    // The entrypoint sits in a transcript's first records, so a session that
+    // does not count is skipped before its body is read.
+    if (!entrypoints.has(headEntrypoint(session.file))) continue;
+    read += 1;
+    for (const file of [session.file, ...session.subagents]) {
+      let text;
+      try {
+        text = fs.readFileSync(file, 'utf8');
+      } catch {
+        unreadable += 1;
+        continue;
+      }
+      for (const line of text.split('\n')) {
+        if (!line.includes('"tool_use"') && !line.includes('<command-name>')) continue;
+        try {
+          tallyCalls(calls, JSON.parse(line), params);
+        } catch {}
+      }
+    }
+  }
+  return { calls, read, unreadable, folders: dirsToRead.length };
+}
+
 // The two readings that set the newest session's listings against what the
-// last N sessions called.
-function usageMetrics(sessions, params, { val, cnc }) {
+// account's last N sessions called.
+function usageMetrics(latest, usage, params, { val, cnc }) {
   const n = Number(params.usage_sessions);
-  const source = `state: the newest desktop session's listings against the calls of the last ${n} desktop sessions with their subagents; N = ${n} sessions, ${sessions.length} read`;
+  const source = `state: the newest desktop session's listings against the calls of the account's last ${n} sessions (entrypoint in params.usage_entrypoints) across every project folder and Cowork session, with their subagents; N = ${n} sessions, ${usage.read} read${usage.unreadable ? `, ${usage.unreadable} files unreadable` : ''}`;
   if (!(n >= 1)) {
     for (const id of ['plugins_unused', 'connectors_unused']) cnc(id, 'params.usage_sessions must be at least one session', source);
     return;
   }
-  const latest = sessions[0].listing;
-  const calls = emptyCalls();
-  for (const s of sessions) for (const kind of Object.keys(calls)) for (const name of s.calls[kind]) calls[kind].add(name);
+  const calls = usage.calls;
   const loaded = pluginsIn(latest);
   const called = pluginsCalled(calls, loaded);
   const idle = [...loaded].filter((p) => !called.has(p)).sort();
