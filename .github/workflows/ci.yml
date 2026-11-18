@@ -4,6 +4,7 @@ name: ci
 # ruleset requires its verdict, ci / ci-ok. Default workflow token only, read access.
 on:
   pull_request:
+  merge_group:
   push:
     branches: [main]
 
