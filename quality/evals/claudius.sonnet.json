@@ -6,10 +6,10 @@
  "date": "2026-11-15",
  "claudeVersion": "2.1.314",
  "partial": false,
- "note": "merge-* and plain-voice-* cases: 3 runs per arm; other cases: 1 run per arm. claude plugin eval, schemaVersion 1, scores only.",
+ "note": "merge-* and plain-voice-* cases: 3 runs per arm; other cases: 1 run per arm. claude plugin eval, schemaVersion 1, scores only. plan-* cases re-measured 2026-11-19 at plugin 0.3.2.",
  "costUsd": 1.44,
  "aggregates": {
-  "overallScore": 0.711111111111111,
+  "overallScore": 0.6444444444444444,
   "meanDelta": 0.5777777777777777,
   "casesTotal": 15
  },
@@ -106,7 +106,7 @@
    "name": "plan-a-feature",
    "runs": 1,
    "aggregates": {
-    "score": 1,
+    "score": 0,
     "delta": 0
    }
   },
@@ -114,16 +114,16 @@
    "name": "plan-an-app",
    "runs": 1,
    "aggregates": {
-    "score": 1,
-    "delta": 1
+    "score": 0,
+    "delta": 0
    }
   },
   {
    "name": "plan-in-chat",
    "runs": 1,
    "aggregates": {
-    "score": 0,
-    "delta": 0
+    "score": 1,
+    "delta": 1
    }
   },
   {
