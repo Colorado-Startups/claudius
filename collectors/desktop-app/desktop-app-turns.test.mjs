@@ -156,7 +156,7 @@ test('subagent_start_tokens: the heaviest agent type\'s median context at its fi
 // A session that shows a plan once per entry of `verdicts`: true approved it, false sent it back.
 function planHome(name, sessions) {
   const dir = path.join(tmp, name);
-  sessions.forEach(([sid, startIso, verdicts]) => {
+  sessions.forEach(([sid, startIso, verdicts, extra = () => []]) => {
     const s = session(sid, startIso);
     const rows = [s.human(0)];
     verdicts.forEach((ok, i) => {
@@ -164,7 +164,7 @@ function planHome(name, sessions) {
       r.message.content[0].is_error = !ok;
       rows.push(s.say(2 * i + 1, `m${i}`, [[`x${i}`, 'ExitPlanMode']]), r);
     });
-    write(path.join(dir, '.claude', 'projects', '-Users-someone-Developer-acme-site', `${sid}.jsonl`), jsonl(rows));
+    write(path.join(dir, '.claude', 'projects', '-Users-someone-Developer-acme-site', `${sid}.jsonl`), jsonl([...rows, ...extra(s)]));
   });
   return dir;
 }
@@ -181,6 +181,26 @@ test('plans_first_pass: the share of first-shown plans approved as shown', async
   assert.deepEqual(rows(got), { 'sessions that showed a plan': 3, 'plans first shown': 4, 'approved as shown': 2 });
   // N = 1: only the newest session that showed a plan.
   assert.equal(pick(await collect({ ...base, home: plans, params: { ...params, plan_session_count: 1 } }), 'plans_first_pass').value, 100);
+});
+
+test('plans_first_pass: runs of approvals and rejections, a sidechain result and a session with no plan', async () => {
+  // A subagent's plan result is no plan of the session's own.
+  const side = (s) => {
+    const r = { ...s.result(20, 'sx', 'rejected'), isSidechain: true };
+    r.message.content[0].is_error = true;
+    return [{ ...s.say(19, 'ms', [['sx', 'ExitPlanMode']]), isSidechain: true }, r];
+  };
+  const plans = planHome('plans-runs-home', [
+    ['r1', '2026-11-05T08:00:00Z', [true, true]],
+    ['r2', '2026-11-06T08:00:00Z', [false, false, true]],
+    ['r3', '2026-11-07T08:00:00Z', [true], side],
+    // The newest session showed no plan: it counts toward nothing and takes no slot.
+    ['r4', '2026-11-09T08:00:00Z', []],
+  ]);
+  const got = pick(await collect({ ...base, home: plans, params: { ...params, plan_session_count: 3 } }), 'plans_first_pass');
+  // r1: two shown, both approved. r2: one shown, never approved. r3: one shown, approved.
+  assert.equal(got.value, 75);
+  assert.deepEqual(rows(got), { 'sessions that showed a plan': 3, 'plans first shown': 4, 'approved as shown': 3 });
 });
 
 test('a param a repo override broke reads could_not_check, and collect does not throw', async () => {
