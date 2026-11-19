@@ -1,10 +1,8 @@
 // Plugin trust for the desktop app collector (desktop-app.mjs): what is
-// installed, from which marketplace tier, what has an Anthropic equivalent,
-// and what has gone stale. Reads only names and settings: install records,
-// settings files, the desktop app's plugin manifest, marketplace catalogs,
-// and the names of custom skills, agents and hook commands.
+// installed, from which marketplace tier, and what has gone stale. Reads
+// only names and settings: install records, settings files, the desktop app's
+// plugin manifest and marketplace catalogs.
 //   desktop_app.plugins_untrusted    enabled plugins from community or third-party marketplaces
-//   desktop_app.plugins_replaceable  custom skills, agents or hooks with an Anthropic equivalent, and third-party plugins an official marketplace also lists
 //   desktop_app.plugins_stale        install records turned off, delisted plugins, plugins with no upstream update in params.stale_days
 //                                    (reported to turn back on, add the official one or fix; nothing is turned off: templates/claude/README.md#all-on-app-wide)
 // Tiers follow code.claude.com/docs/en/plugins/security: a marketplace's name
@@ -16,17 +14,6 @@ import path from 'node:path';
 import { resolvePath } from '../claude/claude.mjs';
 import { item } from '../instructions/instructions-lib.mjs';
 
-// The equivalents data file, each match compiled once; a row whose match is
-// no valid regular expression is left out and counted in the source.
-const EQUIVALENTS = [];
-let badEquivalents = 0;
-for (const e of JSON.parse(fs.readFileSync(new URL('./anthropic-equivalents.json', import.meta.url), 'utf8')).equivalents ?? []) {
-  try {
-    EQUIVALENTS.push({ ...e, re: new RegExp(e.match) });
-  } catch {
-    badEquivalents += 1;
-  }
-}
 const DAY = 864e5;
 
 const readJson = (file) => {
@@ -39,13 +26,6 @@ const readJson = (file) => {
 const dirs = (dir) => {
   try {
     return fs.readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
-  } catch {
-    return [];
-  }
-};
-const files = (dir, ext) => {
-  try {
-    return fs.readdirSync(dir).filter((n) => n.endsWith(ext));
   } catch {
     return [];
   }
@@ -80,7 +60,7 @@ function enabledMap(...settingsFiles) {
   return Object.assign({}, ...settingsFiles.map((f) => readJson(f)?.enabledPlugins ?? {}));
 }
 
-// Everything that adds plugins, skills, agents or hooks, as named records.
+// Everything that adds plugins, as named records.
 export function inventory({ home, root, params }) {
   const pluginsDir = resolvePath(params.plugins_dir, { home, root });
   const dot = params.claude_dir_name;
@@ -120,33 +100,22 @@ export function inventory({ home, root, params }) {
       }
     }
   }
-  // Custom skills, agents and hook commands: the user's and this repo's.
-  const custom = [];
-  for (const base of [path.join(home, dot), path.join(root, dot)]) {
-    for (const d of dirs(path.join(base, 'skills'))) if (!fs.existsSync(path.join(base, 'skills', d, params.plugin_manifest_dir))) custom.push({ kind: 'skill', name: d });
-    for (const f of files(path.join(base, 'agents'), '.md')) custom.push({ kind: 'agent', name: f.replace(/\.md$/, '') });
-  }
-  for (const file of [userSettings, ...projectSettings(root)]) {
-    for (const groups of Object.values(readJson(file)?.hooks ?? {})) {
-      for (const g of Array.isArray(groups) ? groups : []) for (const h of g?.hooks ?? []) if (h?.command) custom.push({ kind: 'hook', name: path.basename(String(h.command).split(/\s+/).find((w) => /\.(py|sh|mjs|js)"?$/.test(w)) ?? String(h.command).split(/\s+/)[0]).replace(/"$/, '') });
-    }
-  }
   // The official-tier catalogs Claude Code has cloned, for names and authors.
   const catalog = {};
   for (const m of params.official_marketplaces ?? []) {
     for (const p of readJson(path.join(pluginsDir, 'marketplaces', m, params.plugin_manifest_dir, 'marketplace.json'))?.plugins ?? []) catalog[p.name] ??= { marketplace: m, author: p.author?.name ?? null };
   }
   const cache = readJson(path.join(pluginsDir, 'plugin-catalog-cache.json'));
-  return { plugins, custom, own, catalog, cache: cache?.catalog?.plugins ?? {}, cacheAt: cache?.fetchedAt ?? null, flagged: readJson(path.join(pluginsDir, 'flagged-plugins.json')) ?? {} };
+  return { plugins, own, catalog, cache: cache?.catalog?.plugins ?? {}, cacheAt: cache?.fetchedAt ?? null, flagged: readJson(path.join(pluginsDir, 'flagged-plugins.json')) ?? {} };
 }
 
 const kept = (p, params, own) => own.has(p.marketplace) || Object.hasOwn(params.kept_plugins ?? {}, p.id);
 const enabledOnce = (plugins) => [...new Map(plugins.filter((p) => p.enabled).map((p) => [p.id, p])).values()];
 
-// The three plugin readings, written through val.
+// The two plugin readings, written through val.
 export function pluginMetrics(inv, params, now, { val, cnc }) {
-  if (!inv.plugins.length && !inv.custom.length) {
-    for (const id of ['plugins_untrusted', 'plugins_replaceable', 'plugins_stale']) cnc(id, 'no plugin install record, desktop app plugin manifest, custom skill, agent or hook found', 'the desktop_app collector');
+  if (!inv.plugins.length) {
+    for (const id of ['plugins_untrusted', 'plugins_stale']) cnc(id, 'no plugin install record or desktop app plugin manifest found', 'the desktop_app collector');
     return;
   }
   const enabled = enabledOnce(inv.plugins);
@@ -156,15 +125,6 @@ export function pluginMetrics(inv, params, now, { val, cnc }) {
     ...['official', 'directory', 'community', 'third-party'].map((t) => item(`${t} tier, enabled`, byTier(t).length, 'plugins')),
     ...untrusted.map((p) => item(p.id, 1, 'plugins')),
   ]);
-  const swaps = [];
-  for (const p of enabled) {
-    const official = inv.catalog[p.name];
-    const tier = tierOf(p.marketplace, params);
-    if ((tier === 'community' || tier === 'third-party') && official && !inv.own.has(p.marketplace)) swaps.push([p.id, `${p.name}@${official.marketplace}`]);
-  }
-  for (const c of inv.custom) for (const e of EQUIVALENTS) if (e.kind === c.kind && e.re.test(c.name)) swaps.push([`${c.kind} ${c.name}`, e.use]);
-  const replaceable = [...new Map(swaps.map(([what, use]) => [what, use])).entries()].sort();
-  val('plugins_replaceable', replaceable.length, `state: the custom skills, agents and hook commands in the user\'s and this repo\'s params.claude_dir_name folders, against anthropic-equivalents.json${badEquivalents ? ` (${badEquivalents} rows left out: no valid match)` : ''} and against the official-tier catalogs Claude Code has cloned (a community or third-party plugin whose name an official marketplace also lists)`, replaceable.map(([what, use]) => ({ ...item(what, 1, 'items'), use })));
   const stale = new Map();
   for (const p of inv.plugins) if (p.origin.startsWith('cli') && !p.enabled && !enabled.some((e) => e.id === p.id)) stale.set(p.id, p.gone ? 'installed for a folder that is gone' : 'installed, turned off');
   for (const id of Object.keys(inv.flagged)) stale.set(id, 'delisted by its marketplace');

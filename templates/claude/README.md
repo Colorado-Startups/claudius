@@ -42,7 +42,7 @@ The deny list is a backstop, not a full blocklist. Claude Code's built-in check 
 | # | Do | Who |
 |---|---|---|
 | 1 | Copy Git Crafter `templates/agents/AGENTS.md` and `CLAUDE.md`; fill the `<...>` cells | Claude |
-| 2 | Copy this folder's files; skip `REVIEW.md` without Code Review. Install the plugins once per clone ([Plugins](#plugins)) | Claude |
+| 2 | Copy this folder's files; skip `REVIEW.md` without Code Review. Install the plugins once per machine, at user scope ([Plugins](#plugins)) | Claude |
 | 3 | Desktop app settings (table below) | owner, once |
 | 4 | Install Git Crafter's guards and `merging` skill user-level: `tools/claude_os_sync.py`. Each guard's header gives its hook entry for `~/.claude/settings.json` | Claude |
 | 5 | Optional `@claude` in CI: Git Crafter `templates/ci/claude-review.yml`. It reads `CLAUDE_CODE_OAUTH_TOKEN`, made by `claude setup-token` on a Pro, Max, Ultra, Team or Enterprise plan. Never an API key | owner: the token |
@@ -138,7 +138,7 @@ flowchart TD
   P -->|yes| D[put to work, keep on]
 ```
 
-| The template turns on (`@claude-plugins-official`, author Anthropic) | For | Replaces |
+| The template turns on (`@claude-plugins-official`, author Anthropic) | For | Covers |
 |---|---|---|
 | `feature-dev` | explore, design and build a feature | custom build skills |
 | `code-review` | `/code-review` on a pull request | |
@@ -146,15 +146,15 @@ flowchart TD
 | `session-report` | an HTML report of tokens, cache, subagents and skills from your transcripts | hand-written usage scripts |
 | `claude-md-management` | audit and update `CLAUDE.md` | |
 
-The committed `enabledPlugins` turns them on but does not download them. Once per clone, in your shell:
+The committed `enabledPlugins` turns them on but does not download them. Once per machine, in your shell, at user scope so every session has them:
 
 ```bash
-for p in feature-dev code-review pr-review-toolkit session-report claude-md-management; do claude plugin install "$p@claude-plugins-official" --scope project; done
+for p in feature-dev code-review pr-review-toolkit session-report claude-md-management; do claude plugin install "$p@claude-plugins-official" --scope user; done
 ```
 
 | `/plugin` Errors tab says | Do |
 |---|---|
-| `Plugin "<name>" is enabled in project settings but isn't installed here` | `claude plugin install <name>@claude-plugins-official --scope project` once in this clone, then `/reload-plugins` |
+| `Plugin "<name>" is enabled in project settings but isn't installed here` | `claude plugin install <name>@claude-plugins-official --scope user` once on this machine, then `/reload-plugins` |
 
 On a machine that has never run an interactive `claude`, add the marketplace first: `claude plugin marketplace add anthropics/claude-plugins-official`. Cloud sessions load none of these.
 

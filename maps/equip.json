@@ -38,19 +38,9 @@
     "/plugin Discover",
     "claude.com/marketplace"
    ],
-   "rule": "Install from Anthropic's official marketplaces or its reviewed directory; anything else needs a named reason.",
+   "rule": "Install from Anthropic's marketplaces or reviewed directory, official equivalents beside custom copies; anything else names a reason.",
    "rule_ref": "https://code.claude.com/docs/en/plugins/security",
    "metric": "desktop_app.plugins_untrusted"
-  },
-  {
-   "id": "add",
-   "name": "Add",
-   "tools": [
-    "anthropic-equivalents.json"
-   ],
-   "rule": "A custom skill, agent or hook gets its Anthropic equivalent installed and used; the custom one stays on.",
-   "rule_ref": "https://code.claude.com/docs/en/plugins/anthropic-marketplaces",
-   "metric": "desktop_app.plugins_replaceable"
   },
   {
    "id": "keep",

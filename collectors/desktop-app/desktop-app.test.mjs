@@ -8,7 +8,6 @@ import os from 'node:os';
 import path from 'node:path';
 import { after, test } from 'node:test';
 import { CHARTS, loadTargets } from '../lib/engine.mjs';
-import { pluginOfName, serverOf } from './desktop-app-listings.mjs';
 import { area, collect, metricIds, PARAMS } from './desktop-app.mjs';
 
 const now = new Date('2026-11-10T12:00:00Z');
@@ -116,21 +115,8 @@ test('targets: valid, on the desktop app tab, plain means, a goal basis and N or
   const goal = Object.fromEntries(defs.map((d) => [d.id, [d.goal, d.near]]));
   assert.deepEqual(goal['desktop_app.listing_tokens'], [10000, 20000], "the skills docs' 1% listing budget, and its 2% example");
   for (const id of ['connectors_broken', 'connectors_pending']) assert.equal(goal[`desktop_app.${id}`][0], 0, id);
-  // Retired 2026-11-19: their only fix was turning a plugin or connector off app-wide (templates/claude/README.md, All on, app-wide).
-  for (const id of ['plugins_unused', 'connectors_unused']) assert.ok(!metricIds.includes(`desktop_app.${id}`), id);
-});
-
-test('names: one server per tool name, one plugin per colon name', () => {
-  assert.equal(serverOf('mcp__plugin_gamma_srv__x'), 'plugin_gamma_srv');
-  // A double underscore inside the tool's own name starts no second server.
-  assert.equal(serverOf('mcp__srv__a__b'), 'srv');
-  // A server whose own name holds one still gives one key for all its tools.
-  assert.equal(serverOf('mcp__Word__By_Someone___open'), serverOf('mcp__Word__By_Someone___close'));
-  for (const builtIn of ['Read', 'mcp__', 'mcp__nameonly']) assert.equal(serverOf(builtIn), null, builtIn);
-  assert.equal(pluginOfName('alpha:do'), 'alpha');
-  assert.equal(pluginOfName('alpha:helper:AGENT'), 'alpha');
-  assert.equal(pluginOfName('plugin:eps:one'), 'eps');
-  assert.equal(pluginOfName('plain'), null);
+  // Retired 2026-11-19: each could reach its goal only by turning a plugin or connector off app-wide (templates/claude/README.md, All on, app-wide).
+  for (const id of ['plugins_unused', 'connectors_unused', 'plugins_replaceable']) assert.ok(!metricIds.includes(`desktop_app.${id}`), id);
 });
 
 test('collect: the listing metrics read the newest desktop session', async () => {

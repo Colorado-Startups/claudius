@@ -38,7 +38,6 @@ write(path.join(plugins, 'installed_plugins.json'), {
 });
 write(path.join(home, '.claude', 'settings.json'), {
   enabledPlugins: { 'feature-dev@claude-plugins-official': true, 'cloudflare@cloudflare': true, 'superpowers@claude-plugins-official': true, 'odd@claude-community': true, 'own-tool@acme-tools': true, 'ralph-loop@claude-plugins-official': false, 'legal-x@synced': false },
-  hooks: { PreToolUse: [{ hooks: [{ type: 'command', command: 'python3 -I /h/.claude/code-os/bash_guard.py' }] }], Stop: [{ hooks: [{ type: 'command', command: 'python3 -I "/h/turn_check.py"' }] }] },
 });
 write(path.join(plugins, 'known_marketplaces.json'), { 'acme-tools': { source: { source: 'github', repo: 'acme/tools' } }, cloudflare: { source: { source: 'github', repo: 'cloudflare/skills' } } });
 write(path.join(plugins, 'marketplaces', 'claude-plugins-official', '.claude-plugin', 'marketplace.json'), { plugins: [{ name: 'cloudflare', author: { name: 'Cloudflare' } }, { name: 'feature-dev', author: { name: 'Anthropic' } }] });
@@ -49,10 +48,6 @@ write(desktopManifest, { lastUpdated: 1, plugins: [{ id: 'plugin_01', name: '0d5
 write(path.join(path.dirname(desktopManifest), '..', '..', 'escape', '.claude-plugin', 'plugin.json'), { name: 'escaped' });
 // The directory entry's real name is in its own plugin.json.
 write(path.join(path.dirname(desktopManifest), 'plugin_01', '.claude-plugin', 'plugin.json'), { name: 'brand-voice' });
-// Custom pieces: a reviewer agent and a usage-report skill have Anthropic equivalents; a comfy skill has none.
-write(path.join(home, '.claude', 'agents', 'reviewer.md'), '---\nname: reviewer\n---\n');
-write(path.join(home, '.claude', 'skills', 'usage-report', 'SKILL.md'), '---\nname: usage-report\n---\n');
-write(path.join(home, '.claude', 'skills', 'comfy', 'SKILL.md'), '---\nname: comfy\n---\n');
 // The repo's origin is on the acme GitHub account, so acme's marketplaces are the owner's.
 write(path.join(root, '.git', 'config'), '[remote "origin"]\n\turl = git@github.com:acme/site.git\n');
 
@@ -97,20 +92,6 @@ test('plugins_untrusted: kept_plugins sets a named plugin aside', () => {
   assert.equal(out.plugins_untrusted, 1);
 });
 
-test('plugins_replaceable: an official listing of a third-party plugin, the equivalents file, and custom pieces', () => {
-  const r = run().plugins_replaceable;
-  const rows = Object.fromEntries(r.detail.map((d) => [d.label, d.use]));
-  assert.equal(rows['cloudflare@cloudflare'], 'cloudflare@claude-plugins-official');
-  assert.equal(rows['superpowers@claude-plugins-official'], undefined, 'superpowers is listed in the official marketplace and kept');
-  assert.match(rows['agent reviewer'], /pr-review-toolkit/);
-  assert.match(rows['skill usage-report'], /session-report/);
-  assert.match(rows['hook bash_guard.py'], /Auto mode/);
-  assert.match(rows['hook turn_check.py'], /recap/);
-  assert.equal(rows['skill comfy'], undefined, 'no equivalent, not flagged');
-  assert.equal(rows['ralph-loop@claude-plugins-official'], undefined, 'turned off, so not flagged here');
-  assert.equal(r.value, 5);
-});
-
 test('plugins_stale: turned off, folder gone, delisted, and no upstream update in 180 days', () => {
   const r = run().plugins_stale;
   const rows = Object.fromEntries(r.detail.map((d) => [d.label, d.why]));
@@ -126,7 +107,7 @@ test('plugins_stale: turned off, folder gone, delisted, and no upstream update i
 test('an empty home: the plugin metrics are not measured, never 0', () => {
   const out = {};
   pluginMetrics(inventory({ home: path.join(tmp, 'empty'), root, params: PARAMS }), PARAMS, now, { val: (id, value) => (out[id] = value), cnc: (id, reason) => (out[id] = reason) });
-  for (const id of ['plugins_untrusted', 'plugins_replaceable', 'plugins_stale']) assert.match(String(out[id]), /no plugin install record/);
+  for (const id of ['plugins_untrusted', 'plugins_stale']) assert.match(String(out[id]), /no plugin install record/);
 });
 
 test('desktop directory plugins go by their own plugin.json name', () => {

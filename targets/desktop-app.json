@@ -2,11 +2,10 @@
   {
     "id": "desktop_app.connectors_broken",
     "params": {
-      "comment": "projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root. project_match (default the repo's own project folder) names no path here. entrypoint: the transcript value that marks a desktop app session; a terminal session is not this tab's. app_servers: servers the desktop app adds itself, which its connector list does not show and a user cannot switch off as connectors; an entry ending in _ is a prefix, any other a whole name. human_origin: the origin kind of a record a person typed. plan_tool, recap_tool, session_tool and archive_tool: the app's tools for the task list, the closing recap, starting a session and archiving one. plan_exit_tool: the tool that shows a plan for approval; its result's is_error flag is true when the owner sent the plan back. plan_session_count: N for plans_first_pass, the sessions that showed a plan. session_id_pattern: how a started session's id reads in the tool's result. idle_hours: a session whose last record is newer may still be running, so its open last turn and unarchived sub-sessions are left out; it is no measuring window. cowork_dir: where the desktop app keeps its plugin manifest. plugins_dir: Claude Code's plugins root. official_marketplaces and community_marketplaces: the reserved names in code.claude.com/docs/en/plugins/security; directory_marketplaces: the name the desktop app's manifest gives Anthropic's directory on claude.ai, whose versions Anthropic reviews before publishing (plugins/publish). own_marketplaces: marketplaces the repo owner publishes, besides those from the repo's own GitHub account, which count as the owner's on their own. kept_plugins: plugin id to the reason it stays though community or third-party. stale_days: an enabled plugin with no upstream update in this many days counts as stale. claude_dir_name, settings_files and plugin_manifest_dir: the folder and file names Claude Code uses for settings, skills, agents and plugin manifests. maintainer_author: the catalog author whose plugins are maintained with Claude Code itself, so their age alone never makes them stale.",
+      "comment": "projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root. project_match (default the repo's own project folder) names no path here. entrypoint: the transcript value that marks a desktop app session; a terminal session is not this tab's. app_servers: servers the desktop app adds itself, which its connector list does not show and a user cannot switch off as connectors; an entry ending in _ is a prefix, any other a whole name. human_origin: the origin kind of a record a person typed. plan_tool, recap_tool, session_tool and archive_tool: the app's tools for the task list, the closing recap, starting a session and archiving one. plan_exit_tool: the tool that shows a plan for approval; its result's is_error flag is true when the owner sent the plan back. plan_session_count: N for plans_first_pass, the sessions that showed a plan. session_id_pattern: how a started session's id reads in the tool's result. idle_hours: a session whose last record is newer may still be running, so its open last turn and unarchived sub-sessions are left out; it is no measuring window. cowork_dir: where the desktop app keeps its plugin manifest. plugins_dir: Claude Code's plugins root. official_marketplaces and community_marketplaces: the reserved names in code.claude.com/docs/en/plugins/security; directory_marketplaces: the name the desktop app's manifest gives Anthropic's directory on claude.ai, whose versions Anthropic reviews before publishing (plugins/publish). own_marketplaces: marketplaces the repo owner publishes, besides those from the repo's own GitHub account, which count as the owner's on their own. kept_plugins: plugin id to the reason it stays though community or third-party. stale_days: an enabled plugin with no upstream update in this many days counts as stale. claude_dir_name, settings_files and plugin_manifest_dir: the folder and file names Claude Code uses for settings and plugin manifests. maintainer_author: the catalog author whose plugins are maintained with Claude Code itself, so their age alone never makes them stale.",
       "projects_dir": "~/.claude/projects",
       "subagents_dir": "subagents",
       "entrypoint": "claude-desktop",
-      "skill_tool": "Skill",
       "agent_tool": "Agent",
       "app_servers": [
         "ccd_",
@@ -249,22 +248,6 @@
     "direction": "lower",
     "goal_source": "goal from the plugin security docs: a plugin runs code with your privileges, and only the official and community names come from Anthropic (code.claude.com/docs/en/plugins/security, read 2026-11-14); this template prefers the official tier and Anthropic's directory, so none from elsewhere unless kept by name",
     "source": "state: Claude Code install records with the settings that enable them, plus the desktop app's plugin manifest, each placed by marketplace name (params.official_marketplaces, directory_marketplaces, community_marketplaces, else third-party); the repo owner's own marketplaces and params.kept_plugins set aside",
-    "needs": "local-files",
-    "chart": "table"
-  },
-  {
-    "id": "desktop_app.plugins_replaceable",
-    "tab": "desktop-app",
-    "kind": "quality",
-    "group": "Plugins",
-    "label": "Custom pieces with an Anthropic equivalent",
-    "means": "Custom skills, agents or hooks, and third-party plugins, that an Anthropic plugin or built-in feature already does.",
-    "unit": "items",
-    "goal": 0,
-    "near": 2,
-    "direction": "lower",
-    "goal_source": "template goal, no public benchmark: an Anthropic plugin or built-in feature is maintained with Claude Code itself (code.claude.com/docs/en/plugins/anthropic-marketplaces, read 2026-11-14), so its equivalent is installed and put to work beside each listed piece; the custom piece stays on (the owner, 2026-11-19)",
-    "source": "state: the custom skills, agents and hook commands in the user's and this repo's params.claude_dir_name folders, against collectors/desktop-app/anthropic-equivalents.json and the official-tier catalogs Claude Code has cloned",
     "needs": "local-files",
     "chart": "table"
   },

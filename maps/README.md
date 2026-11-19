@@ -40,13 +40,12 @@ The rule every step serves: [All on, app-wide](../templates/claude/README.md#all
 
 ```mermaid
 flowchart LR
-  source["🔒 Source"] --> add["🔒 Add"] --> keep["🔒 Keep"] --> connect["🔒 Connect"] --> fix["🔒 Fix"] --> stale["🔒 Restore"]
+  source["🔒 Source"] --> keep["🔒 Keep"] --> connect["🔒 Connect"] --> fix["🔒 Fix"] --> stale["🔒 Restore"]
 ```
 
 | Step | Ideal | Metric |
 |---|---|---|
-| Source | 🅰 official marketplaces or 🅱 Anthropic's reviewed directory; anything else named | `desktop_app.plugins_untrusted` |
-| Add | A custom skill, agent or hook gets Anthropic's equivalent beside it; the custom one stays on | `desktop_app.plugins_replaceable` |
+| Source | 🅰 official marketplaces or 🅱 Anthropic's reviewed directory, official equivalents beside custom copies, which stay on; anything else named | `desktop_app.plugins_untrusted` |
 | Keep | A listing over budget is fixed by `skillListingBudgetFraction`, never by turning one off | `desktop_app.listing_tokens` |
 | Connect | Every listed connector connected before the first prompt | `desktop_app.connectors_pending` |
 | Fix | A connector that fails or needs a sign-in is repaired or signed in | `desktop_app.connectors_broken` |
@@ -59,7 +58,7 @@ flowchart LR
 | 🅲 Community | `claude-community` | ⚠️ no 🅰/🅱 equivalent only |
 | 🅳 Third-party | everything else | ❌ add the official one beside it, or name a reason in `kept_plugins`; it stays on |
 
-Tiers follow [plugin security](https://code.claude.com/docs/en/plugins/security) (read 2026-11-14): Claude Code accepts the official and community names only from `github.com/anthropics/`. Equivalents: [`collectors/desktop-app/anthropic-equivalents.json`](../collectors/desktop-app/anthropic-equivalents.json).
+Tiers follow [plugin security](https://code.claude.com/docs/en/plugins/security) (read 2026-11-14): Claude Code accepts the official and community names only from `github.com/anthropics/`.
 
 ## Publish: a plugin or skill, from its first SKILL.md to Anthropic's directory
 

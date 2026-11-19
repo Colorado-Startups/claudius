@@ -29,6 +29,7 @@
   "collectors/desktop-app/desktop-app-turns.mjs",
   "collectors/desktop-app/desktop-app-turns.test.mjs",
   "collectors/desktop-app/desktop-app-work.mjs",
+  "collectors/desktop-app/desktop-app-listings.mjs",
   "collectors/blockers/blockers-core.mjs",
   "collectors/blockers/blockers-fixtures.mjs",
   "collectors/blockers/blockers-github.mjs",
@@ -146,10 +147,6 @@
   [
    "quality/collectors/claude/lead-time.test.mjs",
    "collectors/claude/lead-time.test.mjs"
-  ],
-  [
-   "quality/collectors/desktop-app/desktop-app-calls.mjs",
-   "collectors/desktop-app/desktop-app-calls.mjs"
   ],
   [
    "quality/collectors/desktop-app/desktop-app-listings.mjs",

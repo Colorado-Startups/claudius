@@ -9,7 +9,7 @@
 //   desktop_app.subagents_killed    subagent runs killed or failed
 //   desktop_app.parallel_share      Agent calls sent together
 //   desktop_app.subagent_start_tokens  the context a subagent starts with
-//   desktop_app.plugins_untrusted / plugins_replaceable / plugins_stale  plugin trust (desktop-app-plugins.mjs)
+//   desktop_app.plugins_untrusted / plugins_stale  plugin trust (desktop-app-plugins.mjs)
 //
 // Every path, tool name and N is a param on quality/targets/desktop-app.json.
 // Only a transcript whose entrypoint is params.entrypoint counts: a terminal
@@ -32,7 +32,6 @@ import { projectMatch, resolvePath } from '../claude/claude.mjs';
 import { attempt, item } from '../instructions/instructions-lib.mjs';
 import { eachLine, mainSessions } from '../instructions/instructions-sessions.mjs';
 import { redact, useLib } from '../lib/engine.mjs';
-import { emptyCalls, tallyCalls } from './desktop-app-calls.mjs';
 import { emptyListing, foldListing, hasListing, isAppServer } from './desktop-app-listings.mjs';
 import { inventory, pluginMetrics } from './desktop-app-plugins.mjs';
 import { emptyTurns, foldTurn } from './desktop-app-turns.mjs';
@@ -79,22 +78,21 @@ async function gather({ root = '.', mode, home = os.homedir(), now = new Date(),
   else for (const id of LISTING_IDS) cnc(id, 'the newest desktop session holds no listing attachment', self);
   const inv = attempt(() => inventory({ home, root, params }));
   const pluginError = inv.error ?? attempt(() => pluginMetrics(inv, params, now, { val, cnc }))?.error;
-  if (pluginError) for (const id of ['plugins_untrusted', 'plugins_replaceable', 'plugins_stale']) cnc(id, pluginError, self);
+  if (pluginError) for (const id of ['plugins_untrusted', 'plugins_stale']) cnc(id, pluginError, self);
   workMetrics(sessions, params, now, { val, cnc });
   subagentMetric(sessions, params, now, { val, cnc });
   return Object.fromEntries(metricIds.map((id) => [id, out[id] ?? { could_not_check: 'collector produced no value', source: self }]));
 }
 
-// One transcript in a single pass: its entrypoint, its listings, its calls
-// and its turns.
+// One transcript in a single pass: its entrypoint, its listings and its
+// turns.
 function readSession(file, params) {
-  const read = { entrypoint: null, listing: emptyListing(), calls: emptyCalls(), turns: emptyTurns() };
+  const read = { entrypoint: null, listing: emptyListing(), turns: emptyTurns() };
   eachLine(file, (record) => {
     read.entrypoint ??= record.entrypoint ?? null;
     foldListing(read.listing, record);
-    tallyCalls(read.calls, record, params);
     // A turn reading that fails (a pattern param that is no regex) stops
-    // for this session and is reported; the listings and calls still read.
+    // for this session and is reported; the listings still read.
     if (!read.turnsError) read.turnsError = attempt(() => foldTurn(read.turns, record, params))?.error;
   });
   return read;
