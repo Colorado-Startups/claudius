@@ -8,7 +8,7 @@ Brand: [Colorado Startups brand guide](https://colorado-startups.github.io/brand
 
 | 🧩 With Claudius | ⬜ Without | 📈 Lift | 🪙 Always-on tokens |
 |---|---|---|---|
-| **63%** of graded tasks passed | 7% | **+56 points**, ± 13 at 95% | 465 |
+| **63%** of graded tasks passed | 7% | **+56 points**, ± 13 at 95% | 404 |
 
 [Scorecard](SCORECARD.md): 15 tasks on three models, measured 2026-11-15; `plan` re-measured 2026-11-19 at plugin 0.4.1.
 
