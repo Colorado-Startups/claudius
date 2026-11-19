@@ -37,13 +37,13 @@ An Anthropic-first workflow for the Claude desktop app. Claudius adds only what 
 
 | Lift | Haiku 5.5 | Sonnet 5.5 | Opus 5.5 |
 |---|---|---|---|
-| `plan` | ✅ +0.67 | ✅ +0.33 | ✅ +0.67 |
+| `plan` | ✅ +0.33 | ✅ +0.33 | ✅ +1.00 |
 | `merge` | ✅ +0.22 | ✅ +0.89 | ✅ +0.22 |
 | `equip` | ✅ +0.33 | ✅ +0.33 | ✅ +0.33 |
 | `find-plugin` | ✅ +0.67 | ✅ +0.67 | ✅ +0.67 |
 | `plain-voice` | ✅ +0.33 | ✅ +0.67 | ✅ +0.44 |
 
-Lift is the mean score with Claudius minus without it, over each skill's three cases in [evals/](evals/). Measured with `claude plugin eval`, judged by Sonnet 5.5, on 2026-11-15: `merge` and `plain-voice` cases ran 3 times per arm, the others once. Scores: [quality/evals](https://github.com/Colorado-Startups/claudius/tree/main/quality/evals). A skill that doesn't beat the no-plugin baseline is left out.
+Lift is the mean score with Claudius minus without it, over each skill's three cases in [evals/](evals/). Measured with `claude plugin eval`, judged by Sonnet 5.5, on 2026-11-15: `merge` and `plain-voice` cases ran 3 times per arm, the others once. The `plan` cases were re-measured on 2026-11-19 at plugin 0.3.2. Their grader now also requires the `Checked:` line. Scores: [quality/evals](https://github.com/Colorado-Startups/claudius/tree/main/quality/evals). A skill that doesn't beat the no-plugin baseline is left out.
 
 ## What it runs and changes
 
