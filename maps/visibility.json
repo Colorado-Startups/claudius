@@ -1,0 +1,19 @@
+{
+ "id": "visibility",
+ "name": "Visibility",
+ "why": "Every repo of an org, from one audit run to public or private, each side checked",
+ "ideal": "One run lists every repo; a private repo shows nothing signed out, and a public one holds no personal email and scans for secrets.",
+ "sources": [
+  {"title": "GitHub Docs: setting repository visibility", "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/setting-repository-visibility", "date": "2026-11-19"},
+  {"title": "GitHub Docs: changing the visibility of your GitHub Pages site", "url": "https://docs.github.com/en/enterprise-cloud@latest/pages/getting-started-with-github-pages/changing-the-visibility-of-your-github-pages-site", "date": "2026-11-19"},
+  {"title": "GitHub Docs: rate limits for the REST API", "url": "https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api", "date": "2026-11-19"}
+ ],
+ "critical_path": ["list", "probe", "scan", "decide"],
+ "steps": [
+  {"id": "list", "name": "List", "tools": ["The visibility collector", "gh api orgs/<org>/repos"], "rule": "One run lists every repo with its visibility and archived flag, never repo by repo.", "rule_ref": "https://docs.github.com/en/rest/repos/repos#list-organization-repositories", "metric": "visibility.audit_seconds"},
+  {"id": "probe", "name": "Probe", "tools": ["gh api repos/<repo>/pages", "A signed-out request"], "rule": "A private repo's Pages site is published privately, and a signed-out request does not load it.", "rule_ref": "https://docs.github.com/en/enterprise-cloud@latest/pages/getting-started-with-github-pages/changing-the-visibility-of-your-github-pages-site", "metric": "visibility.private_public_pages"},
+  {"id": "scan", "name": "Scan", "tools": ["Every branch's commits"], "rule": "Public history carries only noreply or org author emails, on every branch, not the default alone.", "rule_ref": "https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address", "metric": "visibility.personal_author_emails"},
+  {"id": "decide", "name": "Decide", "tools": ["Secret scanning", "Push protection"], "rule": "A repo stays public only with secret scanning and push protection on.", "rule_ref": "https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning", "metric": "visibility.public_without_secret_scanning"},
+  {"id": "record", "name": "Record", "tools": ["The Quality page"], "rule": "Each audit is one collect run on the Quality page, spending a tenth of the token's hourly requests.", "rule_ref": "https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api", "metric": "visibility.requests"}
+ ]
+}
