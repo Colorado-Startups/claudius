@@ -28,3 +28,4 @@ echo "fidelity: $(node -p 'const m = require("./tests/moved.json"); `${m.files.l
 git -C "$eng" checkout -q --detach "$pin"
 npm ci --prefix "$eng" --ignore-scripts --no-audit --no-fund --loglevel=error
 GIT_CRAFTER="$eng" node --import ./tests/engine-lib.mjs --test collectors/*/*.test.mjs
+GIT_CRAFTER="$eng" node --test tests/maps.check.mjs
