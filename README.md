@@ -8,9 +8,9 @@ Brand: [Colorado Startups brand guide](https://colorado-startups.github.io/brand
 
 | 🧩 With Claudius | ⬜ Without | 📈 Lift | 🪙 Always-on tokens |
 |---|---|---|---|
-| **59%** of graded tasks passed | 10% | **+50 points**, ± 14 at 95% | 465 |
+| **57%** of graded tasks passed | 7% | **+50 points**, ± 14 at 95% | 465 |
 
-[Scorecard](SCORECARD.md): 15 tasks on three models, measured 2026-11-15.
+[Scorecard](SCORECARD.md): 15 tasks on three models, measured 2026-11-15; `plan` re-measured 2026-11-19 at plugin 0.3.2.
 
 | [Best practices tab](https://colorado-startups.github.io/claudius/#practices): 10 of 10 at goal | [Publish map](https://colorado-startups.github.io/claudius/process.html#map-publish): 6 of 6 steps |
 |---|---|

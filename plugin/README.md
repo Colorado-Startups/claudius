@@ -43,7 +43,7 @@ An Anthropic-first workflow for the Claude desktop app. Claudius adds only what 
 | `find-plugin` | ✅ +0.67 | ✅ +0.67 | ✅ +0.67 |
 | `plain-voice` | ✅ +0.33 | ✅ +0.67 | ✅ +0.44 |
 
-Lift is the mean score with Claudius minus without it, over each skill's three cases in [evals/](evals/). Measured with `claude plugin eval`, judged by Sonnet 5.5, on 2026-11-15: `merge` and `plain-voice` cases ran 3 times per arm, the others once. The `plan` cases were re-measured on 2026-11-19 at plugin 0.3.2. Their grader now also requires the `Checked:` line. Scores: [quality/evals](https://github.com/Colorado-Startups/claudius/tree/main/quality/evals). A skill that doesn't beat the no-plugin baseline is left out.
+Lift is the mean score with Claudius minus without it, over each skill's three cases in [evals/](evals/). Measured with `claude plugin eval`, judged by Sonnet 5.5, on 2026-11-15: `merge` and `plain-voice` cases ran 3 times per arm, the others once. The `plan` cases were re-measured on 2026-11-19 at plugin 0.3.2. Their grader now also requires the `Checked:` line. Only Claudius writes that line, so the without arm scores 0. The `plan` figures measure that line, from one run per arm. Scores: [quality/evals](https://github.com/Colorado-Startups/claudius/tree/main/quality/evals). A skill that doesn't beat the no-plugin baseline is left out.
 
 ## What it runs and changes
 
