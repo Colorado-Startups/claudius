@@ -1,5 +1,5 @@
 {
-  "ideal": "Every repo is on the side it was chosen for: a private repo shows nothing signed out, and a public one carries no personal email and scans for secrets.",
+  "ideal": "Each repo sits on its chosen side: a private one shows nothing signed out; a public one has no personal email and scans for secrets.",
   "sources": [
     {"title": "Setting repository visibility", "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/setting-repository-visibility", "date": "2026-11-19"},
     {"title": "Changing the visibility of your GitHub Pages site", "url": "https://docs.github.com/en/enterprise-cloud@latest/pages/getting-started-with-github-pages/changing-the-visibility-of-your-github-pages-site", "date": "2026-11-19"},
