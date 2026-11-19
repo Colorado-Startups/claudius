@@ -1,7 +1,7 @@
 {
  "id": "equip",
  "name": "Equip",
- "why": "A capability a session needs, from Anthropic's plugins to a lean session that loads only what it uses",
+ "why": "Every plugin, skill and connector on for the whole app, put to work in the sessions that need it",
  "ideal": "Every plugin, skill and connector the owner added stays on account-wide and gets used; official ones replace custom copies.",
  "sources": [
   {

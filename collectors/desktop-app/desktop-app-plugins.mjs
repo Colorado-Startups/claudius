@@ -6,6 +6,7 @@
 //   desktop_app.plugins_untrusted    enabled plugins from community or third-party marketplaces
 //   desktop_app.plugins_replaceable  custom skills, agents or hooks with an Anthropic equivalent, and third-party plugins an official marketplace also lists
 //   desktop_app.plugins_stale        install records turned off, delisted plugins, plugins with no upstream update in params.stale_days
+//                                    (reported to swap or fix; nothing the owner added is turned off, the owner 2026-11-19)
 // Tiers follow code.claude.com/docs/en/plugins/security: a marketplace's name
 // places it, and Claude Code accepts the official and community names only
 // from github.com/anthropics/.
