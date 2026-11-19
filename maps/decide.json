@@ -2,7 +2,7 @@
  "id": "decide",
  "name": "Decide",
  "why": "A question or blocker, from where it arises to Claude's call or the owner's queue, then cleared for good",
- "ideal": "Claude makes every call its delegation allows and moves on; only questions and human steps reach the owner, and a blocker that costs more than it helps is fixed once.",
+ "ideal": "Claude makes every call its delegation allows; only questions and human steps reach the owner, and a costly blocker is fixed once.",
  "sources": [
   {"title": "Claude Code: configure permissions", "url": "https://code.claude.com/docs/en/permissions", "date": "2026-11-04"},
   {"title": "Claude Code: hooks reference", "url": "https://code.claude.com/docs/en/hooks", "date": "2026-11-04"},
