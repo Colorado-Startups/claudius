@@ -1,6 +1,6 @@
 # Process maps
 
-Four maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }` and `{ "use": "publish" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
+Five maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }` and `{ "use": "visibility" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
 
 ## Guard: a tool call, through the guards, to run or blocked
 
@@ -77,4 +77,21 @@ flowchart LR
 
 Every Publish step reads the repo's committed files, so all six show on the public page. The rules, one row each with its doc, are in [`collectors/practices/practices-rules.mjs`](../collectors/practices/practices-rules.mjs), from Anthropic's [plugin pre-submission checklist](https://claude.com/docs/plugins/pre-submission-checklist) and [skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) (both read 2026-11-15). Eval reports are `claude plugin eval` `aggregate-result.json` files, one per model, at `quality/evals/<plugin>.haiku.json`, `.sonnet.json` and `.opus.json` (`params.eval_reports` on [`targets/practices.json`](../targets/practices.json)).
 
-Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json).
+## Visibility: every repo of an org, from one audit run to public or private
+
+```mermaid
+flowchart LR
+  list["List"] --> probe["Probe"] --> scan["Scan"] --> decide["Decide"] --> record["Record"]
+```
+
+| Step | Ideal | Metric |
+|---|---|---|
+| List | One run lists every repo with its visibility and archived flag | `visibility.audit_seconds` |
+| Probe | A private repo's Pages site is private and does not load signed out | `visibility.private_public_pages` |
+| Scan | Public history carries only noreply or org author emails, on every branch | `visibility.personal_author_emails` |
+| Decide | A repo stays public only with secret scanning and push protection on | `visibility.public_without_secret_scanning` |
+| Record | One collect run on the Quality page, a tenth of the token's hourly requests | `visibility.requests` |
+
+Probe and Decide need an admin token: in CI without `ADMIN_READ_TOKEN` they read not measured, never 0. The [`visibility`](../plugin/skills/visibility/SKILL.md) skill runs the same audit in a session.
+
+Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json).

@@ -1,5 +1,5 @@
 {
-  "comment": "Claudius's own Quality page: the seven Claude tabs, read from this repo's own targets, collectors and ideals, then four Git Crafter tabs that re-check the free GitHub features each build. Keys: Git Crafter quality/CONFIG.md.",
+  "comment": "Claudius's own Quality page: the seven Claude tabs and Visibility, read from this repo's own targets, collectors and ideals, then four Git Crafter tabs that re-check the free GitHub features each build. Keys: Git Crafter quality/CONFIG.md.",
   "tabs": [
     ["claude", "Claude"],
     ["claude-settings", "Claude settings"],
@@ -8,6 +8,7 @@
     ["tokens", "Tokens"],
     ["instructions", "Instructions"],
     ["practices", "Best practices"],
+    ["visibility", "Visibility"],
     "dependabot",
     "scanning",
     "insights",
