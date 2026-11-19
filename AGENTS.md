@@ -11,4 +11,5 @@ Instructions for every coding agent in this repo, from Git Crafter `templates/ag
 | Secrets | Never print, copy or commit a key value. Use each CLI's own login |
 | Privacy | Never commit `quality/data/`, `quality/history/` or `quality/public/`. A local run's numbers stay on its machine (`tests/privacy.mjs`) |
 | Templates | A file in `templates/claude/` and its copy at the root change together (`tests/templates.test.mjs`) |
+| Plugins, skills, connectors, agents | Never turned off app-wide; a session ignores what it doesn't need ([All on, app-wide](templates/claude/README.md#all-on-app-wide)) |
 | Writing | One idea per sentence, no em dashes. Attribute every figure in its sentence |

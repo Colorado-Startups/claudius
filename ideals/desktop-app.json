@@ -1,5 +1,5 @@
 {
-  "ideal": "Each session loads only the plugins, skills and connectors it uses, from Anthropic's marketplaces or reviewed directory, delegates in parallel, and gets short summaries.",
+  "ideal": "Every plugin, skill and connector stays on app-wide; each session loads only what it uses, delegates in parallel and gets short summaries.",
   "sources": [
     {
       "title": "Desktop application",
@@ -57,7 +57,7 @@
       "date": "2026-11-14"
     }
   ],
-  "quality": "Every connector works, every plugin and connector loaded gets used, and each work turn keeps a task list and ends with a recap.",
+  "quality": "Every connector works, plugins come from Anthropic first, and each work turn keeps a task list and ends with a recap.",
   "speed": "Independent subagents start together, and no tool is still connecting when work begins.",
-  "consumption": "Listings of skills, agents and tools stay small, and a subagent starts with only the tools its task needs."
+  "consumption": "Listings fit the skill listing budget with every plugin on; a subagent gets the full suite, loading schemas and skill bodies only when used."
 }

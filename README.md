@@ -33,7 +33,7 @@ flowchart LR
 | # | Do | Where |
 |---|---|---|
 | 1 | Adopt Git Crafter: CI, open-repo files, `AGENTS.md` and `CLAUDE.md` | Git Crafter `templates/ci/README.md`, `templates/agents/` |
-| 2 | Copy the Claude files and set the desktop app | [templates/claude/README.md](templates/claude/README.md) |
+| 2 | Copy the Claude files and set the desktop app, every plugin, skill and connector kept on ([All on, app-wide](templates/claude/README.md#all-on-app-wide)) | [templates/claude/README.md](templates/claude/README.md) |
 | 3 | Add the pack (table below) | `quality/config.json` |
 | 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }` and `{ "use": "visibility" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
 | 5 | Run the one local command for the numbers CI never sees | below |

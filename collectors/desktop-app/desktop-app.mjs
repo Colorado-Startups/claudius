@@ -2,8 +2,6 @@
 // load and whether they use it.
 //
 //   desktop_app.connectors_broken   servers that failed or need a sign-in
-//   desktop_app.plugins_unused      plugins loaded that no recent session called
-//   desktop_app.connectors_unused   connected servers no recent session called
 //   desktop_app.connectors_pending  servers still connecting at the first prompt
 //   desktop_app.listing_tokens      the skill, agent, server and tool listings
 //   desktop_app.turns_closed        work turns with a task list and a recap
@@ -11,7 +9,7 @@
 //   desktop_app.subagents_killed    subagent runs killed or failed
 //   desktop_app.parallel_share      Agent calls sent together
 //   desktop_app.subagent_start_tokens  the context a subagent starts with
-//   desktop_app.plugins_untrusted / plugins_replaceable / plugins_stale  plugin trust (desktop-app-plugins.mjs)
+//   desktop_app.plugins_untrusted / plugins_stale  plugin trust (desktop-app-plugins.mjs)
 //
 // Every path, tool name and N is a param on quality/targets/desktop-app.json.
 // Only a transcript whose entrypoint is params.entrypoint counts: a terminal
@@ -30,13 +28,11 @@
 
 import fs from 'node:fs';
 import os from 'node:os';
-import path from 'node:path';
 import { projectMatch, resolvePath } from '../claude/claude.mjs';
 import { attempt, item } from '../instructions/instructions-lib.mjs';
 import { eachLine, mainSessions } from '../instructions/instructions-sessions.mjs';
 import { redact, useLib } from '../lib/engine.mjs';
-import { emptyCalls, pluginsCalled, tallyCalls } from './desktop-app-calls.mjs';
-import { emptyListing, foldListing, hasListing, isAppServer, pluginsIn, serverKind, serversIn } from './desktop-app-listings.mjs';
+import { emptyListing, foldListing, hasListing, isAppServer } from './desktop-app-listings.mjs';
 import { inventory, pluginMetrics } from './desktop-app-plugins.mjs';
 import { emptyTurns, foldTurn } from './desktop-app-turns.mjs';
 import { subagentMetric, workMetrics } from './desktop-app-work.mjs';
@@ -50,10 +46,8 @@ export const metricIds = TARGETS.map((t) => t.id);
 export const PARAMS = Object.assign({}, ...TARGETS.map((t) => t.params ?? {}));
 
 const CI_REASON = 'transcripts live on the machine that ran the sessions; refreshed by a --local collect there';
-const LISTING_IDS = ['connectors_broken', 'connectors_pending', 'listing_tokens', 'plugins_unused', 'connectors_unused'];
+const LISTING_IDS = ['connectors_broken', 'connectors_pending', 'listing_tokens'];
 const tokens = (bytes) => Math.round(bytes / 4);
-// The usage window: at least the newest session, whatever the param says.
-const usageWindow = (params) => Math.max(1, Math.floor(Number(params.usage_sessions)) || 1);
 
 // Every metric of this tab, with each home path and account name taken out
 // of the text (redact.mjs).
@@ -80,30 +74,25 @@ async function gather({ root = '.', mode, home = os.homedir(), now = new Date(),
     out[`${area}.${id}`] = { could_not_check: reason, source };
   };
   const latest = sessions[0].listing;
-  if (hasListing(latest)) {
-    stateMetrics(latest, params, val);
-    const usage = attempt(() => accountUsage(params, home, root, now.getTime()));
-    if (usage.error) for (const id of ['plugins_unused', 'connectors_unused']) cnc(id, usage.error, self);
-    else usageMetrics(latest, usage, params, { val, cnc });
-  } else for (const id of LISTING_IDS) cnc(id, 'the newest desktop session holds no listing attachment', self);
+  if (hasListing(latest)) stateMetrics(latest, params, val);
+  else for (const id of LISTING_IDS) cnc(id, 'the newest desktop session holds no listing attachment', self);
   const inv = attempt(() => inventory({ home, root, params }));
   const pluginError = inv.error ?? attempt(() => pluginMetrics(inv, params, now, { val, cnc }))?.error;
-  if (pluginError) for (const id of ['plugins_untrusted', 'plugins_replaceable', 'plugins_stale']) cnc(id, pluginError, self);
+  if (pluginError) for (const id of ['plugins_untrusted', 'plugins_stale']) cnc(id, pluginError, self);
   workMetrics(sessions, params, now, { val, cnc });
   subagentMetric(sessions, params, now, { val, cnc });
   return Object.fromEntries(metricIds.map((id) => [id, out[id] ?? { could_not_check: 'collector produced no value', source: self }]));
 }
 
-// One transcript in a single pass: its entrypoint, its listings, its calls
-// and its turns.
+// One transcript in a single pass: its entrypoint, its listings and its
+// turns.
 function readSession(file, params) {
-  const read = { entrypoint: null, listing: emptyListing(), calls: emptyCalls(), turns: emptyTurns() };
+  const read = { entrypoint: null, listing: emptyListing(), turns: emptyTurns() };
   eachLine(file, (record) => {
     read.entrypoint ??= record.entrypoint ?? null;
     foldListing(read.listing, record);
-    tallyCalls(read.calls, record, params);
     // A turn reading that fails (a pattern param that is no regex) stops
-    // for this session and is reported; the listings and calls still read.
+    // for this session and is reported; the listings still read.
     if (!read.turnsError) read.turnsError = attempt(() => foldTurn(read.turns, record, params))?.error;
   });
   return read;
@@ -124,7 +113,7 @@ function desktopSessions(projectsDir, params, upTo) {
 // The three readings of the newest session's listings alone.
 function stateMetrics(latest, params, val) {
   const { needsAuth, failed } = latest.last;
-  // A server the app adds itself is not the user's to speed up or switch off.
+  // A server the app adds itself is not the user's to speed up.
   const pending = latest.first.pending.filter((s) => !isAppServer(s, params.app_servers));
   val('connectors_broken', needsAuth.length + failed.length, 'state: the last tool listing of the newest desktop session', [item('need sign-in', needsAuth.length, 'servers'), item('failed to connect', failed.length, 'servers')]);
   val('connectors_pending', pending.length, 'state: the first tool listing of the newest desktop session, the app\'s own servers set aside', [item('still connecting', pending.length, 'servers')]);
@@ -135,89 +124,6 @@ function stateMetrics(latest, params, val) {
     ['server instructions', latest.bytes.instructions],
   ].map(([label, bytes]) => item(label, tokens(bytes), 'tokens'));
   val('listing_tokens', parts.reduce((n, p) => n + p.value, 0), 'state: bytes / 4 of the four listings of the newest desktop session, every delta added up', parts);
-}
-
-// The entrypoint named in a transcript's head, or null.
-const HEAD_BYTES = 65536;
-function headEntrypoint(file) {
-  let fd;
-  try {
-    fd = fs.openSync(file, 'r');
-    const buf = Buffer.alloc(HEAD_BYTES);
-    return /"entrypoint":"([^"]+)"/.exec(buf.subarray(0, fs.readSync(fd, buf, 0, HEAD_BYTES, 0)).toString('utf8'))?.[1] ?? null;
-  } catch {
-    return null;
-  } finally {
-    if (fd !== undefined) fs.closeSync(fd);
-  }
-}
-
-// The Cowork transcript folders under params.cowork_dir: <account>/<org>/local_<id>/<claude_dir_name>/projects.
-function coworkProjectDirs(cowork, params) {
-  const sub = (d) => (fs.existsSync(d) ? fs.readdirSync(d, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => path.join(d, e.name)) : []);
-  return sub(cowork).flatMap(sub).flatMap(sub).filter((d) => path.basename(d).startsWith('local_')).map((d) => path.join(d, params.claude_dir_name, 'projects')).filter((d) => fs.existsSync(d));
-}
-
-// Plugins and connectors belong to the account, so their use is read across
-// every project folder and every Cowork session: the calls of the last N
-// sessions whose entrypoint is in params.usage_entrypoints, with their subagents.
-// Only lines holding a tool call or a typed command are parsed.
-function accountUsage(params, home, root, upTo) {
-  const dirsToRead = [resolvePath(params.projects_dir, { home, root }), ...coworkProjectDirs(resolvePath(params.cowork_dir, { home, root }), params)];
-  const all = dirsToRead.flatMap((d) => mainSessions(d, '', params.subagents_dir, upTo)).sort((a, b) => b.start - a.start);
-  const entrypoints = new Set(params.usage_entrypoints ?? [params.entrypoint]);
-  const calls = emptyCalls();
-  let read = 0;
-  let unreadable = 0;
-  for (const session of all) {
-    if (read >= usageWindow(params)) break;
-    // The entrypoint sits in a transcript's first records, so a session that
-    // does not count is skipped before its body is read.
-    if (!entrypoints.has(headEntrypoint(session.file))) continue;
-    read += 1;
-    for (const file of [session.file, ...session.subagents]) {
-      let text;
-      try {
-        text = fs.readFileSync(file, 'utf8');
-      } catch {
-        unreadable += 1;
-        continue;
-      }
-      for (const line of text.split('\n')) {
-        if (!line.includes('"tool_use"') && !line.includes('<command-name>')) continue;
-        try {
-          tallyCalls(calls, JSON.parse(line), params);
-        } catch {}
-      }
-    }
-  }
-  return { calls, read, unreadable, folders: dirsToRead.length };
-}
-
-// The two readings that set the newest session's listings against what the
-// account's last N sessions called.
-function usageMetrics(latest, usage, params, { val, cnc }) {
-  const n = Number(params.usage_sessions);
-  const source = `state: the newest desktop session's listings against the calls of the account's last ${n} sessions (entrypoint in params.usage_entrypoints) across every project folder and Cowork session, with their subagents; N = ${n} sessions, ${usage.read} read${usage.unreadable ? `, ${usage.unreadable} files unreadable` : ''}`;
-  if (!(n >= 1)) {
-    for (const id of ['plugins_unused', 'connectors_unused']) cnc(id, 'params.usage_sessions must be at least one session', source);
-    return;
-  }
-  const calls = usage.calls;
-  const loaded = pluginsIn(latest);
-  const called = pluginsCalled(calls, loaded);
-  const idle = [...loaded].filter((p) => !called.has(p)).sort();
-  val('plugins_unused', idle.length, source, [item('plugins loaded', loaded.size, 'plugins'), item('plugins called', loaded.size - idle.length, 'plugins'), ...idle.map((p) => item(p, 0, 'calls'))]);
-  // The app's own servers, and any kind a repo's params say its owner keeps, are set aside.
-  const kept = Array.isArray(params.kept_kinds) ? params.kept_kinds : [];
-  const servers = serversIn(latest).filter((s) => !isAppServer(s, params.app_servers) && !kept.includes(serverKind(s)));
-  const unused = servers.filter((s) => !calls.servers.has(s));
-  const kinds = ['plugin servers', 'account connectors', 'other servers'];
-  val('connectors_unused', unused.length, source, [
-    item('servers connected', servers.length, 'servers'),
-    item('servers called', servers.length - unused.length, 'servers'),
-    ...kinds.map((kind) => item(`${kind} unused`, unused.filter((s) => serverKind(s) === kind).length, 'servers')),
-  ]);
 }
 
 function all(reason, source) {

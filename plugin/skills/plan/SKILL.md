@@ -43,7 +43,7 @@ Fix what fails. Then put one line above the plan, each row marked ✅ for a pass
 
 | Keep usage low | Rule |
 |---|---|
-| Briefs | A worker starts fresh on its brief, not a fork of the planning conversation |
+| Briefs | A worker starts fresh on its brief, not a fork of the planning conversation. The brief limits what it does, never which plugins, skills or connectors it reaches ([All on, app-wide](https://github.com/Colorado-Startups/claudius/blob/main/templates/claude/README.md#all-on-app-wide)) |
 | Reads | A search across many files goes to `Explore` with `model: "haiku"` |
 | Waits | CI, conflicts and review comments come from Auto-fix, never a poll |
 | Rounds | At most three review rounds a PR; after that, rethink the step |
