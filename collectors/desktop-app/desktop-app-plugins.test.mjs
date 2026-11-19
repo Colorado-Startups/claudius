@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { after, test } from 'node:test';
-import { collect, PARAMS } from './desktop-app.mjs';
+import { PARAMS } from './desktop-app.mjs';
 import { inventory, pluginMetrics, repoOwner, tierOf } from './desktop-app-plugins.mjs';
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'desktop-app-plugins-'));
@@ -15,7 +15,6 @@ const write = (p, text) => {
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, typeof text === 'string' ? text : JSON.stringify(text));
 };
-const jsonl = (rows) => `${rows.map((r) => JSON.stringify(r)).join('\n')}\n`;
 const now = new Date('2026-11-14T12:00:00Z');
 
 const home = path.join(tmp, 'home');
@@ -128,24 +127,6 @@ test('an empty home: the plugin metrics are not measured, never 0', () => {
   const out = {};
   pluginMetrics(inventory({ home: path.join(tmp, 'empty'), root, params: PARAMS }), PARAMS, now, { val: (id, value) => (out[id] = value), cnc: (id, reason) => (out[id] = reason) });
   for (const id of ['plugins_untrusted', 'plugins_replaceable', 'plugins_stale']) assert.match(String(out[id]), /no plugin install record/);
-});
-
-test('plugin and connector use is read across the account: another project folder and a Cowork session count, a terminal session does not', async () => {
-  const h = path.join(tmp, 'usage-home');
-  const projects = path.join(h, '.claude', 'projects');
-  const t = (m) => new Date(Date.parse('2026-11-14T08:00:00Z') + m * 6e4).toISOString();
-  const call = (sid, m, entrypoint, skill) => ({ timestamp: t(m), sessionId: sid, entrypoint, type: 'assistant', message: { id: `${sid}${m}`, content: [{ type: 'tool_use', id: `u${m}`, name: 'Skill', input: { skill } }] } });
-  const listing = { timestamp: t(100), sessionId: 'r1', entrypoint: 'claude-desktop', type: 'attachment', attachment: { type: 'skill_listing', content: 'x'.repeat(40), names: ['alpha:do', 'omega:go', 'tau:run'], skillCount: 3, isInitial: true } };
-  const tools = { timestamp: t(100), sessionId: 'r1', entrypoint: 'claude-desktop', type: 'attachment', attachment: { type: 'deferred_tools_delta', addedNames: ['Read'], addedLines: ['Read'], removedNames: [], pendingMcpServers: [], needsAuthMcpServers: [], failedMcpServers: [] } };
-  write(path.join(projects, '-Users-someone-Developer-acme-site', 'r1.jsonl'), jsonl([tools, listing]));
-  write(path.join(projects, '-Users-someone-Developer-other', 'o1.jsonl'), jsonl([call('o1', 10, 'claude-desktop', 'omega:go')]));
-  write(path.join(projects, '-Users-someone-Developer-other', 't1.jsonl'), jsonl([call('t1', 20, 'cli', 'tau:run')]));
-  write(path.join(h, 'Library', 'Application Support', 'Claude', 'local-agent-mode-sessions', 'acct', 'org', 'local_abc', '.claude', 'projects', 'session', 'c1.jsonl'), jsonl([call('c1', 30, 'local-agent', 'alpha:do')]));
-  const got = await collect({ root: '/Users/someone/Developer/acme site', mode: 'local', home: h, now, params: { ...PARAMS, project_match: 'acme-site' } });
-  const r = got['desktop_app.plugins_unused'];
-  assert.equal(r.value, 1, r.source);
-  assert.deepEqual(r.detail.filter((d) => d.unit === 'calls').map((d) => d.label), ['tau'], 'only the terminal session called tau');
-  assert.match(r.source, /across every project folder and Cowork session/);
 });
 
 test('desktop directory plugins go by their own plugin.json name', () => {

@@ -59,7 +59,7 @@ Lift is the mean score with Claudius minus without it, over each skill's three c
 |---|---|---|
 | `plan` | `gh` | GitHub issues in your repo; sessions you start |
 | `merge` | `gh`, `git` | A PR comment and a merge, at the reviewed commit only |
-| `equip` | `claude plugin` | Installed and enabled plugins, and repo `.claude/settings.json`, only after you say yes to its change table |
+| `equip` | `claude plugin` | Installs official plugins, turns back on ones left off and removes install records whose project folder is gone, only after you say yes to its change table. It turns nothing off ([All on, app-wide](https://github.com/Colorado-Startups/claudius/blob/main/templates/claude/README.md#all-on-app-wide)) |
 | `find-plugin` | `claude plugin install`, after a yes | Nothing until you say yes |
 | `plain-voice` | nothing | Nothing; it returns text |
 | `visibility` | `gh api`, `git clone`, `curl`, all reads | Nothing; it reports counts |

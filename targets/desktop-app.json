@@ -2,11 +2,10 @@
   {
     "id": "desktop_app.connectors_broken",
     "params": {
-      "comment": "projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root. project_match (default the repo's own project folder) names no path here. entrypoint: the transcript value that marks a desktop app session; a terminal session is not this tab's. usage_sessions: N, the docs' own window for Not used recently. app_servers: servers the desktop app adds itself, which its connector list does not show and a user cannot switch off as connectors; an entry ending in _ is a prefix, any other a whole name. human_origin: the origin kind of a record a person typed. plan_tool, recap_tool, session_tool and archive_tool: the app's tools for the task list, the closing recap, starting a session and archiving one. plan_exit_tool: the tool that shows a plan for approval; its result's is_error flag is true when the owner sent the plan back. plan_session_count: N for plans_first_pass, the sessions that showed a plan. session_id_pattern: how a started session's id reads in the tool's result. idle_hours: a session whose last record is newer may still be running, so its open last turn and unarchived sub-sessions are left out; it is no measuring window. kept_kinds: kinds of server (plugin servers, account connectors, other servers) a repo's owner keeps on for other work; they are set aside from desktop_app.connectors_unused and still count in desktop_app.listing_tokens. None by default. usage_sessions: N for plugins_unused and connectors_unused, read across the account's project folders and Cowork sessions; the docs mark a plugin Not used recently after 14 days and 10 sessions, and with parallel sessions the 14 days bind (373 desktop sessions in 14 days on one account, measured 2026-11-14), so N is held at 200 sessions, not a calendar window. usage_entrypoints: the entrypoints whose calls count as use: the desktop app's Code sessions and its Cowork sessions. cowork_dir: where the desktop app keeps Cowork sessions and its plugin manifest. plugins_dir: Claude Code's plugins root. official_marketplaces and community_marketplaces: the reserved names in code.claude.com/docs/en/plugins/security; directory_marketplaces: the name the desktop app's manifest gives Anthropic's directory on claude.ai, whose versions Anthropic reviews before publishing (plugins/publish). own_marketplaces: marketplaces the repo owner publishes, besides those from the repo's own GitHub account, which count as the owner's on their own. kept_plugins: plugin id to the reason it stays though community or third-party. stale_days: an enabled plugin with no upstream update in this many days counts as stale. claude_dir_name, settings_files and plugin_manifest_dir: the folder and file names Claude Code uses for settings, skills, agents and plugin manifests. maintainer_author: the catalog author whose plugins are maintained with Claude Code itself, so their age alone never makes them stale.",
+      "comment": "projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root. project_match (default the repo's own project folder) names no path here. entrypoint: the transcript value that marks a desktop app session; a terminal session is not this tab's. app_servers: servers the desktop app adds itself, which its connector list does not show and a user cannot switch off as connectors; an entry ending in _ is a prefix, any other a whole name. human_origin: the origin kind of a record a person typed. plan_tool, recap_tool, session_tool and archive_tool: the app's tools for the task list, the closing recap, starting a session and archiving one. plan_exit_tool: the tool that shows a plan for approval; its result's is_error flag is true when the owner sent the plan back. plan_session_count: N for plans_first_pass, the sessions that showed a plan. session_id_pattern: how a started session's id reads in the tool's result. idle_hours: a session whose last record is newer may still be running, so its open last turn and unarchived sub-sessions are left out; it is no measuring window. cowork_dir: where the desktop app keeps its plugin manifest. plugins_dir: Claude Code's plugins root. official_marketplaces and community_marketplaces: the reserved names in code.claude.com/docs/en/plugins/security; directory_marketplaces: the name the desktop app's manifest gives Anthropic's directory on claude.ai, whose versions Anthropic reviews before publishing (plugins/publish). own_marketplaces: marketplaces the repo owner publishes, besides those from the repo's own GitHub account, which count as the owner's on their own. kept_plugins: plugin id to the reason it stays though community or third-party. stale_days: an enabled plugin with no upstream update in this many days counts as stale. claude_dir_name, settings_files and plugin_manifest_dir: the folder and file names Claude Code uses for settings, skills, agents and plugin manifests. maintainer_author: the catalog author whose plugins are maintained with Claude Code itself, so their age alone never makes them stale.",
       "projects_dir": "~/.claude/projects",
       "subagents_dir": "subagents",
       "entrypoint": "claude-desktop",
-      "usage_sessions": 200,
       "skill_tool": "Skill",
       "agent_tool": "Agent",
       "app_servers": [
@@ -55,11 +54,6 @@
       "notice_count": 50,
       "subagent_runs": 20,
       "subagent_meta_suffix": ".meta.json",
-      "kept_kinds": [],
-      "usage_entrypoints": [
-        "claude-desktop",
-        "local-agent"
-      ],
       "cowork_dir": "~/Library/Application Support/Claude/local-agent-mode-sessions",
       "plugins_dir": "~/.claude/plugins",
       "official_marketplaces": [
@@ -112,40 +106,6 @@
     "source": "state: the newest transcript of this repo whose entrypoint is params.entrypoint, its last deferred_tools_delta attachment: needsAuthMcpServers plus failedMcpServers, counted; the attachment is observed in transcripts, not named in Anthropic's public docs",
     "needs": "local-files",
     "chart": "table"
-  },
-  {
-    "id": "desktop_app.plugins_unused",
-    "tab": "desktop-app",
-    "kind": "quality",
-    "group": "Use",
-    "label": "Plugins loaded and not used",
-    "means": "Plugins whose skills, agents and servers load into every session though no recent session called one.",
-    "unit": "plugins",
-    "goal": 0,
-    "near": 2,
-    "direction": "lower",
-    "goal_source": "goal from the plugin docs: an enabled plugin is part of every session, and Not used recently means unused for 10 sessions and 14 days (code.claude.com/docs/en/plugins/measure, read 2026-11-10); the session count is held here, a calendar window is not",
-    "source": "state: the plugins named in the newest desktop session's skill listing, agent listing and server lists (the name before the colon, or after plugin_ in a tool name), against Skill, Agent and server calls in the account's last params.usage_sessions sessions (params.usage_entrypoints) across every project folder and Cowork session, with their subagents; N = 200 sessions",
-    "needs": "local-files",
-    "chart": "table",
-    "defined": "2026-11-14"
-  },
-  {
-    "id": "desktop_app.connectors_unused",
-    "tab": "desktop-app",
-    "kind": "quality",
-    "group": "Use",
-    "label": "Connectors loaded and not used",
-    "means": "Connected servers whose tool names and instructions load every session though no recent session called one.",
-    "unit": "servers",
-    "goal": 0,
-    "near": 2,
-    "direction": "lower",
-    "goal_source": "goal from the best practices: connected servers add their tool names and instructions even when unused, so this reports their cost; an unused one is put to work, never turned off: one desktop app serves every repo and project (the owner, 2026-11-19; code.claude.com/docs/en/costs, read 2026-11-10)",
-    "source": "state: the servers behind the mcp__ tool names the newest desktop session lists, those in params.app_servers and of a kind in params.kept_kinds set aside, against calls in the account's last params.usage_sessions sessions across every project folder and Cowork session, with their subagents; N = 10 sessions, the window of desktop_app.plugins_unused",
-    "needs": "local-files",
-    "chart": "table",
-    "defined": "2026-11-14"
   },
   {
     "id": "desktop_app.turns_closed",
@@ -255,7 +215,7 @@
     "goal": 10000,
     "near": 20000,
     "direction": "lower",
-    "goal_source": "goal from the skills docs: the skill listing budget is 1% of the model's context window (code.claude.com/docs/en/skills, Skill descriptions are cut short, read 2026-11-10), at a 1,000,000-token window = 10,000 tokens, held here for all four listings together; near at 2%, the docs' example of a raised budget",
+    "goal_source": "goal from the skills docs: the skill listing budget is 1% of the model's context window (code.claude.com/docs/en/skills, Skill descriptions are cut short, read 2026-11-10), at a 1,000,000-token window = 10,000 tokens, held here for all four listings together; near at 2%, the docs' example of a raised budget; a listing over budget is fixed by the Equip skill's Budget step (skillListingBudgetFraction), never by turning a plugin, skill or connector off (the owner, 2026-11-19)",
     "source": "state: bytes / 4 of the newest desktop session's skill_listing content, agent_listing_delta lines, mcp_instructions_delta blocks and deferred_tools_delta lines, every delta of the session added up",
     "needs": "local-files",
     "chart": "stack"
@@ -271,7 +231,7 @@
     "goal": 30000,
     "near": 50000,
     "direction": "lower",
-    "goal_source": "template goal, no public benchmark: a subagent inherits every tool unless its definition lists them (code.claude.com/docs/en/sub-agents, read 2026-11-10), so one given only what its task needs starts small",
+    "goal_source": "template goal, no public benchmark: a subagent gets the full suite, never a cut tool list (the owner, 2026-11-19); it inherits every tool unless its definition lists them (code.claude.com/docs/en/sub-agents, read 2026-11-10), and connector schemas and skill bodies load only when called (code.claude.com/docs/en/mcp and /skills, read 2026-11-15), so a full suite still starts small",
     "source": "the last params.subagent_runs subagent transcripts of this repo's desktop sessions: input plus cache-write plus cache-read tokens of each run's first model call (message.usage), the median of each agent type, the largest; rows from Claude Code 2.1.307 on; N = 20 runs",
     "needs": "local-files",
     "chart": "bar"
@@ -303,7 +263,7 @@
     "goal": 0,
     "near": 2,
     "direction": "lower",
-    "goal_source": "template goal, no public benchmark: an Anthropic plugin or built-in feature is maintained with Claude Code itself (code.claude.com/docs/en/plugins/anthropic-marketplaces, read 2026-11-14), so a custom copy of it is code to keep in step for nothing",
+    "goal_source": "template goal, no public benchmark: an Anthropic plugin or built-in feature is maintained with Claude Code itself (code.claude.com/docs/en/plugins/anthropic-marketplaces, read 2026-11-14), so its equivalent is installed and put to work beside each listed piece; the custom piece stays on (the owner, 2026-11-19)",
     "source": "state: the custom skills, agents and hook commands in the user's and this repo's params.claude_dir_name folders, against collectors/desktop-app/anthropic-equivalents.json and the official-tier catalogs Claude Code has cloned",
     "needs": "local-files",
     "chart": "table"
@@ -319,7 +279,7 @@
     "goal": 0,
     "near": 2,
     "direction": "lower",
-    "goal_source": "goal from the plugin docs: a delisted one is flagged (code.claude.com/docs/en/plugins/security and /plugins/loading, read 2026-11-14); an install record whose project folder is gone is removed, and a delisted or unmaintained plugin is reported, swapped for an official one or fixed, never turned off (the owner, 2026-11-19)",
+    "goal_source": "goal from the plugin docs: a delisted one is flagged (code.claude.com/docs/en/plugins/security and /plugins/loading, read 2026-11-14); an install left off is turned back on, a record whose project folder is gone is removed, and a delisted or unmaintained plugin is reported, its official equivalent added or the plugin fixed, never turned off (the owner, 2026-11-19)",
     "source": "state: install records no settings source enables, plugins in flagged-plugins.json, and enabled plugins whose last_updated in plugin-catalog-cache.json is older than params.stale_days (180), plugins by params.maintainer_author set aside",
     "needs": "local-files",
     "chart": "table"

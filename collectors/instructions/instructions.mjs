@@ -246,8 +246,7 @@ function unusedMetric(ctx, listed) {
   // Rules, skills and agents no recent session used.
   const n = Number(params.unused_sessions);
   // A path-scoped rule the repo keeps for the account's other repos, by file
-  // name in params.kept_rules, is set aside, as desktop-app.mjs sets aside
-  // params.kept_kinds.
+  // name in params.kept_rules, is set aside.
   const kept = toList(params.kept_rules);
   const unusedSource = `the last ${n} main sessions by start, each with its subagents: Skill calls and typed slash commands by name, Agent calls by subagent_type (none is general-purpose), and a paths rule when a ${toList(params.touch_tools).join(', ')} call touched a matching file under the session's folder; a rule with no paths loads every session and is left out, and so is a rule in params.kept_rules (${kept.join(', ') || 'none'})`;
   if (!(n > 0)) cnc('instructions.unused', 'params.unused_sessions must be positive', unusedSource);

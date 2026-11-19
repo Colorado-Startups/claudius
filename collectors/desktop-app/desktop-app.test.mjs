@@ -115,7 +115,9 @@ test('targets: valid, on the desktop app tab, plain means, a goal basis and N or
   for (const kind of ['quality', 'speed', 'consumption']) assert.ok(defs.some((d) => d.kind === kind), `a ${kind} metric`);
   const goal = Object.fromEntries(defs.map((d) => [d.id, [d.goal, d.near]]));
   assert.deepEqual(goal['desktop_app.listing_tokens'], [10000, 20000], "the skills docs' 1% listing budget, and its 2% example");
-  for (const id of ['connectors_broken', 'plugins_unused', 'connectors_unused', 'connectors_pending']) assert.equal(goal[`desktop_app.${id}`][0], 0, id);
+  for (const id of ['connectors_broken', 'connectors_pending']) assert.equal(goal[`desktop_app.${id}`][0], 0, id);
+  // Retired 2026-11-19: their only fix was turning a plugin or connector off app-wide (templates/claude/README.md, All on, app-wide).
+  for (const id of ['plugins_unused', 'connectors_unused']) assert.ok(!metricIds.includes(`desktop_app.${id}`), id);
 });
 
 test('names: one server per tool name, one plugin per colon name', () => {
@@ -140,13 +142,6 @@ test('collect: the listing metrics read the newest desktop session', async () =>
   assert.deepEqual(labels(got['desktop_app.connectors_broken']), { 'need sign-in': 1, 'failed to connect': 2 });
   // The first listing's state; the app's own servers (ccd_turn, visualize) are not the user's to speed up.
   assert.equal(v['desktop_app.connectors_pending'], 3);
-  // Loaded: alpha, theta, beta, iota, eps, zeta, eta, gamma, delta. Called in s1, s2 or its subagent: alpha, beta, gamma, delta.
-  assert.equal(v['desktop_app.plugins_unused'], 5);
-  assert.deepEqual(got['desktop_app.plugins_unused'].detail.slice(0, 2).map((d) => [d.label, d.value]), [['plugins loaded', 9], ['plugins called', 4]]);
-  assert.deepEqual(got['desktop_app.plugins_unused'].detail.slice(2).map((d) => d.label), ['eps', 'eta', 'iota', 'theta', 'zeta']);
-  // Connected: gamma, delta, accounts A and B, local-tool, straggler; the app's own ccd_turn is set aside. Called: gamma, delta, A.
-  assert.equal(v['desktop_app.connectors_unused'], 3);
-  assert.deepEqual(labels(got['desktop_app.connectors_unused']), { 'servers connected': 6, 'servers called': 3, 'plugin servers unused': 0, 'account connectors unused': 1, 'other servers unused': 2 });
   // bytes / 4 of each listing.
   assert.equal(v['desktop_app.listing_tokens'], 100 + 50 + 20 + Math.round(bytes([...TOOLS_1, ...TOOLS_2]) / 4));
   assert.deepEqual(got['desktop_app.listing_tokens'].detail.map((d) => [d.label, d.value]), [
@@ -155,20 +150,6 @@ test('collect: the listing metrics read the newest desktop session', async () =>
     ['agents', 50],
     ['server instructions', 20],
   ]);
-});
-
-test('collect: a kind of server the owner keeps is set aside from the unused count', async () => {
-  const got = await collect({ ...base, params: { ...params, kept_kinds: ['account connectors'] } });
-  // Accounts A and B are set aside; gamma and delta were called; local-tool and straggler were not.
-  assert.equal(got['desktop_app.connectors_unused'].value, 2);
-  assert.deepEqual(labels(got['desktop_app.connectors_unused']), { 'servers connected': 4, 'servers called': 2, 'plugin servers unused': 0, 'account connectors unused': 0, 'other servers unused': 2 });
-});
-
-test('collect: the window is the last N desktop sessions', async () => {
-  const one = await collect({ ...base, params: { ...params, usage_sessions: 1 } });
-  // Only s2 and its subagent: alpha, beta and gamma were called in s1 alone.
-  assert.equal(one['desktop_app.plugins_unused'].value, 8);
-  assert.equal(one['desktop_app.connectors_unused'].value, 5);
 });
 
 test('nothing private leaves the collector', async () => {
@@ -190,17 +171,13 @@ test('a missing input reads could_not_check, never 0', async () => {
   // A folder with only terminal sessions is not the desktop app's.
   const cli = await collect({ ...base, params: { ...params, entrypoint: 'no-such-app' } });
   for (const id of metricIds) assert.match(cli[id].could_not_check, /no desktop session/, id);
-  // A window of zero sessions is a bad param, not zero unused plugins.
-  const zero = await collect({ ...base, params: { ...params, usage_sessions: 0 } });
-  assert.match(zero['desktop_app.plugins_unused'].could_not_check, /usage_sessions/);
-  assert.equal(zero['desktop_app.connectors_broken'].value, 3);
 });
 
 test('a desktop session with no listing: the listing metrics are not measured', async () => {
   const bare = path.join(tmp, 'bare-home');
   write(path.join(bare, '.claude', 'projects', '-Users-someone-Developer-acme-site', 'b1.jsonl'), jsonl([call('b1', 0, 'Read')]));
   const got = await collect({ ...base, home: bare });
-  for (const id of ['connectors_broken', 'plugins_unused', 'connectors_unused', 'connectors_pending', 'listing_tokens']) assert.match(got[`desktop_app.${id}`].could_not_check, /no listing/, id);
+  for (const id of ['connectors_broken', 'connectors_pending', 'listing_tokens']) assert.match(got[`desktop_app.${id}`].could_not_check, /no listing/, id);
   // The turn metrics need no listing: with no turn a person started they are not measured either.
   for (const id of metricIds) assert.ok(got[id].could_not_check && !('value' in got[id]), id);
 });

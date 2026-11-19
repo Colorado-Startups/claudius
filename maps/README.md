@@ -34,28 +34,30 @@ flowchart LR
 | Plan | Checked once before it is shown, so the owner approves it as first shown | `desktop_app.plans_first_pass` |
 | Clear | Each blocker that costs more than it helps is fixed or removed by PR | `blockers.costly` |
 
-## Equip: every capability on, account-wide, and put to work
+## Equip: every capability on, app-wide, and put to work
+
+The rule every step serves: [All on, app-wide](../templates/claude/README.md#all-on-app-wide).
 
 ```mermaid
 flowchart LR
-  source["🔒 Source"] --> swap["🔒 Swap"] --> scope["🔒 Keep"] --> connect["🔒 Connect"] --> use["🔒 Use"] --> prune["🔒 Orphans"]
+  source["🔒 Source"] --> add["🔒 Add"] --> keep["🔒 Keep"] --> connect["🔒 Connect"] --> fix["🔒 Fix"] --> stale["🔒 Restore"]
 ```
 
 | Step | Ideal | Metric |
 |---|---|---|
 | Source | 🅰 official marketplaces or 🅱 Anthropic's reviewed directory; anything else named | `desktop_app.plugins_untrusted` |
-| Swap | A custom skill, agent or hook gives way to Anthropic's | `desktop_app.plugins_replaceable` |
-| Keep | Every plugin, skill and connector stays on account-wide; listing tokens reported, never cut by turning one off | `desktop_app.listing_tokens` |
-| Connect | Every listed connector signed in before the first prompt | `desktop_app.connectors_pending` |
-| Use | A plugin or connector that goes unused is put to work in the project that needs it, never turned off | `desktop_app.plugins_unused` |
-| Orphans | Only install records whose project folder is gone are removed; nothing the owner added is turned off | `desktop_app.plugins_stale` |
+| Add | A custom skill, agent or hook gets Anthropic's equivalent beside it; the custom one stays on | `desktop_app.plugins_replaceable` |
+| Keep | A listing over budget is fixed by `skillListingBudgetFraction`, never by turning one off | `desktop_app.listing_tokens` |
+| Connect | Every listed connector connected before the first prompt | `desktop_app.connectors_pending` |
+| Fix | A connector that fails or needs a sign-in is repaired or signed in | `desktop_app.connectors_broken` |
+| Restore | An install left off is turned back on; only a record whose project folder is gone is removed | `desktop_app.plugins_stale` |
 
 | Tier | Marketplace name | Rule |
 |---|---|---|
 | 🅰 Anthropic | `claude-plugins-official`, `knowledge-work-plugins`, `claude-for-legal`, `claude-for-financial-services`, `life-sciences` … | ✅ prefer |
 | 🅱 Reviewed | Anthropic's directory on claude.ai (`anthropic-plugin-directory` in the desktop app) | ✅ allow |
 | 🅲 Community | `claude-community` | ⚠️ no 🅰/🅱 equivalent only |
-| 🅳 Third-party | everything else | ❌ swap, or name a reason in `kept_plugins` |
+| 🅳 Third-party | everything else | ❌ add the official one beside it, or name a reason in `kept_plugins`; it stays on |
 
 Tiers follow [plugin security](https://code.claude.com/docs/en/plugins/security) (read 2026-11-14): Claude Code accepts the official and community names only from `github.com/anthropics/`. Equivalents: [`collectors/desktop-app/anthropic-equivalents.json`](../collectors/desktop-app/anthropic-equivalents.json).
 

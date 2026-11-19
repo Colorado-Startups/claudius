@@ -2,7 +2,7 @@
  "id": "equip",
  "name": "Equip",
  "why": "Every plugin, skill and connector on for the whole app, put to work in the sessions that need it",
- "ideal": "Every plugin, skill and connector the owner added stays on account-wide and gets used; official ones replace custom copies.",
+ "ideal": "Every plugin, skill and connector the owner added stays on app-wide and works; each session loads only what it uses.",
  "sources": [
   {
    "title": "Claude Code: plugin security and trust",
@@ -27,8 +27,8 @@
  ],
  "critical_path": [
   "source",
-  "scope",
-  "prune"
+  "keep",
+  "stale"
  ],
  "steps": [
   {
@@ -43,24 +43,24 @@
    "metric": "desktop_app.plugins_untrusted"
   },
   {
-   "id": "swap",
-   "name": "Swap",
+   "id": "add",
+   "name": "Add",
    "tools": [
     "anthropic-equivalents.json"
    ],
-   "rule": "A custom skill, agent or hook gives way to the Anthropic one that does the same job.",
+   "rule": "A custom skill, agent or hook gets its Anthropic equivalent installed and used; the custom one stays on.",
    "rule_ref": "https://code.claude.com/docs/en/plugins/anthropic-marketplaces",
    "metric": "desktop_app.plugins_replaceable"
   },
   {
-   "id": "scope",
+   "id": "keep",
    "name": "Keep",
    "tools": [
-    "enabledPlugins in .claude/settings.json",
-    "claude plugin details"
+    "claude plugin details",
+    "skillListingBudgetFraction"
    ],
-   "rule": "Every plugin stays on account-wide; listing tokens are reported, never cut by turning one off.",
-   "rule_ref": "https://code.claude.com/docs/en/plugins/loading",
+   "rule": "Every plugin stays on app-wide; a listing over budget is fixed by skillListingBudgetFraction, never by turning one off.",
+   "rule_ref": "https://github.com/Colorado-Startups/claudius/blob/main/templates/claude/README.md#all-on-app-wide",
    "metric": "desktop_app.listing_tokens"
   },
   {
@@ -69,31 +69,30 @@
    "tools": [
     "Settings, Connectors"
    ],
-   "rule": "Every connector a session lists is signed in and ready before the first prompt.",
+   "rule": "Every connector a session lists has connected before the first prompt.",
    "rule_ref": "https://code.claude.com/docs/en/mcp",
    "metric": "desktop_app.connectors_pending"
   },
   {
-   "id": "use",
-   "name": "Use",
+   "id": "fix",
+   "name": "Fix",
    "tools": [
-    "/plugin Installed, Not used recently",
-    "/skill-doctor",
-    "/usage"
+    "/mcp",
+    "Settings, Connectors"
    ],
-   "rule": "A plugin or connector that goes unused is put to work in the project that needs it, never turned off.",
-   "rule_ref": "https://code.claude.com/docs/en/plugins/measure",
-   "metric": "desktop_app.plugins_unused"
+   "rule": "A connector that fails or needs a sign-in is repaired or signed in, never turned off.",
+   "rule_ref": "https://code.claude.com/docs/en/mcp",
+   "metric": "desktop_app.connectors_broken"
   },
   {
-   "id": "prune",
-   "name": "Orphans",
+   "id": "stale",
+   "name": "Restore",
    "tools": [
-    "claude plugin uninstall",
+    "/plugin Installed",
     "/doctor"
    ],
-   "rule": "Only install records whose project folder is gone are removed; nothing the owner added is turned off.",
-   "rule_ref": "https://code.claude.com/docs/en/plugins/security",
+   "rule": "An install left off is turned back on; only a record whose project folder is gone is removed.",
+   "rule_ref": "https://code.claude.com/docs/en/plugins/loading",
    "metric": "desktop_app.plugins_stale"
   }
  ]
