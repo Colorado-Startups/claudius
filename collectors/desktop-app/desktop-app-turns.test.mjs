@@ -153,13 +153,43 @@ test('subagent_start_tokens: the heaviest agent type\'s median context at its fi
   assert.equal(pick(await collect({ ...base, params: { ...params, subagent_runs: 0 } }), 'subagent_start_tokens').could_not_check, 'params.subagent_runs must be at least one run');
 });
 
+// A session that shows a plan once per entry of `verdicts`: true approved it, false sent it back.
+function planHome(name, sessions) {
+  const dir = path.join(tmp, name);
+  sessions.forEach(([sid, startIso, verdicts]) => {
+    const s = session(sid, startIso);
+    const rows = [s.human(0)];
+    verdicts.forEach((ok, i) => {
+      const r = s.result(2 * i + 2, `x${i}`, ok ? 'approved' : 'rejected');
+      r.message.content[0].is_error = !ok;
+      rows.push(s.say(2 * i + 1, `m${i}`, [[`x${i}`, 'ExitPlanMode']]), r);
+    });
+    write(path.join(dir, '.claude', 'projects', '-Users-someone-Developer-acme-site', `${sid}.jsonl`), jsonl(rows));
+  });
+  return dir;
+}
+
+test('plans_first_pass: the share of first-shown plans approved as shown', async () => {
+  const plans = planHome('plans-home', [
+    ['p1', '2026-11-09T08:00:00Z', [true]],
+    ['p2', '2026-11-08T08:00:00Z', [false, true]],
+    ['p3', '2026-11-07T08:00:00Z', [true, false]],
+  ]);
+  const got = pick(await collect({ ...base, home: plans }), 'plans_first_pass');
+  // p1: one shown, approved. p2: sent back, then approved: one shown, not approved. p3: the plan after an approval is shown first, and sent back.
+  assert.equal(got.value, 50);
+  assert.deepEqual(rows(got), { 'sessions that showed a plan': 3, 'plans first shown': 4, 'approved as shown': 2 });
+  // N = 1: only the newest session that showed a plan.
+  assert.equal(pick(await collect({ ...base, home: plans, params: { ...params, plan_session_count: 1 } }), 'plans_first_pass').value, 100);
+});
+
 test('a param a repo override broke reads could_not_check, and collect does not throw', async () => {
   // A status list that is no list counts nothing as killed.
   const noList = await collect({ ...base, params: { ...params, bad_statuses: 'killed' } });
   assert.equal(pick(noList, 'subagents_killed').value, 0);
   // A pattern that is no regex fails the four turn readings, not the whole collector.
   const got = await collect({ ...base, params: { ...params, session_id_pattern: '(' } });
-  for (const id of ['turns_closed', 'sub_sessions_closed', 'subagents_killed', 'parallel_share']) assert.match(pick(got, id).could_not_check, /Invalid regular expression/, id);
+  for (const id of ['turns_closed', 'sub_sessions_closed', 'subagents_killed', 'parallel_share', 'plans_first_pass']) assert.match(pick(got, id).could_not_check, /Invalid regular expression/, id);
   assert.equal(pick(got, 'subagent_start_tokens').value, 30000);
 });
 
@@ -168,7 +198,7 @@ test('nothing to judge reads could_not_check, never 0 or 100', async () => {
   const q = session('q1', '2026-11-08T08:00:00Z');
   write(path.join(quiet, '.claude', 'projects', '-Users-someone-Developer-acme-site', 'q1.jsonl'), jsonl([q.human(0), q.say(1, 'k1', [['r9', 'Read']])]));
   const got = await collect({ ...base, home: quiet });
-  for (const id of ['turns_closed', 'sub_sessions_closed', 'subagents_killed', 'parallel_share', 'subagent_start_tokens']) {
+  for (const id of ['turns_closed', 'sub_sessions_closed', 'subagents_killed', 'parallel_share', 'plans_first_pass', 'subagent_start_tokens']) {
     assert.ok(pick(got, id).could_not_check && !('value' in pick(got, id)), id);
   }
 });

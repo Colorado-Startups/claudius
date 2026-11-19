@@ -1,7 +1,8 @@
 // Turns for the desktop app collector (desktop-app.mjs): what each turn a
 // person started did, which subagents and sub-sessions it launched, and how
-// they ended. Tool names, a call's session id, a notice's status and the
-// origin of a user record are read; prompts and replies never are.
+// they ended. Tool names, a call's session id, a notice's status, the origin
+// of a user record and whether a tool result is an error are read; prompts and
+// replies never are.
 
 const TOOL_USE_ID = /<tool-use-id>([^<]+)<\/tool-use-id>/;
 const STATUS = /<status>([^<]+)<\/status>/;
@@ -13,9 +14,10 @@ const textOf = (content) => (typeof content === 'string' ? content : list(conten
 
 // An empty reading of one session: its turns, the open one, each tool call's
 // name, the message of the last Agent call and whether anything was learned
-// since, and what the session started and archived.
+// since, what the session started and archived, and each plan-approval result
+// in order (true: approved, false: sent back).
 export function emptyTurns() {
-  return { turns: [], open: null, tools: new Map(), agentMessage: null, learned: false, notices: [], started: [], archived: new Set(), lastAt: 0 };
+  return { turns: [], open: null, tools: new Map(), agentMessage: null, learned: false, notices: [], started: [], archived: new Set(), plans: [], lastAt: 0 };
 }
 
 function newTurn(at) {
@@ -28,6 +30,7 @@ function newTurn(at) {
 function onResult(state, part, record, params) {
   const name = state.tools.get(part.tool_use_id);
   if (name !== params.agent_tool || record.toolUseResult?.status !== params.async_status) state.learned = true;
+  if (params.plan_exit_tool && name === params.plan_exit_tool) state.plans.push(part.is_error !== true);
   if (name !== params.session_tool) return;
   const id = new RegExp(String(params.session_id_pattern)).exec(textOf(part.content));
   if (id?.[1]) state.started.push({ id: id[1], at: Date.parse(record.timestamp) });
@@ -106,11 +109,20 @@ function verdict(turn, isLast, live, params) {
   return isLast && live ? 'open' : 'missed';
 }
 
+// One session's plans: a plan is first shown when no plan result came before
+// it or the one before it was approved. Null when the session showed no plan.
+function planReading(state) {
+  const first = state.plans.filter((_, i) => i === 0 || state.plans[i - 1]);
+  return first.length ? { at: state.lastAt, shown: first.length, approved: first.filter(Boolean).length } : null;
+}
+
 // Every session's turns and sub-sessions, judged: a work turn is closed,
 // missed or left out, and a sub-session archived, left or still live.
 export function judge(states, now, params) {
-  const out = { turns: [], asked: 0, open: 0, subs: [], liveSubs: 0, notices: [], agentTurns: [] };
+  const out = { turns: [], asked: 0, open: 0, subs: [], liveSubs: 0, notices: [], agentTurns: [], planSessions: [] };
   for (const state of states) {
+    const plans = planReading(state);
+    if (plans) out.planSessions.push(plans);
     const live = isLive(state, now, params);
     state.turns.forEach((turn, i) => {
       const v = verdict(turn, i === state.turns.length - 1, live, params);

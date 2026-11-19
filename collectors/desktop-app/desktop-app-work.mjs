@@ -1,5 +1,5 @@
-// Work metrics for the desktop app collector (desktop-app.mjs): the four
-// readings of how sessions run their turns, sub-sessions and subagents, and
+// Work metrics for the desktop app collector (desktop-app.mjs): the five
+// readings of how sessions run their turns, sub-sessions, subagents and plans, and
 // the context a subagent starts with. Each takes the last N events, so new
 // work replaces old; an empty N is could_not_check, never 0 or 100.
 
@@ -70,10 +70,25 @@ function parallelShare(judged, params, { val, cnc }) {
   ]);
 }
 
-const TURN_IDS = ['turns_closed', 'sub_sessions_closed', 'subagents_killed', 'parallel_share'];
+function plansFirstPass(judged, params, { val, cnc }) {
+  const n = Number(params.plan_session_count);
+  const source = `the last ${n} sessions that showed a plan: the share of first-shown plans (the first, or one after an approval) whose params.plan_exit_tool result is no error; N = ${n} plan sessions`;
+  const w = window(judged.planSessions, n, 'plan_session_count', 'session that showed a plan');
+  if (w.reason) return cnc('plans_first_pass', w.reason, source);
+  const shown = w.last.reduce((sum, x) => sum + x.shown, 0);
+  const approved = w.last.reduce((sum, x) => sum + x.approved, 0);
+  val('plans_first_pass', pct(approved, shown), source, [
+    item('sessions that showed a plan', w.last.length, 'sessions'),
+    item('plans first shown', shown, 'plans'),
+    item('approved as shown', approved, 'plans'),
+  ]);
+}
 
-// The four readings of turns, sub-sessions and subagent notices. A session
-// whose turns could not be read (a broken param) leaves all four unmeasured.
+const TURN_IDS = ['turns_closed', 'sub_sessions_closed', 'subagents_killed', 'parallel_share', 'plans_first_pass'];
+
+// The five readings of turns, sub-sessions, subagent notices and plans. A
+// session whose turns could not be read (a broken param) leaves all five
+// unmeasured.
 export function workMetrics(sessions, params, now, write) {
   const broken = sessions.find((s) => s.turnsError);
   if (broken) {
@@ -85,6 +100,7 @@ export function workMetrics(sessions, params, now, write) {
   subSessionsClosed(judged, params, write);
   subagentsKilled(judged, params, write);
   parallelShare(judged, params, write);
+  plansFirstPass(judged, params, write);
 }
 
 // The context of a subagent run's first model call, or null when the run
