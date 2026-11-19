@@ -10,7 +10,7 @@ Measured 2026-11-15 at plugin 0.3.0; `plan` re-measured 2026-11-19 at 0.4.1 · H
 
 | 📈 Got better | ➖ Same | 📉 Got worse | 🪙 Always-on tokens | ✅ Anthropic's checks |
 |---|---|---|---|---|
-| **30** of 45 | 15 | **0** | **465** (goal 500) | **12** of 12 |
+| **30** of 45 | 15 | **0** | **404** (goal 500) | **12** of 12 |
 
 ## 📈 Quality
 
@@ -57,20 +57,21 @@ Observed on two repos on 2026-11-15: `claudius` #68 to #73 and `git-crafter` #13
 
 | Measure | Value | Reference |
 |---|---|---|
-| Always-on tokens, five skills | **465** | goal 500 · Claude Code flags a plugin at 2,000 |
-| Right skill picked with 102 plugins on | **8 of 8** | skills listed by name only |
-| Skill listing at that setting | **12,300** tokens | 107,616 with every description shown |
+| Always-on tokens, six skills | **404** | goal 500 · Claude Code flags a plugin at 2,000 |
+| Right skill picked with 102 plugins on | **8 of 8** | skills listed by name only · plugin 0.3.0 |
+| Skill listing at that setting | **12,300** tokens | 107,616 with every description shown · plugin 0.3.0 |
 
 | Skill | Always on | When used |
 |---|---|---|
-| `plan` | ~80 | ~1,200 |
-| `merge` | ~100 | ~1,000 |
-| `equip` | ~100 | ~1,600 |
-| `find-plugin` | ~80 | ~720 |
-| `plain-voice` | ~100 | ~540 |
-| **All five** | **465** | |
+| `plan` | ~70 | ~1,000 |
+| `merge` | ~70 | ~1,100 |
+| `equip` | ~70 | ~990 |
+| `visibility` | ~60 | ~770 |
+| `find-plugin` | ~60 | ~460 |
+| `plain-voice` | ~70 | ~340 |
+| **All six** | **404** | |
 
-The rows are Claude Code's rounded estimates (`claude plugin details`, plugin 0.3.0); its own total is 465. The Best practices tab estimates the same listing at 309, by characters ÷ 4.
+The rows are Claude Code's rounded estimates (`claude plugin details`, plugin 0.4.1, read 2026-11-19); its own total is 404. The Best practices tab estimates the same listing at 389, by characters ÷ 4.
 
 ## ✅ Standards
 
@@ -85,7 +86,7 @@ The rows are Claude Code's rounded estimates (`claude plugin details`, plugin 0.
 | Skill authoring rules broken | 0 | 0 | Best practices tab |
 | Skill files past the size and layout rules | 0 | 0 | Best practices tab |
 | Skills that run tools they do not name | 0 | 0 | Best practices tab |
-| Largest plugin's always-on tokens (chars ÷ 4) | 309 | 500 | Best practices tab |
+| Largest plugin's always-on tokens (chars ÷ 4) | 389 | 500 | Best practices tab |
 | Plugin skills with fewer than three eval cases | 0 | 0 | Best practices tab |
 | Plugin skills not shown to beat no plugin | 0 | 0 | Best practices tab |
 | Directory portal: blocking findings | 0 | 0 | scan passed at 1d57131 (plugin 0.3.0) |
