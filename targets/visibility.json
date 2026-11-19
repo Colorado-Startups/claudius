@@ -15,10 +15,9 @@
     "needs": "github-admin",
     "chart": "number",
     "params": {
-      "comment": "owner: the GitHub org audited; empty means this repo's owner. org_domains: email domains the org owns, so an author at one is not personal. last_commits: how many of the latest commits of each branch of each public repo are read, at most 100.",
+      "comment": "owner: the GitHub org audited; empty means this repo's owner. org_domains: email domains the org owns, beyond its profile's site and email domain, so an author at one is not personal.",
       "owner": "",
-      "org_domains": [],
-      "last_commits": 100
+      "org_domains": []
     }
   },
   {
@@ -43,13 +42,13 @@
     "kind": "quality",
     "group": "Public",
     "label": "Personal emails in public history",
-    "means": "Distinct commit author emails in public repos that are neither GitHub's noreply address nor the org's own domain.",
+    "means": "Distinct author emails in every commit of every branch of each public repo that are neither GitHub's noreply address nor the org's own domain.",
     "unit": "emails",
     "goal": 0,
     "near": 1,
     "direction": "lower",
     "goal_source": "template goal: the commits API returns each author email to anyone; GitHub Docs, Setting your commit email address (read 2026-11-19), makes a no-reply address the author email once email privacy is on",
-    "source": "gh api repos/<repo>/branches, then the last params.last_commits commits of each branch, of every public repo (collectors/visibility/visibility.mjs); detail counts per repo and the forks of those repos, never an address",
+    "source": "gh api --paginate repos/<repo>/branches, then every commit of each branch, every page, of every public repo (collectors/visibility/visibility.mjs); detail counts per repo and the forks of those repos, never an address",
     "needs": "gh",
     "chart": "table"
   },

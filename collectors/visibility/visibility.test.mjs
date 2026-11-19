@@ -27,9 +27,9 @@ function fakeGh({ repos = REPOS, routes = ROUTES } = {}) {
     if (route in routes) return structuredClone(routes[route]);
     throw Object.assign(new Error(`HTTP 404: ${route}`), { status: 404 });
   };
-  return { rest, restAll: async () => structuredClone(repos) };
+  return { rest, restAll: async (route) => (route.startsWith('orgs/') ? structuredClone(repos) : rest(route)) };
 }
-const params = { owner: 'acme', org_domains: [], last_commits: 100 };
+const params = { owner: 'acme', org_domains: [] };
 const run = (opts = {}) => collect({ params, gh: fakeGh(opts), fetchPage: async () => false, ...opts });
 
 test('visibility: every metric of the targets file, read from one org', async () => {
@@ -44,6 +44,13 @@ test('visibility: every metric of the targets file, read from one org', async ()
   assert.equal(out['visibility.requests'].value, 8, 'org, list, two Pages reads, two branch lists, two commit reads');
   assert.ok(out['visibility.audit_seconds'].value >= 0);
   assert.ok(!JSON.stringify(out).includes('home.example') && !/vault|notes/.test(JSON.stringify(out)), 'no address, no private name');
+});
+
+test('visibility: every page of a branch is read, each page one request', async () => {
+  const long = [...Array(150)].map(() => commit('1+a@users.noreply.github.com')).concat(commit('late@home.example'));
+  const out = await run({ routes: { ...ROUTES, 'repos/acme/tools/branches?per_page=100': [{ name: 'main' }], 'repos/acme/tools/commits?sha=main&per_page=100': long } });
+  assert.equal(out['visibility.personal_author_emails'].value, 2, 'the address in commit 151 counts');
+  assert.equal(out['visibility.requests'].value, 10, 'two pages for that branch');
 });
 
 test('visibility: a page that loads signed out counts, though its setting says private', async () => {

@@ -2,7 +2,7 @@
 //   Quality: private repos with a public page; public repos without secret scanning; personal emails in public history.
 //   Speed: seconds per audit. Consumption: gh api requests per audit.
 // Reads gh api only, plus one signed-out request per private repo's site. Org: params.owner, else this repo's owner.
-// A state read now; of each public repo, the last params.last_commits commits of every branch, not the default alone.
+// A state read now; of each public repo, every commit of every branch, each list read to its last page.
 // A token that cannot count every private repo, or hides security_and_analysis, leaves that metric not measured,
 // never 0 (Git Crafter quality/SCORING.md); in CI that waits for ADMIN_READ_TOKEN (actions/pages admin-read-token).
 // Privacy: detail rows name public repos only; an email is counted, never kept.
@@ -38,14 +38,15 @@ async function gather({ root = '.', mode, params = TEMPLATE, gh, fetchPage = sig
   const client = gh ?? ghClient(admin || undefined);
   let requests = 0;
   const rest = (route) => (requests += 1, client.rest(route));
+  // Every page of a list, each page one request.
+  const restAll = (route) => client.restAll(route).then((list) => ((requests += Math.max(1, Math.ceil(list.length / 100))), list), (err) => ((requests += 1), Promise.reject(err)));
   const out = {};
   const val = (id, value, source, detail) => (out[id] = { value, ...(detail?.length ? { detail } : {}), source, read_at: readAt });
   const cnc = (id, reason, source) => (out[id] = { could_not_check: reason, source });
   let org, repos;
   try {
     org = await rest(`orgs/${owner}`);
-    repos = await client.restAll(`orgs/${owner}/repos?per_page=100&type=all`);
-    requests += Math.max(1, Math.ceil(repos.length / 100));
+    repos = await restAll(`orgs/${owner}/repos?per_page=100&type=all`);
   } catch (err) {
     return all(`gh api orgs/${owner}: ${firstLine(err)}`);
   }
@@ -78,17 +79,21 @@ async function gather({ root = '.', mode, params = TEMPLATE, gh, fetchPage = sig
     val('visibility.public_without_secret_scanning', off.length, `${scanSource}; ${live.length} repos`, off.map((r) => ({ label: r.name, value: 1, unit: 'repos' })));
   }
 
-  // Scan: personal author emails in every branch of every public repo. Its forks keep a copy whatever is rewritten.
-  const n = Math.min(100, Number(params.last_commits ?? 100));
+  // Scan: personal author emails in every commit of every branch of every public repo. Forks keep a copy whatever
+  // is rewritten. One repo at a time and four branches at a time, clear of GitHub's secondary rate limits.
   const domains = [...(params.org_domains ?? []), ...orgDomains(org)];
-  const emailSource = `gh api repos/<repo>/branches, then the last ${n} commits of each branch (params.last_commits), of every public repo; distinct author emails neither GitHub noreply nor at params.org_domains or the org profile's site or email domain; counts only`;
+  const emailSource = `gh api --paginate repos/<repo>/branches, then every commit of each branch, every page, of every public repo, one repo and four branches at a time; distinct author emails neither GitHub noreply nor at params.org_domains or the org profile's site or email domain; counts only`;
   try {
-    const found = await Promise.all(pub.map(async (r) => {
-      const branches = await rest(`repos/${r.full_name}/branches?per_page=100`);
-      const lists = await Promise.all(branches.map((b) => rest(`repos/${r.full_name}/commits?sha=${encodeURIComponent(b.name)}&per_page=${n}`).catch((err) => (err.status === 409 ? [] : Promise.reject(err)))));
-      return { r, mine: new Set(lists.flat().map((c) => c.commit?.author?.email).filter((e) => personal(e, domains)).map((e) => e.toLowerCase())) };
-    }));
-    const hit = found.filter((f) => f.mine.size);
+    const hit = [];
+    for (const r of pub) {
+      const branches = await restAll(`repos/${r.full_name}/branches?per_page=100`);
+      const mine = new Set();
+      for (let i = 0; i < branches.length; i += 4) {
+        const lists = await Promise.all(branches.slice(i, i + 4).map((b) => restAll(`repos/${r.full_name}/commits?sha=${encodeURIComponent(b.name)}&per_page=100`).catch((err) => (err.status === 409 ? [] : Promise.reject(err)))));
+        for (const c of lists.flat()) if (personal(c.commit?.author?.email, domains)) mine.add(c.commit.author.email.toLowerCase());
+      }
+      if (mine.size) hit.push({ r, mine });
+    }
     const seen = new Set(hit.flatMap((f) => [...f.mine]));
     const detail = hit.map((f) => ({ label: f.r.name, value: f.mine.size, unit: 'emails' }));
     const forks = hit.reduce((sum, f) => sum + (f.r.forks_count ?? 0), 0);
