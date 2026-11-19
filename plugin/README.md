@@ -6,7 +6,7 @@ An Anthropic-first workflow for the Claude desktop app. Claudius adds only what 
 
 | Skill | Use it when | Builds on |
 |---|---|---|
-| `plan` | someone outlines a product or feature | plan mode, Artifacts, sessions, superpowers `writing-plans` |
+| `plan` | someone outlines a product or feature, or plan mode is on | plan mode, Artifacts, sessions, superpowers `writing-plans` |
 | `merge` | a pull request is open | Anthropic's `pr-review-toolkit`, `gh` |
 | `equip` | sessions feel heavy, or an account is being set up | `/plugin`, `claude plugin`, `/usage` |
 | `find-plugin` | someone asks if a plugin, skill or connector exists for a task | Anthropic's catalog, the directory, `skill-creator` |
