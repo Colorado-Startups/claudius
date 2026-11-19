@@ -34,21 +34,21 @@ flowchart LR
 | Plan | Checked once before it is shown, so the owner approves it as first shown | `desktop_app.plans_first_pass` |
 | Clear | Each blocker that costs more than it helps is fixed or removed by PR | `blockers.costly` |
 
-## Equip: a capability, from Anthropic's plugins to a lean session
+## Equip: every capability on, account-wide, and put to work
 
 ```mermaid
 flowchart LR
-  source["🔒 Source"] --> swap["🔒 Swap"] --> scope["🔒 Scope"] --> connect["🔒 Connect"] --> use["🔒 Use"] --> prune["🔒 Prune"]
+  source["🔒 Source"] --> swap["🔒 Swap"] --> scope["🔒 Keep"] --> connect["🔒 Connect"] --> use["🔒 Use"] --> prune["🔒 Orphans"]
 ```
 
 | Step | Ideal | Metric |
 |---|---|---|
 | Source | 🅰 official marketplaces or 🅱 Anthropic's reviewed directory; anything else named | `desktop_app.plugins_untrusted` |
 | Swap | A custom skill, agent or hook gives way to Anthropic's | `desktop_app.plugins_replaceable` |
-| Scope | Domain plugins on in the repos that use them | `desktop_app.listing_tokens` |
+| Keep | Every plugin, skill and connector stays on account-wide; listing tokens reported, never cut by turning one off | `desktop_app.listing_tokens` |
 | Connect | Every listed connector signed in before the first prompt | `desktop_app.connectors_pending` |
-| Use | An Anthropic or reviewed plugin that goes unused is put to work in the project that needs it, not dropped | `desktop_app.plugins_unused` |
-| Prune | Turned-off, orphaned, delisted, unmaintained installs uninstalled | `desktop_app.plugins_stale` |
+| Use | A plugin or connector that goes unused is put to work in the project that needs it, never turned off | `desktop_app.plugins_unused` |
+| Orphans | Only install records whose project folder is gone are removed; nothing the owner added is turned off | `desktop_app.plugins_stale` |
 
 | Tier | Marketplace name | Rule |
 |---|---|---|

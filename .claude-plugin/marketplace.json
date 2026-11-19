@@ -9,7 +9,7 @@
     {
       "name": "claudius",
       "source": "./plugin",
-      "description": "Anthropic-first workflow for the Claude desktop app: plan, merge at the reviewed commit, and a lean plugin setup."
+      "description": "Anthropic-first workflow for the Claude desktop app: plan, merge at the reviewed commit, and every plugin on and put to work."
     }
   ]
 }

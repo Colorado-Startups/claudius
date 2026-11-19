@@ -1,8 +1,8 @@
 {
  "id": "equip",
  "name": "Equip",
- "why": "A capability a session needs, from Anthropic's plugins to a lean session that loads only what it uses",
- "ideal": "Anthropic-built and reviewed plugins stay on and get used, replace custom copies, and dead installs go.",
+ "why": "Every plugin, skill and connector on for the whole app, put to work in the sessions that need it",
+ "ideal": "Every plugin, skill and connector the owner added stays on account-wide and gets used; official ones replace custom copies.",
  "sources": [
   {
    "title": "Claude Code: plugin security and trust",
@@ -54,12 +54,12 @@
   },
   {
    "id": "scope",
-   "name": "Scope",
+   "name": "Keep",
    "tools": [
     "enabledPlugins in .claude/settings.json",
     "claude plugin details"
    ],
-   "rule": "Domain plugins are enabled in the repos that use them, so every session lists only its own.",
+   "rule": "Every plugin stays on account-wide; listing tokens are reported, never cut by turning one off.",
    "rule_ref": "https://code.claude.com/docs/en/plugins/loading",
    "metric": "desktop_app.listing_tokens"
   },
@@ -81,18 +81,18 @@
     "/skill-doctor",
     "/usage"
    ],
-   "rule": "An Anthropic or reviewed plugin that goes unused is put to work in the project that needs it, not dropped.",
+   "rule": "A plugin or connector that goes unused is put to work in the project that needs it, never turned off.",
    "rule_ref": "https://code.claude.com/docs/en/plugins/measure",
    "metric": "desktop_app.plugins_unused"
   },
   {
    "id": "prune",
-   "name": "Prune",
+   "name": "Orphans",
    "tools": [
     "claude plugin uninstall",
     "/doctor"
    ],
-   "rule": "Turned-off, orphaned, delisted and long-unmaintained installs are uninstalled.",
+   "rule": "Only install records whose project folder is gone are removed; nothing the owner added is turned off.",
    "rule_ref": "https://code.claude.com/docs/en/plugins/security",
    "metric": "desktop_app.plugins_stale"
   }
