@@ -25,7 +25,7 @@ flowchart LR
 | 1 | Define | Read the outline and the repo. Ask only product, vision or billing questions: one AskUserQuestion call, at most 4, each with a recommended default. No AskUserQuestion, or no answer: plan on the defaults and list them above the plan; never stop at the questions. Decide engineering, security and settings questions yourself from current docs | AskUserQuestion |
 | 2 | Split | In plan mode, cut the work into steps. Each step is one PR of at most 200 changed lines, with its test, touching files no other step touches. If superpowers is installed, its `writing-plans` is the method for design and step-by-step plans | Plan mode |
 | 3 | Show | Publish the plan as an Artifact: a flow diagram, then one row per step (step, issue title, files, test, runs with or after, metric it moves). Labels, not paragraphs | Artifacts |
-| 4 | Approve | Run the Check table once. Then ExitPlanMode with the `Checked:` line, the steps and the Artifact link. On a yes, file the issues (step 5), then start one session per independent step on a brief under 150 words; steps that share files run in order | Sessions, worktrees |
+| 4 | Approve | Run the Check table once; if it fixed anything, republish the Artifact. Then ExitPlanMode with the `Checked:` line, the steps and the Artifact link. On a yes, file the issues (step 5), then start one session per independent step on a brief under 150 words; steps that share files run in order | Sessions, worktrees |
 | 5 | File | After the yes, one issue per step: `gh issue create`, its body the step's row and the Artifact link. Add `--type Task` only when `gh api orgs/<owner>/issue-types` lists Task; a 404 or no Task means plain | `gh` |
 | 6 | Build | A worker branches, tests, pushes once, and opens a PR that says `Closes #<issue>` with a table body. It stops at the open PR | Auto-fix |
 | 7 | Merge | The orchestrator reviews and merges each PR with the `merge` skill | pr-review-toolkit |
@@ -39,7 +39,7 @@ flowchart LR
 | Equipped | Each step names the skill, plugin or connector it uses. A missing one is listed to add |
 | Owner | Only product and billing items wait for the owner, each with a default |
 
-Fix what fails. Then put one line above the plan: `Checked: True ✅ · Whole ✅ · Small ✅ · Equipped ✅ · Owner 0 · Changed: <what the check fixed>`. One pass, never a loop. The check runs for any plan in plan mode, even one with no issues or sessions to follow. When the owner says "check", run the same table.
+Fix what fails. Then put one line above the plan, each row marked ✅ for a pass or ❌ for a fail: `Checked: True ✅ · Whole ✅ · Small ✅ · Equipped ✅ · Owner ✅ · Changed: <what the check fixed>`. A row that still fails after the pass keeps its ❌, with the reason in that line. One pass, never a loop. The check runs for any plan in plan mode, even one with no issues or sessions to follow. When the owner says "check", run the same table.
 
 | Keep usage low | Rule |
 |---|---|
