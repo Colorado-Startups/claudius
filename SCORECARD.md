@@ -36,6 +36,8 @@ Lift is in points: the pass rate with Claudius minus the pass rate without it, o
 
 `plan` was re-measured on 2026-11-19 at plugin 0.4.1, three runs per arm. Its grader requires a `Checked:` line that only Claudius writes, so its without arm scores 0. Its figures measure that line.
 
+`visibility` was measured on 2026-11-19 at plugin 0.4.1, three runs per arm. Its `visibility-private-terms` case never fired the skill in 9 runs and scored 0 in both arms, so its lift comes from the other two cases ([#91](https://github.com/Colorado-Startups/claudius/issues/91)).
+
 ## 🔀 GitHub
 
 ```mermaid
