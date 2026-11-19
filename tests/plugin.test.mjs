@@ -51,7 +51,7 @@ test('plugin: each skill has a name and a description of at most 50 words; the l
     assert.ok(words(fm.description) <= 50, `${s}: ${words(fm.description)} words`);
     chars += fm.name.length + fm.description.length;
   }
-  // claude plugin details reports ~444 always-on tokens for these five (2026-11-15); characters / 4 is the budget's estimate.
+  // claude plugin details reports ~404 always-on tokens for these six at 0.4.1 (2026-11-19); characters / 4 is the budget's estimate.
   assert.ok(chars / 4 < 500, `${Math.round(chars / 4)} tokens`);
 });
 

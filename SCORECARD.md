@@ -58,8 +58,8 @@ Observed on two repos on 2026-11-15: `claudius` #68 to #73 and `git-crafter` #13
 | Measure | Value | Reference |
 |---|---|---|
 | Always-on tokens, six skills | **404** | goal 500 · Claude Code flags a plugin at 2,000 |
-| Right skill picked with 102 plugins on | **8 of 8** | skills listed by name only |
-| Skill listing at that setting | **12,300** tokens | 107,616 with every description shown |
+| Right skill picked with 102 plugins on | **8 of 8** | skills listed by name only · plugin 0.3.0 |
+| Skill listing at that setting | **12,300** tokens | 107,616 with every description shown · plugin 0.3.0 |
 
 | Skill | Always on | When used |
 |---|---|---|
