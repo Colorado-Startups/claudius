@@ -2,38 +2,38 @@
 
 <img src="https://raw.githubusercontent.com/Colorado-Startups/brand/v3.2.0/dist/logo/claudius-icon-1024.png" width="96" alt="Claudius, an AI agent character">
 
-Measured 2026-11-15 at plugin 0.3.0; `plan` re-measured 2026-11-19 at 0.3.2 · Haiku 5.5, Sonnet 5.5, Opus 5.5 · judged by Sonnet 5.5
+Measured 2026-11-15 at plugin 0.3.0; `plan` re-measured 2026-11-19 at 0.4.1 · Haiku 5.5, Sonnet 5.5, Opus 5.5 · judged by Sonnet 5.5
 
 | | 🧩 With Claudius | ⬜ Without | 📈 Lift |
 |---|---|---|---|
-| **Graded tasks Claude got right** | **57%** | 7% | **+50 points**, ± 14 at 95% |
+| **Graded tasks Claude got right** | **63%** | 7% | **+56 points**, ± 13 at 95% |
 
 | 📈 Got better | ➖ Same | 📉 Got worse | 🪙 Always-on tokens | ✅ Anthropic's checks |
 |---|---|---|---|---|
-| **26** of 45 | 19 | **0** | **465** (goal 500) | **12** of 12 |
+| **30** of 45 | 15 | **0** | **465** (goal 500) | **12** of 12 |
 
 ## 📈 Quality
 
 ```mermaid
 xychart-beta
   title "Tasks passed by skill, percent: bars with Claudius, line without"
-  x-axis ["plain-voice", "find-plugin", "plan", "merge", "equip"]
+  x-axis ["plan", "plain-voice", "find-plugin", "merge", "equip"]
   y-axis "Pass rate" 0 --> 100
-  bar [78, 67, 56, 52, 33]
-  line [30, 0, 0, 7, 0]
+  bar [85, 78, 67, 52, 33]
+  line [0, 30, 0, 7, 0]
 ```
 
 | Skill | ⬜ Without | 🧩 With | Lift | Haiku | Sonnet | Opus |
 |---|---|---|---|---|---|---|
+| `plan` | 0% | **85%** | +85 | +100 | +89 | +67 |
 | `plain-voice` | 30% | **78%** | +48 | +33 | +67 | +44 |
 | `find-plugin` | 0% | **67%** | +67 | +67 | +67 | +67 |
-| `plan` | 0% | **56%** | +56 | +33 | +33 | +100 |
 | `merge` | 7% | **52%** | +44 | +22 | +89 | +22 |
 | `equip` | 0% | **33%** | +33 | +33 | +33 | +33 |
 
 Lift is in points: the pass rate with Claudius minus the pass rate without it, on the same task and model.
 
-`plan` was re-measured on 2026-11-19 at plugin 0.3.2, one run per arm. Its grader requires a `Checked:` line that only Claudius writes, so its without arm scores 0. Its figures measure that line.
+`plan` was re-measured on 2026-11-19 at plugin 0.4.1, three runs per arm. Its grader requires a `Checked:` line that only Claudius writes, so its without arm scores 0. Its figures measure that line.
 
 ## 🔀 GitHub
 
@@ -100,7 +100,7 @@ Plugin 0.3.0 passed the directory's scan on 2026-11-15, with warnings only, and 
 | What | How |
 |---|---|
 | Tasks | 15, three per skill, in [plugin/evals](plugin/evals) |
-| Runs | 162 agent runs: `merge` and `plain-voice` tasks 3 per arm, the rest 1 |
+| Runs | 198 agent runs: `merge`, `plain-voice` and `plan` tasks 3 per arm, the rest 1 |
 | Tool | `claude plugin eval`, each task with the plugin and without it |
 | Scores | [quality/evals](quality/evals), one file per model |
 | Interval | 1.96 standard errors of the 45 paired differences |

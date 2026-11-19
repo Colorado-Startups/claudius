@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Turns an owner's product outline into a visual plan Artifact, one GitHub issue per PR-sized step, and one session per independent step, and checks any plan once before it is shown. Use when someone outlines an app, product or feature to build, or in plan mode.
+description: Plans an app, product or feature build as a visual plan of PR-sized steps, one session brief per independent step, checked once before showing. Files GitHub issues and starts sessions when tools allow. Use when someone outlines what to build or asks to plan it, in chat or plan mode.
 compatibility: Needs the gh CLI signed in, and the Claude desktop app's Code tab for sessions and Artifacts. Without a shell it writes the plan as a table and lists the session briefs.
 ---
 
