@@ -108,7 +108,7 @@
     "goal": 0,
     "near": 2,
     "direction": "lower",
-    "goal_source": "goal from the MCP docs: a server that needs authentication or failed to connect gives no tools until it is fixed (code.claude.com/docs/en/mcp, read 2026-11-10), and the best practices say to turn off the servers not needed (code.claude.com/docs/en/best-practices, read 2026-11-10), so none stays broken",
+    "goal_source": "goal from the MCP docs: a server that needs authentication or failed to connect gives no tools until it is fixed (code.claude.com/docs/en/mcp, read 2026-11-10); a broken one is signed in or repaired, never turned off (the owner, 2026-11-19), so none stays broken",
     "source": "state: the newest transcript of this repo whose entrypoint is params.entrypoint, its last deferred_tools_delta attachment: needsAuthMcpServers plus failedMcpServers, counted; the attachment is observed in transcripts, not named in Anthropic's public docs",
     "needs": "local-files",
     "chart": "table"
@@ -141,7 +141,7 @@
     "goal": 0,
     "near": 2,
     "direction": "lower",
-    "goal_source": "goal from the best practices: connected servers add their tool names and instructions even when unused, so turn off the ones not needed (code.claude.com/docs/en/best-practices and code.claude.com/docs/en/costs, read 2026-11-10)",
+    "goal_source": "goal from the best practices: connected servers add their tool names and instructions even when unused, so this reports their cost; an unused one is put to work, never turned off: one desktop app serves every repo and project (the owner, 2026-11-19; code.claude.com/docs/en/costs, read 2026-11-10)",
     "source": "state: the servers behind the mcp__ tool names the newest desktop session lists, those in params.app_servers and of a kind in params.kept_kinds set aside, against calls in the account's last params.usage_sessions sessions across every project folder and Cowork session, with their subagents; N = 10 sessions, the window of desktop_app.plugins_unused",
     "needs": "local-files",
     "chart": "table",

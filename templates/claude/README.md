@@ -47,17 +47,17 @@ No hooks sit in the repo's `settings.json`: a hook that points at a guard the ma
 | Merge when ready | off | It turns on GitHub auto-merge; merges go through the `merging` skill's verdict |
 | Output style | Default | Explanatory and Learning add Insights to replies, and Learning stops for you to write code |
 | Effort | medium | Git Crafter `skills/merging/orchestrating.md`: Opus at medium runs sessions |
-| Plugins and connectors | only the ones the repo calls | Each one's tools, skills and instructions go out again on every turn (chart below). `desktop_app.plugins_unused`, `connectors_unused` and `listing_tokens` score it |
-| Domain plugins (legal, finance, sales, design) | per repo: `enabledPlugins` in that repo's `.claude/settings.json`; off in `~/.claude/settings.json` | They load only where that work happens |
-| `syncClaudeAiPlugins` | `false` in `~/.claude/settings.json`, when claude.ai plugins you never use in Code load | Stops your claude.ai account's plugins loading in Code. A repo file cannot set it; to drop one plugin there, `"<name>@synced": false` |
-| `/plugin`, Installed tab: **Not used recently** | monthly: disable each one listed | Listed after 14 days and 10 sessions unused |
-| `/skill-doctor` | monthly | Skills in the listing never invoked, with each one's context cost |
-| `/doctor` | monthly | Recommends disabling skills, MCP servers and plugins you did not use |
+| Plugins, skills and connectors | **all on, account-wide** | One desktop app serves every repo and project, so each one the owner added stays on. Never turn one off, scope it to one repo or disconnect it to save tokens (the owner, 2026-11-19). Their cost per turn is in the chart below; `desktop_app.plugins_unused`, `connectors_unused` and `listing_tokens` report it |
+| Domain plugins (legal, finance, sales, design) | on in `~/.claude/settings.json`, like every other | Another repo or project uses them |
+| `syncClaudeAiPlugins` | unset (on) | `false` drops your claude.ai plugins from every Code session |
+| `/plugin`, Installed tab: **Not used recently** | monthly: put each one listed to work; keep it on | Listed after 14 days and 10 sessions unused |
+| `/skill-doctor` | monthly | Skills in the listing never invoked, with each one's context cost. Keep them on |
+| `/doctor` | monthly | Lists skills, MCP servers and plugins you did not use. Keep them on; fix only the ones that fail |
 | `/usage` | weekly | Share of usage per skill, subagent, plugin and MCP server (Pro, Max, Ultra, Team, Enterprise) |
 
 Run the four checks in a terminal session in the repo (`claude`): it reads the same settings files as the app.
 
-What one turn carries before any message, in an example session with many plugins on (the app's `get_usage` context categories, read 2026-11-14). The MCP and skill slices shrink as dead or unreviewed plugins are removed:
+What one turn carries before any message, in an example session with many plugins on (the app's `get_usage` context categories, read 2026-11-14). The MCP and skill slices are the cost of keeping every plugin and connector on:
 
 ```mermaid
 pie title Fixed context per turn, tokens
@@ -123,7 +123,7 @@ flowchart TD
   Q3 -->|yes| X[named exception]
   Q3 -->|no| Z[skip]
   I --> M[measure monthly:<br/>unused · stale · tokens] --> P{Not used recently?}
-  P -->|yes| D[disable]
+  P -->|yes| D[put to work, keep on]
 ```
 
 | The template turns on (`@claude-plugins-official`, author Anthropic) | For | Replaces |
