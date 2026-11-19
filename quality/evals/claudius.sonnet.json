@@ -6,12 +6,12 @@
  "date": "2026-11-15",
  "claudeVersion": "2.1.314",
  "partial": false,
- "note": "merge-*, plain-voice-* and plan-* cases: 3 runs per arm; other cases: 1 run per arm. claude plugin eval, schemaVersion 1, scores only. plan-* cases re-measured 2026-11-19 at plugin 0.4.1, 3 runs per arm.",
+ "note": "merge-*, plain-voice-* and plan-* cases: 3 runs per arm; other cases: 1 run per arm. claude plugin eval, schemaVersion 1, scores only. plan-* cases re-measured 2026-11-19 at plugin 0.4.1, 3 runs per arm. visibility-* cases measured 2026-11-19 at plugin 0.4.1, 3 runs per arm.",
  "costUsd": 1.44,
  "aggregates": {
-  "overallScore": 0.7555555555555554,
-  "meanDelta": 0.6888888888888888,
-  "casesTotal": 15
+  "overallScore": 0.7407407407407407,
+  "meanDelta": 0.6296296296296295,
+  "casesTotal": 18
  },
  "cases": [
   {
@@ -131,6 +131,30 @@
    "runs": 1,
    "aggregates": {
     "score": 0,
+    "delta": 0
+   }
+  },
+  {
+   "name": "visibility-org-audit",
+   "runs": 3,
+   "aggregates": {
+    "score": 1,
+    "delta": 1
+   }
+  },
+  {
+   "name": "visibility-private-terms",
+   "runs": 3,
+   "aggregates": {
+    "score": 0,
+    "delta": 0
+   }
+  },
+  {
+   "name": "visibility-retire-repo",
+   "runs": 3,
+   "aggregates": {
+    "score": 1,
     "delta": 0
    }
   }
