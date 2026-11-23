@@ -19,8 +19,10 @@ workers.json is a list; a worker has `name` and either `repo` + `branch` (+ opti
 Output line: {"name","signal","idle_min","pr":{"number","state","ci"}|null,"verdict":"ok|nudge|restart|done"}.
 Progress for a cloud worker is the branch's newest sha plus the PR's head sha, state and check rollup (comments and
 description edits are not progress). For a local worker it is HEAD plus a hash of `git status --porcelain`.
-State between calls (last fingerprint, when it changed, whether a nudge went out) is in --state, default
-$TMPDIR/watch_workers.state.json. Needs `gh` (signed in) for cloud workers; reads no tokens itself. Standard library
+A worker is done when its PR is merged, or ready for review (not a draft) with CI green or absent at the branch's
+newest sha. An error reading a worker is not progress: one that keeps failing is nudged, then restarted, like a quiet
+one, and its signal names the error. State between calls (last fingerprint, when it changed, whether a nudge went out)
+is in --state, default $TMPDIR/watch_workers.<hash of the workers file path>.state.json, so two plans never share it. Needs `gh` (signed in) for cloud workers; reads no tokens itself. Standard library
 only.
 """
 
@@ -37,10 +39,14 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib.parse import quote
 
+try:
+    import fcntl  # POSIX; without it (Windows) state writes go unlocked
+except ImportError:
+    fcntl = None
+
 NUDGE_AFTER_MIN = 1          # quiet this long -> nudge
 RESTART_AFTER_NUDGE_MIN = 1  # still quiet this long after the nudge -> restart
 BUSY_GRACE_MIN = 10          # a session shown busy may go this long without a push (the contract's draft-PR limit)
-DEFAULT_STATE = Path(tempfile.gettempdir()) / "watch_workers.state.json"
 FAILED = {"FAILURE", "TIMED_OUT", "CANCELLED", "ACTION_REQUIRED", "STARTUP_FAILURE", "ERROR"}
 PASSED = {"SUCCESS", "NEUTRAL", "SKIPPED"}
 
@@ -110,17 +116,20 @@ def check_cloud(w):
     pr = None
     if number is not None:
         rc, out, err = sh(["gh", "pr", "view", str(number), "--repo", repo,
-                           "--json", "state,headRefOid,statusCheckRollup"])
+                           "--json", "state,isDraft,headRefOid,statusCheckRollup"])
         if rc:
             return {"error": err}
         d = json.loads(out)
         pr = {"number": number, "state": d["state"].lower(), "ci": ci_state(d.get("statusCheckRollup")),
-              "head": d.get("headRefOid")}
+              "head": d.get("headRefOid"), "draft": bool(d.get("isDraft"))}
     if pr:
         sha7 = (pr["head"] or sha or "")[:7]
-        signal = f"PR #{number} merged" if pr["state"] == "merged" else f"PR #{number} {pr['state']} CI {pr['ci']} {sha7}"
-        fp = "|".join([sha or "-", pr["head"] or "-", pr["state"], pr["ci"]])
-        done = pr["state"] == "merged" or (pr["state"] == "open" and pr["ci"] in ("green", "none") and pr["head"] == sha)
+        state = "draft" if pr["state"] == "open" and pr["draft"] else pr["state"]
+        signal = f"PR #{number} merged" if state == "merged" else f"PR #{number} {state} CI {pr['ci']} {sha7}"
+        fp = "|".join([sha or "-", pr["head"] or "-", state, pr["ci"]])
+        # Ready, not a draft: a worker opens its draft early and pushes every step, so CI can be green mid-work.
+        # CI "none" counts, for repos with no checks; after this, CI results reach the orchestrator from Auto-fix.
+        done = state == "merged" or (state == "open" and pr["ci"] in ("green", "none") and pr["head"] == sha)
         pr = {k: pr[k] for k in ("number", "state", "ci")}
     else:
         signal = f"push {sha[:7]}" if sha else "no branch yet"
@@ -136,9 +145,12 @@ def check_local(w):
     rc, status, err = sh(["git", "-C", path, "status", "--porcelain"])
     if rc:
         return {"error": err}
+    rc, diff, err = sh(["git", "-C", path, "diff", "HEAD", "--no-ext-diff"])
+    if rc:
+        return {"error": err}
     dirty = len(status.splitlines())
     signal = f"commit {head[:7]}" + (f" +{dirty} dirty" if dirty else "")
-    fp = head + "|" + hashlib.sha1(status.encode()).hexdigest()
+    fp = head + "|" + hashlib.sha1((status + "\0" + diff).encode()).hexdigest()
     return {"fp": fp, "signal": signal, "pr": None, "done": False}
 
 
@@ -154,33 +166,61 @@ def judge(name, result, state, now, busy=False):
     s = state.get(name)
     if s is None:
         s = state[name] = {"fp": None, "changed": now, "nudged_at": None}
-    if "error" in result:
-        idle = int((now - s["changed"]) // 60)
-        return {"name": name, "signal": short_error(result["error"]), "idle_min": idle, "pr": None, "verdict": "ok"}
-    if result["fp"] != s["fp"]:
+    error = "error" in result
+    if not error and result["fp"] != s["fp"]:
         s.update(fp=result["fp"], changed=now, nudged_at=None)
     idle = int((now - s["changed"]) // 60)
-    if result["done"]:
+    if not error and result["done"]:
         v = "done"
     else:
         nudged_at = s.get("nudged_at")
         v = verdict(idle, None if nudged_at is None else int((now - nudged_at) // 60), busy)
         if v == "nudge":
             s["nudged_at"] = now
-    return {"name": name, "signal": result["signal"], "idle_min": idle, "pr": result["pr"], "verdict": v}
+    signal = short_error(result["error"]) if error else result["signal"]
+    return {"name": name, "signal": signal, "idle_min": idle, "pr": None if error else result["pr"], "verdict": v}
 
 
-def check_all(workers, state, now, busy=()):
+def check_all(workers):
     with ThreadPoolExecutor(max_workers=min(8, len(workers)) or 1) as pool:
-        results = list(pool.map(check_worker, workers))
-    return [judge(w["name"], r, state, now, w["name"] in busy) for w, r in zip(workers, results)]
+        return list(pool.map(check_worker, workers))
+
+
+class locked_state:
+    """Read, change and write the state file under a lock, so a tick never undoes a --reset made meanwhile."""
+
+    def __init__(self, path):
+        self.path = path
+
+    def __enter__(self):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.lock = open(str(self.path) + ".lock", "a")
+        if fcntl:
+            fcntl.flock(self.lock, fcntl.LOCK_EX)
+        self.state = load_state(self.path)
+        return self.state
+
+    def __exit__(self, kind, *_):
+        try:
+            if kind is None:
+                save_state(self.path, self.state)
+        finally:
+            self.lock.close()
 
 
 def load_state(path):
     try:
-        return json.loads(path.read_text())
-    except (OSError, ValueError):
+        state = json.loads(path.read_text())
+    except FileNotFoundError:
         return {}
+    except (OSError, ValueError) as e:
+        print(f"watch_workers: state file {path} unreadable ({type(e).__name__}); starting fresh", file=sys.stderr)
+        return {}
+    ok = isinstance(state, dict) and all(isinstance(v, dict) and {"fp", "changed"} <= v.keys() for v in state.values())
+    if not ok:
+        print(f"watch_workers: state file {path} has the wrong shape; starting fresh", file=sys.stderr)
+        return {}
+    return state
 
 
 def save_state(path, state):
@@ -202,6 +242,11 @@ def load_workers(path):
     return workers
 
 
+def default_state(workers_path):
+    key = hashlib.sha1(str(Path(workers_path).expanduser().resolve()).encode()).hexdigest()[:12]
+    return Path(tempfile.gettempdir()) / f"watch_workers.{key}.state.json"
+
+
 def emit(row):
     print(json.dumps(row, separators=(",", ":")), flush=True)
 
@@ -209,7 +254,7 @@ def emit(row):
 def main():
     ap = argparse.ArgumentParser(description="Check workers and say which stalled.")
     ap.add_argument("--workers", help="JSON file listing the workers")
-    ap.add_argument("--state", default=str(DEFAULT_STATE), help="state file (default $TMPDIR/watch_workers.state.json)")
+    ap.add_argument("--state", help="state file (default: one per workers file, in $TMPDIR)")
     ap.add_argument("--once", action="store_true", help="check once, print one JSON line per worker")
     ap.add_argument("--every", type=float, default=60, help="seconds between checks in loop mode")
     ap.add_argument("--reset", action="append", metavar="NAME", help="clear this worker's state and exit")
@@ -217,13 +262,14 @@ def main():
     ap.add_argument("--busy", action="append", default=[], metavar="NAME",
                     help="a worker the session list shows busy right now (repeatable)")
     args = ap.parse_args()
-    state_path = Path(args.state).expanduser()
+    if not args.workers and not args.state:
+        ap.error("--workers is required")
+    state_path = Path(args.state).expanduser() if args.state else default_state(args.workers)
 
     if args.reset:
-        state = load_state(state_path)
-        for name in args.reset:
-            state.pop(name, None)
-        save_state(state_path, state)
+        with locked_state(state_path) as state:
+            for name in args.reset:
+                state.pop(name, None)
         print("reset " + ", ".join(args.reset))
         return
     if not args.workers:
@@ -232,9 +278,10 @@ def main():
 
     last = {}
     while True:
-        state = load_state(state_path)
-        rows = check_all(workers, state, args.now if args.now is not None else time.time(), set(args.busy))
-        save_state(state_path, state)
+        results = check_all(workers)
+        now = args.now if args.now is not None else time.time()
+        with locked_state(state_path) as state:
+            rows = [judge(w["name"], r, state, now, w["name"] in args.busy) for w, r in zip(workers, results)]
         for row in rows:
             key = (row["verdict"], row["signal"])
             if args.once or last.get(row["name"]) != key:
