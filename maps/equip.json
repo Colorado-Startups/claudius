@@ -31,11 +31,23 @@
   }
  ],
  "critical_path": [
+  "on",
   "source",
   "keep",
   "stale"
  ],
  "steps": [
+  {
+   "id": "on",
+   "name": "On",
+   "tools": [
+    "settings.json",
+    "/config"
+   ],
+   "rule": "No setting turns a plugin, skill or connector off; a session ignores what it does not need.",
+   "rule_ref": "https://github.com/Colorado-Startups/claudius/blob/main/templates/claude/README.md#all-on-app-wide",
+   "metric": "desktop_app.off_switches"
+  },
   {
    "id": "source",
    "name": "Source",
@@ -52,12 +64,11 @@
    "name": "Keep",
    "tools": [
     "claude plugin details",
-    "skillListingBudgetFraction",
-    "settings.json"
+    "skillListingBudgetFraction"
    ],
    "rule": "Every plugin stays on app-wide; a listing over budget is fixed by skillListingBudgetFraction, never by turning one off.",
    "rule_ref": "https://github.com/Colorado-Startups/claudius/blob/main/templates/claude/README.md#all-on-app-wide",
-   "metric": "desktop_app.off_switches"
+   "metric": "desktop_app.listing_tokens"
   },
   {
    "id": "connect",
