@@ -45,6 +45,7 @@ function cloud(pr) {
   const dir = mkdtempSync(join(tmpdir(), 'watch-gh-'));
   writeFileSync(join(dir, 'gh'), [
     '#!/bin/sh',
+    '[ -n "$FAKE_FAIL" ] && { echo "gh: connection refused" >&2; exit 1; }',
     'case "$1 $2" in',
     '  "api repos/"*) echo "$FAKE_SHA" ;;',
     '  "pr list") echo \'[{"number":7}]\' ;;',
@@ -58,7 +59,8 @@ function cloud(pr) {
   const env = { PATH: `${dir}:${process.env.PATH}`, FAKE_SHA: SHA, FAKE_PR: JSON.stringify(pr) };
   const state = join(dir, 'state.json');
   const run = (now, ...extra) => watch(['--workers', workers, '--state', state, '--now', String(now), ...extra], env);
-  return { run };
+  const fail = (now) => watch(['--workers', workers, '--state', state, '--now', String(now), '--once'], { ...env, FAKE_FAIL: '1' });
+  return { run, fail };
 }
 const pr = (over) => ({ state: 'OPEN', isDraft: false, headRefOid: SHA, statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }], ...over });
 
@@ -128,13 +130,40 @@ test('watch: a draft PR is never done, even with green CI', () => {
   assert.equal(run(T0 + 60, '--once')[0].verdict, 'nudge');
 });
 
-test('watch: a ready PR at the branch head with green or no CI is done, and loop mode then exits', () => {
-  assert.equal(cloud(pr({})).run(T0, '--once')[0].verdict, 'done');
-  assert.equal(cloud(pr({ statusCheckRollup: [] })).run(T0, '--once')[0].verdict, 'done');
-  assert.equal(cloud(pr({ state: 'MERGED' })).run(T0, '--once')[0].signal, 'PR #7 merged');
+// Done is confirmed on a second check, a minute later.
+const doneAfterTwo = (p) => {
+  const { run } = cloud(p);
+  assert.equal(run(T0, '--once')[0].verdict, 'ok');
+  return run(T0 + 60, '--once')[0];
+};
+
+test('watch: a ready PR at the branch head with green or no CI is done on the second check, and loop mode exits', () => {
+  assert.equal(doneAfterTwo(pr({})).verdict, 'done');
+  assert.equal(doneAfterTwo(pr({ statusCheckRollup: [] })).verdict, 'done');
+  const merged = doneAfterTwo(pr({ state: 'MERGED' }));
+  assert.deepEqual([merged.verdict, merged.signal], ['done', 'PR #7 merged']);
   const rows = cloud(pr({})).run(T0, '--every', '0');
-  assert.equal(rows.length, 1);
-  assert.equal(rows[0].verdict, 'done');
+  assert.deepEqual(rows.map((r) => r.verdict), ['ok', 'done']);
+});
+
+test('watch: an old merged PR on a reused branch name is not done', () => {
+  assert.notEqual(doneAfterTwo(pr({ state: 'MERGED', headRefOid: 'b'.repeat(40) })).verdict, 'done');
+});
+
+test('watch: a done worker stays done through a failed read, and is not nudged', () => {
+  const { run, fail } = cloud(pr({}));
+  run(T0, '--once');
+  assert.equal(run(T0 + 60, '--once')[0].verdict, 'done');
+  for (const t of [T0 + 120, T0 + 180, T0 + 240]) assert.equal(fail(t)[0].verdict, 'done');
+});
+
+test('watch: a corrupt state file says so and starts fresh', () => {
+  const { run, state, workers } = local();
+  writeFileSync(state, '{not json');
+  const r = spawnSync('python3', ['-I', SCRIPT, '--workers', workers, '--state', state, '--once', '--now', String(T0)], { encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stderr, /unreadable/);
+  assert.equal(run(T0 + 60).verdict, 'nudge');
 });
 
 test('watch: CI failing or pending, or a PR behind the branch, is not done', () => {
