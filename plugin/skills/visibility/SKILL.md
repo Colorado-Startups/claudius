@@ -23,6 +23,7 @@ No `gh` (no shell tool, or `command -v gh` finds nothing): give the table below 
 | 7 | Retire | Check every branch, not only the default, before calling a repo retired: `gh api --paginate 'repos/ORG/REPO/branches?per_page=100' --jq '.[].name'`, then each branch's commits ahead of the default |
 | 8 | Forks | Making a public repo private leaves its public forks public ([setting repository visibility](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/setting-repository-visibility), read 2026-11-19). Count them before history is rewritten |
 | 9 | Report | One row per repo: visibility, archived, site, emails, scanning, terms, forks, and the side it belongs on |
+| Personal | A personal account (`gh api orgs/OWNER` answers 404), signed in as that user: `gh api users/OWNER --jq .total_private_repos` and `gh api --paginate 'user/repos?per_page=100&affiliation=owner'` replace checks 1 and 2, and check 5 reads `gh api repos/OWNER/REPO --jq .security_and_analysis` per public repo, as `user/repos` omits it. Checks 3 and 4 run as written, but `noreply@anthropic.com` (Claude Code cloud sessions) is not a personal email. A check the login cannot make is not measured, never 0 |
 
 | Measure | Where |
 |---|---|
