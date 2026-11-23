@@ -1,0 +1,18 @@
+{
+ "id": "cloud",
+ "name": "Cloud",
+ "why": "A task, from a cloud session's environment to a PR merged by a local session",
+ "ideal": "A worker loads the repo's files, opens its PR through the REST API, and a local session merges it.",
+ "sources": [
+  {"title": "Claude Code: configure cloud environments", "url": "https://code.claude.com/docs/en/cloud-environments", "date": "2026-11-23"},
+  {"title": "Claude Code: use Claude Code in the cloud", "url": "https://code.claude.com/docs/en/claude-code-on-the-web", "date": "2026-11-23"}
+ ],
+ "critical_path": ["environment", "load", "work", "pr", "merge"],
+ "steps": [
+  {"id": "environment", "name": "Environment", "tools": ["Limited network access", "Allowed domains"], "rule": "The environment is Limited plus the hosts the repo needs, and the repo commits its setup files.", "rule_ref": "https://code.claude.com/docs/en/cloud-environments#network-access", "metric": "claude_settings.setup_files"},
+  {"id": "load", "name": "Load", "tools": ["The repo's CLAUDE.md and imports", ".claude/settings.json"], "rule": "Only what the clone holds loads; nothing in ~/.claude or a repo-declared marketplace does.", "rule_ref": "https://code.claude.com/docs/en/cloud-environments#what-carries-over-from-your-setup", "metric": "claude.instruction_tokens"},
+  {"id": "work", "name": "Work", "tools": ["permissions.deny rules"], "rule": "The worker runs under the repo's deny rules and pushes its branch through the GitHub proxy.", "rule_ref": "https://code.claude.com/docs/en/cloud-environments#github-proxy", "metric": "claude_settings.deny_coverage"},
+  {"id": "pr", "name": "PR", "tools": ["gh api repos/{owner}/{repo}/pulls"], "rule": "The worker opens its PR with gh api, since the proxy refuses gh pr and gh issue.", "rule_ref": "https://code.claude.com/docs/en/cloud-environments#github-proxy", "metric": "blockers.pushes_per_merged_pr"},
+  {"id": "merge", "name": "Merge", "tools": ["A local session", "The merge skill"], "rule": "The merge runs in a local session, which reviews the PR at its head SHA first.", "rule_ref": "https://code.claude.com/docs/en/claude-code-on-the-web#review-changes", "metric": "lead_time.hours"}
+ ]
+}

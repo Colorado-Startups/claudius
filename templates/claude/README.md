@@ -50,6 +50,22 @@ The deny list is a backstop, not a full blocklist. Claude Code's built-in check 
 
 No hooks sit in the repo's `settings.json`: a hook that points at a guard the machine lacks fails every call.
 
+## Cloud sessions
+
+A cloud session starts from a fresh clone of the repo on an Anthropic-hosted VM, so it loads the repo and nothing from your machine. The [Cloud map](../../maps/README.md#cloud-a-task-from-a-cloud-sessions-environment-to-a-pr-merged-by-a-local-session) scores each step.
+
+| Question | Answer |
+|---|---|
+| What loads | The repo's `CLAUDE.md` and what it imports, `.claude/settings.json` hooks and deny rules (in a session with one repo), `.mcp.json`, `.claude/rules/`, and `.claude/skills/`, `agents/` and `commands/` |
+| What does not load | Anything in `~/.claude` (`CLAUDE.md`, skills, agents, commands, user-scope plugins), MCP servers added at user or local scope, and marketplaces the repo declares under `extraKnownMarketplaces`. The `claudius` plugin is one of those, so commit what a worker needs to the repo's `.claude/` |
+| How a worker opens a PR | `gh api repos/{owner}/{repo}/pulls` (REST). The GitHub proxy returns 403 for GraphQL, so `gh pr` and `gh issue` fail |
+| Network | **Limited** (the default): package registries, GitHub and cloud SDKs, plus the hosts you list under **Allowed domains**. List what the repo needs beyond that, per environment |
+| Who merges | A local session: it reviews the PR at its head SHA, then merges that commit ([`merge`](../../plugin/)) |
+
+[All on, app-wide](#all-on-app-wide) still holds: a cloud worker simply starts with fewer files, and a brief names the task, never a tool list.
+
+Sources: code.claude.com/docs/en/cloud-environments and /claude-code-on-the-web, read 2026-11-23.
+
 ## Desktop app (Code tab)
 
 | Setting or check | Set | Why |

@@ -78,7 +78,7 @@ test('public: the Process config writes each pack map in full, without the steps
   const dropped = new Set(writePublic(root));
   const mine = read(join(ROOT, 'quality', 'process', 'config.json'));
   const pub = read(join(root, 'quality', 'public', 'process.json'));
-  assert.deepEqual(mine.maps, [{ use: 'guard' }, { use: 'decide' }, { use: 'equip' }, { use: 'publish' }, { use: 'visibility' }]);
+  assert.deepEqual(mine.maps, [{ use: 'guard' }, { use: 'decide' }, { use: 'equip' }, { use: 'publish' }, { use: 'visibility' }, { use: 'cloud' }]);
   assert.deepEqual({ ...pub, comment: mine.comment, maps: mine.maps }, {
     ...mine,
     docs: { maps: 'quality/public/process.json' },
@@ -90,7 +90,8 @@ test('public: the Process config writes each pack map in full, without the steps
   const guard = read(join(ROOT, 'maps', 'guard.json'));
   const publish = read(join(ROOT, 'maps', 'publish.json'));
   const visibility = read(join(ROOT, 'maps', 'visibility.json'));
-  assert.deepEqual(pub.maps, [{ ...guard, critical_path: [], steps: guard.steps.filter((s) => s.id === 'change') }, publish, visibility], 'Decide and Equip score only local-only metrics, so both are left out; every Publish and Visibility step reads GitHub or repo files, so each stays whole');
+  const cloud = read(join(ROOT, 'maps', 'cloud.json'));
+  assert.deepEqual(pub.maps, [{ ...guard, critical_path: [], steps: guard.steps.filter((s) => s.id === 'change') }, publish, visibility, cloud], 'Decide and Equip score only local-only metrics, so both are left out; every Publish, Visibility and Cloud step reads GitHub or repo files, so each stays whole');
   for (const s of pub.maps.flatMap((m) => m.steps)) assert.ok(!dropped.has(s.metric), s.metric);
 });
 
