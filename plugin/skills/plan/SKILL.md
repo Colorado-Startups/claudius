@@ -1,14 +1,14 @@
 ---
 name: plan
 description: Plans an app, product or feature build as a visual plan of PR-sized steps, one session brief per independent step, checked once before showing. Files GitHub issues and starts sessions when tools allow. Use when someone outlines what to build or asks to plan it, in chat or plan mode.
-compatibility: Needs the gh CLI signed in, and the Claude desktop app's Code tab for sessions and Artifacts. Without a shell it writes the plan as a table and lists the session briefs.
+compatibility: Needs the gh CLI signed in, python3 for the watch, and the Claude desktop app's Code tab for sessions and Artifacts. Without a shell it writes the plan as a table and lists the session briefs.
 ---
 
 # Plan
 
 The owner outlines the product. Claude plans it visually, and the desktop app runs the plan.
 
-Requires `gh` signed in (`gh auth status`), and the desktop app's Code tab for sessions and Artifacts.
+Requires `gh` signed in (`gh auth status`), `python3` for the watch, and the desktop app's Code tab for sessions and Artifacts.
 
 When `mattpocock-skills` (from `claude-plugins-official`) is installed, its `to-spec` writes the PRD and its `to-tickets` files the issues in place of steps 4 and 6 as written; otherwise follow the steps as written.
 
@@ -17,7 +17,7 @@ No `gh` (no shell tool, or `command -v gh` finds nothing), as in chat or Cowork 
 ```mermaid
 flowchart LR
   O[Outline] --> Q[Product questions] --> E[Equip] --> P[Plan mode] --> A[Plan Artifact] --> C[Check] --> Y[Approve] --> I[Issues]
-  I --> S[One session per step] --> R[PR] --> M[merge skill] --> L[Live]
+  I --> S[One session per step] --> W[Watch] --> R[PR] --> M[merge skill] --> L[Live]
 ```
 
 | # | Step | Do | Tool |
@@ -28,10 +28,11 @@ flowchart LR
 | 4 | Show | Publish the plan as an Artifact: a flow diagram, then one row per step (step, issue title, files, test, runs with or after, metric it moves). Labels, not paragraphs | Artifacts |
 | 5 | Approve | Run the Check table once; if it fixed anything, republish the Artifact. Then ExitPlanMode with the `Checked:` line, the steps and the Artifact link. On a yes, file the issues (step 6), then start one session per independent step on a brief under 150 words plus the worker contract; steps that share files run in order | Sessions, worktrees |
 | 6 | File | After the yes, one issue per step: `gh issue create`, its body the step's row and the Artifact link. Add `--type Task` only when `gh api orgs/<owner>/issue-types` lists Task; a 404 or no Task means plain. Also one card per feature or improvement on the owner's board (`gh project item-create`, Status Todo; `gh project item-edit`). Link every issue and card in the plan page. Use the board where the repo's owner keeps one (`gh project list --owner <owner>`). None, or `gh` lacks the `project` scope: skip quietly and say so in the plan | `gh` |
-| 7 | Build | A worker branches, tests, pushes once, and opens a PR that says `Closes #<issue>` with a table body. It stops at the open PR. A bug becomes an issue typed Bug (`--type Bug` where `gh api orgs/<owner>/issue-types` lists it, else label `bug`), in the repo at fault; an idea becomes a draft card (`gh project item-create`). File each the moment it is found, after a search (`gh issue list --search`) shows no duplicate, and list it in the PR body's Left table | Auto-fix, `gh` |
-| 8 | Merge | The orchestrator reviews and merges each PR with the `merge` skill | pr-review-toolkit |
-| 9 | Live | Load the live page in the app's browser. Mark the step done in the Artifact and republish it | Browser, Artifacts |
-| 10 | Wrap up | Before a session ends, reconcile: each merged PR closed its issue, each touched card is moved, each finding is linked | `gh` |
+| 7 | Build | A worker branches, opens a draft PR within 10 minutes, pushes after each step, tests, and readies the PR, which says `Closes #<issue>` with a table body. It stops at the open PR. A bug becomes an issue typed Bug (`--type Bug` where `gh api orgs/<owner>/issue-types` lists it, else label `bug`), in the repo at fault; an idea becomes a draft card (`gh project item-create`). File each the moment it is found, after a search (`gh issue list --search`) shows no duplicate, and list it in the PR body's Left table | Auto-fix, `gh` |
+| 8 | Watch | Start `python3 -I ${CLAUDE_SKILL_DIR}/scripts/watch_workers.py --workers <file>` once under the Monitor tool, with one entry per worker (repo and branch, or a worktree path). Each minute it reads every branch, PR and CI and prints only changes. Before acting on a line, read `ListAgents`: a worker shown busy gets 10 minutes. `nudge`: message the worker. `restart`: stop it, start a fresh session one step up (effort, then model) told to resume from its branch, and run the script with `--reset <name>`. `done`: its PR is green. No Monitor: `/loop 1m` with `--once --busy <name>` | Monitor, `ListAgents`, `gh` |
+| 9 | Merge | The orchestrator reviews and merges each PR with the `merge` skill | pr-review-toolkit |
+| 10 | Live | Load the live page in the app's browser. Mark the step done in the Artifact and republish it | Browser, Artifacts |
+| 11 | Wrap up | Before a session ends, reconcile: each merged PR closed its issue, each touched card is moved, each finding is linked | `gh` |
 
 Paste the worker contract into every brief. A cloud session loads the repo's `CLAUDE.md` but no user files or user-scope plugins ([cloud environments](https://code.claude.com/docs/en/cloud-environments), read 2026-11-23), so the brief is the only place a worker sees it.
 
@@ -42,6 +43,7 @@ Paste the worker contract into every brief. A cloud session loads the repo's `CL
 | Questions | Puts them in the PR body and decides everything else |
 | Repo rules | Follows the repo's `AGENTS.md` and `CLAUDE.md` |
 | Findings | Files each bug and idea as found (step 7) |
+| Pushes | Opens a draft PR within 10 minutes and pushes after each step, so the watch sees progress (step 8) |
 | Done when | Stops at the open PR once the brief's done-when line is met |
 
 | Check once, before Approve | Passes when |
@@ -59,5 +61,5 @@ Fix what fails. Then put one line above the plan, each row marked ✅ for a pass
 |---|---|
 | Briefs | A worker starts fresh on its brief, not a fork of the planning conversation. The brief names the picked skills to use first, limits what the worker does, and never limits which plugins, skills or connectors it reaches ([All on, app-wide](https://github.com/Colorado-Startups/claudius/blob/main/templates/claude/README.md#all-on-app-wide)) |
 | Reads | A search across many files goes to `Explore` with `model: "haiku"` |
-| Waits | CI, conflicts and review comments come from Auto-fix, never a poll |
+| Waits | CI, conflicts and review comments come from Auto-fix, never a poll. The watch reads GitHub, not the model: the orchestrator spends a turn only when it prints a line |
 | Rounds | At most three review rounds a PR; after that, rethink the step |
