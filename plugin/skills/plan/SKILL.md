@@ -41,10 +41,10 @@ Paste the worker contract into every brief. A cloud session loads the repo's `CL
 | Model | Runs on the model and effort the brief names; on anything else, says so in the PR body |
 | Files | Touches only the files the brief names |
 | Questions | Puts them in the PR body and decides everything else |
-| Repo rules | Follows the repo's `AGENTS.md` and `CLAUDE.md` |
-| Findings | Files each bug and idea as found (step 7) |
-| Pushes | Opens a draft PR within 10 minutes and pushes after each step, so the watch sees progress (step 8) |
-| Done when | Stops at the open PR once the brief's done-when line is met |
+| Repo rules | Follows the repo's `AGENTS.md` and `CLAUDE.md` where present. Never pushes to main, force-pushes or commits a secret |
+| Findings | Files each bug as an issue and each idea as a draft card when found, after a search for a duplicate, and lists each in the PR body |
+| Pushes | Opens a draft PR within 10 minutes and pushes after each step, so the orchestrator sees progress |
+| Done when | Stops at the open PR once the brief's goal is met. Never merges or approves its own PR |
 
 | Check once, before Approve | Passes when |
 |---|---|
