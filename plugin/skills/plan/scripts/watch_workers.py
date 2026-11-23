@@ -20,7 +20,8 @@ Output line: {"name","signal","idle_min","pr":{"number","state","ci"}|null,"verd
 Progress for a cloud worker is the branch's newest sha plus the PR's head sha, state and check rollup (comments and
 description edits are not progress). For a local worker it is HEAD plus a hash of `git status --porcelain`.
 A worker is done when its PR is merged at the branch's newest sha (or the branch is gone), or ready for review (not a
-draft) with CI green or absent there, on two checks in a row. A done worker stays done through a failed read. An error reading a worker is not progress: one that keeps failing is nudged, then restarted, like a quiet
+draft) with CI green or absent there, on two checks in a row. A done worker stays done through a failed read.
+Branch names are assumed unique per worker, as the app's sessions make them: a reused name can match an old PR. An error reading a worker is not progress: one that keeps failing is nudged, then restarted, like a quiet
 one, and its signal names the error. State between calls (last fingerprint, when it changed, whether a nudge went out)
 is in --state, default $TMPDIR/watch_workers.<hash of the workers file path>.state.json, so two plans never share it. Needs `gh` (signed in) for cloud workers; reads no tokens itself. Standard library
 only.
@@ -174,6 +175,8 @@ def judge(name, result, state, now, busy=False):
     idle = int((now - s["changed"]) // 60)
     if error and s.get("done"):
         v = "done"  # a finished worker stays finished through a failed read; new work clears it
+    elif error and s.get("done_seen"):
+        v = "ok"  # seen done once: a failed read on the confirming check waits for the next one
     elif not error and result["done"]:
         # Done on two ticks in a row: right after a push, checks can take seconds to register.
         v = "done" if s.get("done_seen") else "ok"

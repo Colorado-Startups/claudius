@@ -46,6 +46,7 @@ function cloud(pr) {
   writeFileSync(join(dir, 'gh'), [
     '#!/bin/sh',
     '[ -n "$FAKE_FAIL" ] && { echo "gh: connection refused" >&2; exit 1; }',
+    '[ -n "$FAKE_NOBRANCH" ] && [ "$1" = api ] && { echo "gh: Not Found (HTTP 404)" >&2; exit 1; }',
     'case "$1 $2" in',
     '  "api repos/"*) echo "$FAKE_SHA" ;;',
     '  "pr list") echo \'[{"number":7}]\' ;;',
@@ -59,8 +60,9 @@ function cloud(pr) {
   const env = { PATH: `${dir}:${process.env.PATH}`, FAKE_SHA: SHA, FAKE_PR: JSON.stringify(pr) };
   const state = join(dir, 'state.json');
   const run = (now, ...extra) => watch(['--workers', workers, '--state', state, '--now', String(now), ...extra], env);
-  const fail = (now) => watch(['--workers', workers, '--state', state, '--now', String(now), '--once'], { ...env, FAKE_FAIL: '1' });
-  return { run, fail };
+  const runEnv = (now, extra) => watch(['--workers', workers, '--state', state, '--now', String(now), '--once'], { ...env, ...extra });
+  const fail = (now) => runEnv(now, { FAKE_FAIL: '1' });
+  return { run, fail, runEnv };
 }
 const pr = (over) => ({ state: 'OPEN', isDraft: false, headRefOid: SHA, statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }], ...over });
 
@@ -155,6 +157,22 @@ test('watch: a done worker stays done through a failed read, and is not nudged',
   run(T0, '--once');
   assert.equal(run(T0 + 60, '--once')[0].verdict, 'done');
   for (const t of [T0 + 120, T0 + 180, T0 + 240]) assert.equal(fail(t)[0].verdict, 'done');
+});
+
+test('watch: a failed read on the confirming check waits; new work clears done', () => {
+  const { run, fail, runEnv } = cloud(pr({}));
+  assert.equal(run(T0, '--once')[0].verdict, 'ok');
+  assert.equal(fail(T0 + 60)[0].verdict, 'ok');
+  assert.equal(run(T0 + 120, '--once')[0].verdict, 'done');
+  const moved = runEnv(T0 + 180, { FAKE_SHA: 'c'.repeat(40) })[0];
+  assert.equal(moved.verdict, 'ok');
+  assert.equal(moved.idle_min, 0);
+});
+
+test('watch: a merged PR whose branch was deleted is done', () => {
+  const { runEnv } = cloud(pr({ state: 'MERGED' }));
+  assert.equal(runEnv(T0, { FAKE_NOBRANCH: '1' })[0].verdict, 'ok');
+  assert.equal(runEnv(T0 + 60, { FAKE_NOBRANCH: '1' })[0].verdict, 'done');
 });
 
 test('watch: a corrupt state file says so and starts fresh', () => {
