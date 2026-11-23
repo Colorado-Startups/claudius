@@ -23,6 +23,11 @@
    "title": "Claude Code: plugin loading reference",
    "url": "https://code.claude.com/docs/en/plugins/loading",
    "date": "2026-11-14"
+  },
+  {
+   "title": "Claude Code: settings files and precedence",
+   "url": "https://code.claude.com/docs/en/settings",
+   "date": "2026-11-23"
   }
  ],
  "critical_path": [
@@ -47,11 +52,12 @@
    "name": "Keep",
    "tools": [
     "claude plugin details",
-    "skillListingBudgetFraction"
+    "skillListingBudgetFraction",
+    "settings.json"
    ],
    "rule": "Every plugin stays on app-wide; a listing over budget is fixed by skillListingBudgetFraction, never by turning one off.",
    "rule_ref": "https://github.com/Colorado-Startups/claudius/blob/main/templates/claude/README.md#all-on-app-wide",
-   "metric": "desktop_app.listing_tokens"
+   "metric": "desktop_app.off_switches"
   },
   {
    "id": "connect",

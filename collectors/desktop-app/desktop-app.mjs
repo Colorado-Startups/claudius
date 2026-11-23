@@ -10,6 +10,7 @@
 //   desktop_app.parallel_share      Agent calls sent together
 //   desktop_app.subagent_start_tokens  the context a subagent starts with
 //   desktop_app.plugins_untrusted / plugins_stale  plugin trust (desktop-app-plugins.mjs)
+//   desktop_app.off_switches        settings that turn a plugin, skill or connector off (desktop-app-plugins.mjs)
 //
 // Every path, tool name and N is a param on quality/targets/desktop-app.json.
 // Only a transcript whose entrypoint is params.entrypoint counts: a terminal
@@ -33,7 +34,7 @@ import { attempt, item } from '../instructions/instructions-lib.mjs';
 import { eachLine, mainSessions } from '../instructions/instructions-sessions.mjs';
 import { redact, useLib } from '../lib/engine.mjs';
 import { emptyListing, foldListing, hasListing, isAppServer } from './desktop-app-listings.mjs';
-import { inventory, pluginMetrics } from './desktop-app-plugins.mjs';
+import { inventory, offSwitches, offSwitchMetric, pluginMetrics } from './desktop-app-plugins.mjs';
 import { emptyTurns, foldTurn } from './desktop-app-turns.mjs';
 import { subagentMetric, workMetrics } from './desktop-app-work.mjs';
 
@@ -79,6 +80,9 @@ async function gather({ root = '.', mode, home = os.homedir(), now = new Date(),
   const inv = attempt(() => inventory({ home, root, params }));
   const pluginError = inv.error ?? attempt(() => pluginMetrics(inv, params, now, { val, cnc }))?.error;
   if (pluginError) for (const id of ['plugins_untrusted', 'plugins_stale']) cnc(id, pluginError, self);
+  const off = attempt(() => offSwitches({ home, root, params }));
+  if (off?.error) cnc('off_switches', off.error, self);
+  else offSwitchMetric(off, { val, cnc });
   workMetrics(sessions, params, now, { val, cnc });
   subagentMetric(sessions, params, now, { val, cnc });
   return Object.fromEntries(metricIds.map((id) => [id, out[id] ?? { could_not_check: 'collector produced no value', source: self }]));

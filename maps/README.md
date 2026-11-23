@@ -46,7 +46,7 @@ flowchart LR
 | Step | Ideal | Metric |
 |---|---|---|
 | Source | 🅰 official marketplaces or 🅱 Anthropic's reviewed directory, official equivalents beside custom copies, which stay on; anything else named | `desktop_app.plugins_untrusted` |
-| Keep | A listing over budget is fixed by `skillListingBudgetFraction`, never by turning one off | `desktop_app.listing_tokens` |
+| Keep | A listing over budget is fixed by `skillListingBudgetFraction`, never by turning one off; no setting turns a plugin, skill or connector off | `desktop_app.off_switches` |
 | Connect | Every listed connector connected before the first prompt | `desktop_app.connectors_pending` |
 | Fix | A connector that fails or needs a sign-in is repaired or signed in | `desktop_app.connectors_broken` |
 | Restore | An install left off is turned back on; only a record whose project folder is gone is removed | `desktop_app.plugins_stale` |

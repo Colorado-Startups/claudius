@@ -2,7 +2,7 @@
   {
     "id": "desktop_app.connectors_broken",
     "params": {
-      "comment": "projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root. project_match (default the repo's own project folder) names no path here. entrypoint: the transcript value that marks a desktop app session; a terminal session is not this tab's. app_servers: servers the desktop app adds itself, which its connector list does not show and a user cannot switch off as connectors; an entry ending in _ is a prefix, any other a whole name. human_origin: the origin kind of a record a person typed. plan_tool, recap_tool, session_tool and archive_tool: the app's tools for the task list, the closing recap, starting a session and archiving one. plan_exit_tool: the tool that shows a plan for approval; its result's is_error flag is true when the owner sent the plan back. plan_session_count: N for plans_first_pass, the sessions that showed a plan. session_id_pattern: how a started session's id reads in the tool's result. idle_hours: a session whose last record is newer may still be running, so its open last turn and unarchived sub-sessions are left out; it is no measuring window. cowork_dir: where the desktop app keeps its plugin manifest. plugins_dir: Claude Code's plugins root. official_marketplaces and community_marketplaces: the reserved names in code.claude.com/docs/en/plugins/security; directory_marketplaces: the name the desktop app's manifest gives Anthropic's directory on claude.ai, whose versions Anthropic reviews before publishing (plugins/publish). own_marketplaces: marketplaces the repo owner publishes, besides those from the repo's own GitHub account, which count as the owner's on their own. kept_plugins: plugin id to the reason it stays though community or third-party. stale_days: an enabled plugin with no upstream update in this many days counts as stale. claude_dir_name, settings_files and plugin_manifest_dir: the folder and file names Claude Code uses for settings and plugin manifests. maintainer_author: the catalog author whose plugins are maintained with Claude Code itself, so their age alone never makes them stale.",
+      "comment": "projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home, an absolute one is itself, any other is under the repo root. project_match (default the repo's own project folder) names no path here. entrypoint: the transcript value that marks a desktop app session; a terminal session is not this tab's. app_servers: servers the desktop app adds itself, which its connector list does not show and a user cannot switch off as connectors; an entry ending in _ is a prefix, any other a whole name. human_origin: the origin kind of a record a person typed. plan_tool, recap_tool, session_tool and archive_tool: the app's tools for the task list, the closing recap, starting a session and archiving one. plan_exit_tool: the tool that shows a plan for approval; its result's is_error flag is true when the owner sent the plan back. plan_session_count: N for plans_first_pass, the sessions that showed a plan. session_id_pattern: how a started session's id reads in the tool's result. idle_hours: a session whose last record is newer may still be running, so its open last turn and unarchived sub-sessions are left out; it is no measuring window. cowork_dir: where the desktop app keeps its plugin manifest. plugins_dir: Claude Code's plugins root. official_marketplaces and community_marketplaces: the reserved names in code.claude.com/docs/en/plugins/security; directory_marketplaces: the name the desktop app's manifest gives Anthropic's directory on claude.ai, whose versions Anthropic reviews before publishing (plugins/publish). own_marketplaces: marketplaces the repo owner publishes, besides those from the repo's own GitHub account, which count as the owner's on their own. kept_plugins: plugin id to the reason it stays though community or third-party. stale_days: an enabled plugin with no upstream update in this many days counts as stale. claude_dir_name, settings_files and plugin_manifest_dir: the folder and file names Claude Code uses for settings and plugin manifests. maintainer_author: the catalog author whose plugins are maintained with Claude Code itself, so their age alone never makes them stale. off_booleans: settings keys that turn something off app-wide, each with the value that does. skill_override_off: the skillOverrides values that turn a skill off or hide it from the model.",
       "projects_dir": "~/.claude/projects",
       "subagents_dir": "subagents",
       "entrypoint": "claude-desktop",
@@ -90,7 +90,16 @@
         "settings.local.json"
       ],
       "plugin_manifest_dir": ".claude-plugin",
-      "maintainer_author": "Anthropic"
+      "maintainer_author": "Anthropic",
+      "off_booleans": {
+        "syncClaudeAiPlugins": false,
+        "syncClaudeAiSkills": false,
+        "disableClaudeAiConnectors": true
+      },
+      "skill_override_off": [
+        "off",
+        "user-invocable-only"
+      ]
     },
     "tab": "desktop-app",
     "kind": "quality",
@@ -264,6 +273,22 @@
     "direction": "lower",
     "goal_source": "goal from the plugin docs: a delisted one is flagged (code.claude.com/docs/en/plugins/security and /plugins/loading, read 2026-11-14); an install left off is turned back on, a record whose project folder is gone is removed, and a delisted or unmaintained plugin is reported, its official equivalent added or the plugin fixed, never turned off (the owner, 2026-11-19)",
     "source": "state: install records no settings source enables, plugins in flagged-plugins.json, and enabled plugins whose last_updated in plugin-catalog-cache.json is older than params.stale_days (180), plugins by params.maintainer_author set aside",
+    "needs": "local-files",
+    "chart": "table"
+  },
+  {
+    "id": "desktop_app.off_switches",
+    "tab": "desktop-app",
+    "kind": "quality",
+    "group": "Plugins",
+    "label": "Settings that turn a plugin, skill or connector off",
+    "means": "Keys in the settings files that switch off what All on, app-wide keeps on, so every session loses it.",
+    "unit": "switches",
+    "goal": 0,
+    "near": 2,
+    "direction": "lower",
+    "goal_source": "goal from the settings docs and the owner's rule: syncClaudeAiPlugins false, syncClaudeAiSkills false, disableClaudeAiConnectors true, a skillOverrides value off or user-invocable-only and an enabledPlugins value false each turn something off for every session (code.claude.com/docs/en/settings, read 2026-11-23); All on, app-wide keeps every plugin, skill and connector on (the owner, 2026-11-19), so none is set",
+    "source": "state: the user, project and local settings files (params.settings_files), each key counted once by the file that wins: params.off_booleans at its off value, skillOverrides values in params.skill_override_off, enabledPlugins entries that are false",
     "needs": "local-files",
     "chart": "table"
   }
