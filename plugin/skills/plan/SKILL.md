@@ -41,8 +41,8 @@ Paste the worker contract into every brief. A cloud session loads the repo's `CL
 | Files | Touches only the files the brief names |
 | Questions | Puts them in the PR body and decides everything else |
 | Repo rules | Follows the repo's `AGENTS.md` and `CLAUDE.md` where present. Never pushes to main, force-pushes or commits a secret |
-| Findings | Files each bug as an issue and each idea as a draft card when found, after a search for a duplicate, and lists each in the PR body |
-| Done when | Stops at the open PR once the brief's goal is met. Never merges or approves its own PR |
+| Findings | Files each bug as an issue in the repo at fault, and each idea as a draft card (`gh project item-create`), when found and after a search for a duplicate. Lists each in the PR body |
+| Done when | Stops at the open PR once the goal the brief states is met. Never merges or approves its own PR |
 
 | Check once, before Approve | Passes when |
 |---|---|
