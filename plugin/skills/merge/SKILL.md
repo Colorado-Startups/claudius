@@ -29,7 +29,7 @@ flowchart LR
 | 6 | Queue | Queue every PR with a MERGE verdict at once, each at the literal SHA that passed: `gh api graphql -f query='mutation($id:ID!,$sha:GitObjectID!){enqueuePullRequest(input:{pullRequestId:$id,expectedHeadOid:$sha}){mergeQueueEntry{position}}}' -F id=<PR node id> -F sha=<sha>`. The node id is `gh pr view N --json id -q .id` |
 | 7 | No queue yet | Set one up (table below). Until then, `gh pr merge N --squash --match-head-commit <sha>`, one PR at a time, in a method the repo allows (`gh api repos/{owner}/{repo}`) |
 | 8 | Conflict | A PR the queue drops for a conflict goes back: merge `main` into its branch, resolve each hunk, push, review the delta (step 4) and queue the new head |
-| 9 | After | If the merge deploys, load the live page once |
+| 9 | After | The PR's `Closes #N` closes the issue; move its card to Done (`gh project item-edit`; no board, skip quietly). A bug found while reviewing gets an issue (`gh issue create --label bug`, in the repo at fault). If the merge deploys, load the live page once |
 
 | Repo setup | Rule |
 |---|---|
