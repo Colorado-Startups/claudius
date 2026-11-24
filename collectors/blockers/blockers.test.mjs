@@ -122,7 +122,7 @@ test('collect: missing inputs read as not measured, never as 0', async () => {
   const gone = path.join(tmp, 'gone');
   const got = await collect({ root: gone, mode: 'local', projectsDir: gone, home: gone, managedPath: gone, now, params: { repo: 'acme/site' }, gh: async () => Promise.reject(new Error('gh: not logged in')) });
   for (const id of metricIds) assert.ok(got[id].could_not_check, `${id} is not measured`);
-  assert.match(got['blockers.pushes_per_merged_pr'].could_not_check, /not logged in/);
+  assert.match(got['blockers.pushes_per_merged_pr'].could_not_check, /gh api graphql failed: auth/, 'a missing login is the auth class, in the collector\'s words');
 });
 
 test('collect in CI: only the needs gh metrics read, from GitHub; nothing on the machine is opened', async () => {
@@ -136,7 +136,8 @@ test('collect in CI: only the needs gh metrics read, from GitHub; nothing on the
   assert.ok(calls.some((c) => c.startsWith('api graphql')) && calls.some((c) => c.startsWith('pr list')));
   const failed = await collect({ ...base, mode: 'ci', gh: async () => Promise.reject(new Error('HTTP 403: Resource not accessible by integration')) });
   for (const id of metricIds) assert.ok(failed[id].could_not_check && !('value' in failed[id]), id);
-  assert.match(failed['blockers.enforcement_reverts'].could_not_check, /HTTP 403/);
+  assert.match(failed['blockers.enforcement_reverts'].could_not_check, /gh api graphql failed: auth/);
+  assert.doesNotMatch(failed['blockers.enforcement_reverts'].could_not_check, /HTTP 403|integration/, 'the error text never reaches the page');
 });
 
 test('the collector holds no repo-specific value: every one is in its targets params', () => {

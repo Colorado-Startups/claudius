@@ -2,7 +2,8 @@
 // push's checks, reverts and bugs naming it (claude.mjs).
 
 import { causes, PULL_FIELDS, reverts as findReverts } from '../lib/engine.mjs';
-import { firstLine, TEMPLATE } from './claude-lib.mjs';
+import { ghFailed } from '../lib/gh-failure.mjs';
+import { TEMPLATE } from './claude-lib.mjs';
 
 const PR_CHUNK = 50;
 const GREEN = new Set(['SUCCESS', 'NEUTRAL', 'SKIPPED']);
@@ -127,7 +128,7 @@ async function readChunk(owner, name, chunk, gh) {
   try {
     body = await graphql(gh, `query { repository(owner: "${owner}", name: "${name}") { ${aliases} } }`);
   } catch (err) {
-    return { ...out, failed: chunk.length, reason: firstLine(err) };
+    return { ...out, failed: chunk.length, reason: ghFailed('gh api graphql', err) };
   }
   // Only a NOT_FOUND on the PR itself means GitHub has no such PR. An error
   // above the PRs, such as a repository NOT_FOUND for a private repo the gh
@@ -141,7 +142,7 @@ async function readChunk(owner, name, chunk, gh) {
 function classifyPull(n, { body, errors, general }, out) {
   const node = body.data?.repository?.[`p${n}`];
   const own = errors.find((e) => e.path?.[1] === `p${n}`);
-  if (general || (own && own.type !== 'NOT_FOUND')) return unread(out, String((general ?? own).message ?? (general ?? own).type).slice(0, 160));
+  if (general || (own && own.type !== 'NOT_FOUND')) return unread(out, ghFailed('gh api graphql', general ?? own));
   if (node) out.found.set(n, node);
   else if (own) out.missing.push(n);
   else unread(out, 'gh returned no data for a PR');
@@ -220,7 +221,7 @@ async function firstPushStates(opened, gh, notCode) {
       const contexts = await commitContexts(repo, pairs.map(([, sha]) => sha), gh);
       for (const [p, sha] of pairs) firstPush.byPr.set(p, classifyChecks(contexts.get(sha), notCode));
     } catch (err) {
-      firstPush.error = `gh api graphql failed (${firstLine(err)})`;
+      firstPush.error = ghFailed('gh api graphql', err);
     }
   }
   return firstPush;
@@ -236,13 +237,13 @@ async function revertsAndBugs(opened, gh) {
     try {
       reverted.byRepo.set(repo, await revertTimes(repo, opened, gh));
     } catch (err) {
-      reverted.error = `gh pr list failed for ${repo} (${firstLine(err)})`;
+      reverted.error = ghFailed('gh pr list', err, repo);
     }
     try {
       const out = await gh(['issue', 'list', '-R', repo, '--type', 'Bug', '--state', 'all', '--json', 'number,title,body,createdAt', '--limit', '1000']);
       bugs.byRepo.set(repo, JSON.parse(out).map((issue) => bugRefs(issue, repo)));
     } catch (err) {
-      bugs.error = `gh issue list failed for ${repo} (${firstLine(err)})`;
+      bugs.error = ghFailed('gh issue list', err, repo);
     }
   }
   return { reverted, bugs };

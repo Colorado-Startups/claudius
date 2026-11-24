@@ -30,11 +30,6 @@ export const median = (xs) => percentile(xs, 0.5);
 // counts something other than the headline (PRs under an hours metric).
 export const item = (label, value, unit) => ({ label, value, unit });
 
-// An error's first line, from stderr or its message, cut to 160 characters.
-export function firstLine(err) {
-  return String(err?.stderr || err?.message || err).trim().split('\n')[0].slice(0, 160);
-}
-
 // One call's API-equivalent cost in dollars, or null for a model with no
 // price. A prompt over params.long_context_tokens (input plus cache) takes the
 // model's long tier when it has one. 5-minute and 1-hour cache writes take

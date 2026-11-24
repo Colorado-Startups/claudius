@@ -207,8 +207,8 @@ test('collect: missing inputs read as not measured, never as 0', async () => {
   const none = await collect({ root: gone, mode: 'local', projectsDir: gone, now, exec: fakeExec() });
   for (const id of metricIds) assert.ok(none[id].could_not_check, id);
   const noGh = await collect({ ...base, root: gone, exec: async (cmd, args) => (cmd === 'gh' ? Promise.reject(new Error('gh: not logged in')) : fakeExec()(cmd, args)) });
-  assert.match(noGh['tokens.waste_share'].could_not_check, /not logged in/);
-  assert.match(noGh['tokens.latest_pr_rework_tokens'].could_not_check, /not logged in/, 'the PR metrics each say why, by their own id');
+  assert.match(noGh['tokens.waste_share'].could_not_check, /gh api graphql failed: auth/);
+  assert.match(noGh['tokens.latest_pr_rework_tokens'].could_not_check, /gh api graphql failed: auth/, 'the PR metrics each say why, by their own id');
   assert.match(noGh['tokens.plan_used'].could_not_check, /absent/);
   assert.equal(noGh['tokens.latest_subagent_return_tokens'].value, 200, 'what subagents return needs no GitHub');
   for (const id of metricIds) assert.ok((await collect({ mode: 'ci' }))[id].could_not_check, id);

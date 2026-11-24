@@ -47,6 +47,7 @@ import { reviewRounds } from '../blockers/blockers.mjs';
 import { mapFolders, readFolders, readPlan, readPulls } from './tokens-io.mjs';
 import { lastN, ownRepo, PROJECTS_DIR, resolvePath } from '../claude/claude.mjs';
 import { redact, useLib } from '../lib/engine.mjs';
+import { ghFailed } from '../lib/gh-failure.mjs';
 
 export { remoteRepo, returnedTokens } from './tokens-io.mjs';
 
@@ -125,7 +126,7 @@ async function loadPulls(links, exec) {
   try {
     return await readPulls(links, exec);
   } catch (err) {
-    return { error: `gh api graphql failed (${String(err?.stderr || err?.message || err).trim().split('\n')[0].slice(0, 160)})` };
+    return { error: ghFailed('gh api graphql', err) };
   }
 }
 
