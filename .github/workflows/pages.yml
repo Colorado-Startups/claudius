@@ -97,6 +97,18 @@ jobs:
           PRIVACY_NAMES: ${{ secrets.PRIVACY_NAMES }}
         run: node tests/privacy.mjs quality/public/data/latest.json quality/public/targets --dist quality/public/dist
 
+      # Each metric the run could not read, with its reason cut to 160 characters, one line each, so a maintainer sees
+      # why a count such as 47 of 64 is short without the data artifact. It runs after the privacy gate, which has
+      # checked the file it reads, and it never fails the build.
+      - name: Unread metrics
+        run: |
+          node -e '
+            const run = JSON.parse(require("fs").readFileSync("quality/public/data/latest.json", "utf8"));
+            const unread = Object.entries(run.metrics).filter(([, m]) => m.could_not_check);
+            console.log(`${unread.length} of ${Object.keys(run.metrics).length} metrics unread`);
+            for (const [id, m] of unread) console.log(`  ${id}: ${String(m.could_not_check).replace(/\s+/g, " ").slice(0, 160)}`);
+          ' || true
+
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
