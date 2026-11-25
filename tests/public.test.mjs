@@ -29,6 +29,7 @@ test('public: each metric that needs local files is dropped but the repo-file on
   const dropped = writePublic(root);
   const pub = read(join(ROOT, 'quality', 'public-params.json'));
   const local = localOnlyIds([join(ROOT, 'targets')]);
+  assert.ok(local.size > 0, 'targets name local-files ids');
   assert.deepEqual(new Set(dropped), new Set([...local].filter((id) => !pub.ids.includes(id))));
   assert.equal(dropped.length, local.size - pub.ids.filter((id) => local.has(id)).length, 'every local-files id but the ones that read repo files');
   const files = readdirSync(join(ROOT, 'targets')).filter((f) => f.endsWith('.json')).sort();
