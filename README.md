@@ -35,9 +35,9 @@ flowchart LR
 | 1 | Adopt Git Crafter: CI, open-repo files, `AGENTS.md` and `CLAUDE.md` | Git Crafter `templates/ci/README.md`, `templates/agents/` |
 | 2 | Copy the Claude files and set the desktop app, every plugin, skill and connector kept on ([All on, app-wide](templates/claude/README.md#all-on-app-wide)) | [templates/claude/README.md](templates/claude/README.md) |
 | 3 | Add the pack (table below) | `quality/config.json` |
-| 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }` and `{ "use": "project" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
+| 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }` and `{ "use": "remember" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
 | 5 | Run the one local command for the numbers CI never sees | below |
-| 6 | Optional, to run it as a Claude Code Project: memory seeds, subagents, scheduled tasks and guard placement | [templates/claude/code-project/README.md](templates/claude/code-project/README.md) |
+| 6 | Optional, to run it as a Claude Code Project: memory seeds, subagents, scheduled tasks and guard placement | [templates/claude/code-project/README.md](templates/claude/code-project/README.md), [quick start](docs/projects-quickstart.md) |
 
 ## Build an app
 
@@ -58,7 +58,7 @@ flowchart LR
 | --- | --- |
 | Templates | `templates/claude/`: the Claude-only files a repo commits. This repo runs copies of them (`tests/templates.test.mjs`) |
 | Plugin | `plugin/`: the `claudius` Claude Code plugin (skills `plan`, `merge`, `equip`, `find-plugin`, `plain-voice`). Install: `claude plugin marketplace add Colorado-Startups/claudius`, then `claude plugin install claudius@claudius` |
-| Pack | 9 tabs: Claude, Claude settings, Claude desktop app, Blockers, Tokens, Instructions, Best practices, Visibility, Code Project. Maps: Guard, Decide, Equip, Publish, Visibility, Project |
+| Pack | 9 tabs: Claude, Claude settings, Claude desktop app, Blockers, Tokens, Instructions, Best practices, Visibility, Code Project. Maps: Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember |
 | Engine | Git Crafter's `actions/pages` and CI standard, pinned by full commit SHA. No engine code lives here |
 | Public pages | Built in CI from `quality/public/`. The Quality page shows only metrics read from GitHub and the repo's files. Each metric that needs local files is dropped: not shown, counted or listed. The exceptions are the ones `quality/public-params.json` reads from committed files alone. A tab left with no metric, Tokens and Claude desktop app, is left off; it shows on a `--local` page (Git Crafter v7.0.1 or later). The Process page shows each map step such a metric does not score |
 | Private numbers | Usage, cost, transcripts and connectors. Read on your own machine only, never uploaded |

@@ -3,7 +3,7 @@
     "id": "code_project.guard_rules_missing",
     "tab": "code-project",
     "kind": "quality",
-    "group": "Guards",
+    "group": "Memory and instructions",
     "label": "Guard rules a thread cannot read",
     "means": "Guard rules (no push to the default branch, no key printed or committed) that CLAUDE.md and AGENTS.md leave unsaid.",
     "unit": "rules",
@@ -16,12 +16,25 @@
     "chart": "table",
     "params": {
       "comment": "instruction_files: the files a cloud thread loads. rules: { label, pattern } pairs, each a case-insensitive regular expression. agent_dirs: folders of subagent files, the repo's own and the template's. repo: owner/name, empty for this repo. branch_prefix, window_days, max_prs: which merged pull requests count as thread work.",
-      "instruction_files": ["CLAUDE.md", "AGENTS.md", ".claude/CLAUDE.md"],
-      "rules": [
-        { "label": "Never push to the default branch", "pattern": "never push to (`?main|the default)" },
-        { "label": "Never print or commit a key", "pattern": "never (print|copy|commit)[^\\n|]*(key|secret|token|password)" }
+      "instruction_files": [
+        "CLAUDE.md",
+        "AGENTS.md",
+        ".claude/CLAUDE.md"
       ],
-      "agent_dirs": [".claude/agents", "templates/claude/code-project/agents"],
+      "rules": [
+        {
+          "label": "Never push to the default branch",
+          "pattern": "never push to (`?main|the default)"
+        },
+        {
+          "label": "Never print or commit a key",
+          "pattern": "never (print|copy|commit)[^\\n|]*(key|secret|token|password)"
+        }
+      ],
+      "agent_dirs": [
+        ".claude/agents",
+        "templates/claude/code-project/agents"
+      ],
       "repo": "",
       "branch_prefix": "claude/",
       "window_days": 30,
@@ -32,7 +45,7 @@
     "id": "code_project.instruction_lines",
     "tab": "code-project",
     "kind": "quality",
-    "group": "Guards",
+    "group": "Memory and instructions",
     "label": "Longest instruction file",
     "means": "Lines in the longest of CLAUDE.md and AGENTS.md. Every thread loads both.",
     "unit": "lines",
@@ -48,7 +61,7 @@
     "id": "code_project.agents_unsafe",
     "tab": "code-project",
     "kind": "quality",
-    "group": "Subagents",
+    "group": "Plugins, skills, connectors",
     "label": "Read-only subagents that can edit",
     "means": "Subagent files that say read only but list a writing tool, or list no tools and so inherit every one.",
     "unit": "agents",
@@ -64,7 +77,7 @@
     "id": "code_project.draft_pr_minutes",
     "tab": "code-project",
     "kind": "speed",
-    "group": "Threads",
+    "group": "Coordinator and threads",
     "label": "First commit to pull request",
     "means": "Median minutes from a claude/ branch's first commit to its pull request, over the last 30 days of merges.",
     "unit": "min",
@@ -80,7 +93,7 @@
     "id": "code_project.ready_to_merge_hours",
     "tab": "code-project",
     "kind": "speed",
-    "group": "Threads",
+    "group": "Coordinator and threads",
     "label": "Pull request open to merge",
     "means": "Median hours a claude/ pull request stays open before it merges, over the last 30 days.",
     "unit": "h",
@@ -96,7 +109,7 @@
     "id": "code_project.agents_without_model",
     "tab": "code-project",
     "kind": "consumption",
-    "group": "Subagents",
+    "group": "Plugins, skills, connectors",
     "label": "Subagents with no model",
     "means": "Subagent files that name no model, so each runs on the parent thread's model.",
     "unit": "agents",
@@ -112,7 +125,7 @@
     "id": "code_project.requests",
     "tab": "code-project",
     "kind": "consumption",
-    "group": "Threads",
+    "group": "Coordinator and threads",
     "label": "API requests per read",
     "means": "gh api requests one read of the thread metrics spends.",
     "unit": "requests",
@@ -136,7 +149,7 @@
     },
     "tab": "code-project",
     "kind": "quality",
-    "group": "Threads",
+    "group": "Coordinator and threads",
     "label": "Thread PRs opened as drafts",
     "means": "Merged pull requests from claude/ branches that were drafts when opened, so CI runs before a person reads them.",
     "unit": "%",
@@ -153,7 +166,7 @@
     "id": "code_project.idle_revivals",
     "tab": "code-project",
     "kind": "consumption",
-    "group": "Cache",
+    "group": "Coordinator and threads",
     "label": "Sessions revived after an idle hour",
     "means": "Sessions that a person resumed after more than an hour idle, so the whole conversation was read again.",
     "unit": "per week",
@@ -170,7 +183,7 @@
     "id": "code_project.tokens_per_merged_pr",
     "tab": "code-project",
     "kind": "consumption",
-    "group": "Cache",
+    "group": "Coordinator and threads",
     "label": "Tokens per merged thread PR, 4-week change",
     "means": "How much the tokens spent per merged claude/ pull request rose or fell from the oldest week to the latest.",
     "unit": "%",
@@ -181,6 +194,259 @@
     "source": "params.weeks (4) buckets of 7 days: billable tokens (input, output and cache write, one count per message id, cache reads left out) of this repo's session transcripts, subagents included, divided by the merged PRs from params.branch_prefix branches of the same week (gh api graphql, up to the latest 100 by update); the change from the oldest bucket with both to the latest; N = 4 weeks (collectors/code-project/code-project-threads.mjs)",
     "needs": "local-files",
     "chart": "bar",
+    "defined": "2026-11-25"
+  },
+  {
+    "id": "code_project.setup_missing",
+    "params": {
+      "comment": "setup_checks: { label, and one of file, dir, json or pattern }. part_rules: one entry per rule metric, { files, rules: [{ label, pattern }] }, each pattern a case-insensitive regular expression. settings_file and plugin_allow: the plugins a repo may turn on.",
+      "setup_checks": [
+        {
+          "label": "AGENTS.md",
+          "file": "AGENTS.md"
+        },
+        {
+          "label": "CLAUDE.md imports AGENTS.md",
+          "file": "CLAUDE.md",
+          "pattern": "^@AGENTS\\.md"
+        },
+        {
+          "label": "Pull request template",
+          "file": ".github/PULL_REQUEST_TEMPLATE.md"
+        },
+        {
+          "label": "Issue forms",
+          "dir": ".github/ISSUE_TEMPLATE"
+        },
+        {
+          "label": "CI workflow",
+          "dir": ".github/workflows"
+        },
+        {
+          "label": "Valid .claude/settings.json",
+          "file": ".claude/settings.json",
+          "json": true
+        }
+      ],
+      "part_rules": {
+        "code_project.cloud_rules_missing": {
+          "files": [
+            "CLAUDE.md",
+            "AGENTS.md",
+            ".claude/CLAUDE.md"
+          ],
+          "rules": [
+            {
+              "label": "Cloud thread reaches GitHub by REST",
+              "pattern": "gh api"
+            },
+            {
+              "label": "Network and variables live in the cloud environment",
+              "pattern": "cloud environment"
+            },
+            {
+              "label": "Local work goes to a local thread or Remote Control",
+              "pattern": "local thread|remote control"
+            }
+          ]
+        },
+        "code_project.memory_rules_missing": {
+          "files": [
+            "CLAUDE.md",
+            "AGENTS.md",
+            ".claude/CLAUDE.md"
+          ],
+          "rules": [
+            {
+              "label": "A lasting fact is saved to project memory",
+              "pattern": "project memory"
+            },
+            {
+              "label": "A bug or fix is tracked as an issue",
+              "pattern": "\\bissue\\b"
+            },
+            {
+              "label": "Memory holds no key or private name",
+              "pattern": "no (key|secret)[^\\n|]*(private|name)"
+            }
+          ]
+        },
+        "code_project.tasks_missing": {
+          "files": [
+            "templates/claude/code-project/README.md"
+          ],
+          "rules": [
+            {
+              "label": "Scheduled tasks are listed",
+              "pattern": "## Scheduled tasks"
+            },
+            {
+              "label": "A weekly digest task",
+              "pattern": "digest[^\\n]*weekly|weekly[^\\n]*digest"
+            },
+            {
+              "label": "A pin check task",
+              "pattern": "pin check"
+            }
+          ]
+        },
+        "code_project.autofix_rules_missing": {
+          "files": [
+            "CLAUDE.md",
+            "AGENTS.md",
+            ".claude/CLAUDE.md"
+          ],
+          "rules": [
+            {
+              "label": "A pull request is watched with auto-fix",
+              "pattern": "auto-fix"
+            },
+            {
+              "label": "A thread stops watching once the pull request merges",
+              "pattern": "stop watching|stops watching"
+            }
+          ]
+        },
+        "code_project.ship_rules_missing": {
+          "files": [
+            "CLAUDE.md",
+            "AGENTS.md",
+            ".claude/CLAUDE.md"
+          ],
+          "rules": [
+            {
+              "label": "The pull request opens as a draft",
+              "pattern": "draft pull request|draft PR"
+            },
+            {
+              "label": "A review at the head commit comes before a merge",
+              "pattern": "review at the head"
+            },
+            {
+              "label": "A merge names the head SHA as its guard",
+              "pattern": "head sha"
+            }
+          ]
+        }
+      },
+      "settings_file": ".claude/settings.json",
+      "plugin_allow": "@claude-plugins-official$|^claudius@claudius$"
+    },
+    "tab": "code-project",
+    "kind": "quality",
+    "group": "Project and settings",
+    "label": "Setup files a thread needs, missing",
+    "means": "Setup files a cloud thread reads that the repo lacks, such as AGENTS.md, a CLAUDE.md import and CI.",
+    "unit": "items",
+    "goal": 0,
+    "near": 1,
+    "direction": "lower",
+    "goal_source": "Claude Code docs, claude-projects (read 2026-11-25): a thread loads each repo's CLAUDE.md and its checked-in files, so the setup lives in the repo; template goal: none missing",
+    "source": "each params.setup_checks entry looked up in the repo (collectors/code-project/code-project-parts.mjs)",
+    "needs": "none",
+    "chart": "table",
+    "defined": "2026-11-25"
+  },
+  {
+    "id": "code_project.cloud_rules_missing",
+    "tab": "code-project",
+    "kind": "quality",
+    "group": "Cloud environment and Mac",
+    "label": "Cloud and Mac rules a thread cannot read",
+    "means": "Rules about the cloud environment, network and local threads that CLAUDE.md and AGENTS.md leave unsaid.",
+    "unit": "items",
+    "goal": 0,
+    "near": 1,
+    "direction": "lower",
+    "goal_source": "Claude Code docs, claude-projects (read 2026-11-25): a cloud thread skips settings.json env and .mcp.json, and network and variables are set in the cloud environment; template goal: none missing",
+    "source": "each params.part_rules rule matched case-insensitively against the part's files (collectors/code-project/code-project-parts.mjs)",
+    "needs": "none",
+    "chart": "table",
+    "defined": "2026-11-25"
+  },
+  {
+    "id": "code_project.memory_rules_missing",
+    "tab": "code-project",
+    "kind": "quality",
+    "group": "Memory and instructions",
+    "label": "Memory rules a thread cannot read",
+    "means": "Rules about project memory and tracking that CLAUDE.md and AGENTS.md leave unsaid.",
+    "unit": "items",
+    "goal": 0,
+    "near": 1,
+    "direction": "lower",
+    "goal_source": "Claude Code docs, memory (read 2026-11-25): a thread starts from the files it loads, so what must persist is said there or saved to memory; template goal: none missing",
+    "source": "each params.part_rules rule matched case-insensitively against the part's files (collectors/code-project/code-project-parts.mjs)",
+    "needs": "none",
+    "chart": "table",
+    "defined": "2026-11-25"
+  },
+  {
+    "id": "code_project.tasks_missing",
+    "tab": "code-project",
+    "kind": "quality",
+    "group": "Scheduled tasks",
+    "label": "Scheduled task rows missing",
+    "means": "Scheduled tasks the Code Project template lists that its README leaves out.",
+    "unit": "items",
+    "goal": 0,
+    "near": 1,
+    "direction": "lower",
+    "goal_source": "Claude Code docs, claude-projects (read 2026-11-25): a scheduled task runs without a conversation, so the template names each task and when it runs; template goal: none missing",
+    "source": "each params.part_rules rule matched case-insensitively against the part's files (collectors/code-project/code-project-parts.mjs)",
+    "needs": "none",
+    "chart": "table",
+    "defined": "2026-11-25"
+  },
+  {
+    "id": "code_project.autofix_rules_missing",
+    "tab": "code-project",
+    "kind": "quality",
+    "group": "PR auto-fix",
+    "label": "Auto-fix rules a thread cannot read",
+    "means": "Rules about watching a pull request with auto-fix that CLAUDE.md and AGENTS.md leave unsaid.",
+    "unit": "items",
+    "goal": 0,
+    "near": 1,
+    "direction": "lower",
+    "goal_source": "Claude Code docs, cloud sessions (read 2026-11-25): auto-fix watches a pull request's CI and reviews and an idle thread wakes on each, so a thread stops watching at merge; template goal: none missing",
+    "source": "each params.part_rules rule matched case-insensitively against the part's files (collectors/code-project/code-project-parts.mjs)",
+    "needs": "none",
+    "chart": "table",
+    "defined": "2026-11-25"
+  },
+  {
+    "id": "code_project.ship_rules_missing",
+    "tab": "code-project",
+    "kind": "quality",
+    "group": "Shipping and merging",
+    "label": "Shipping rules a thread cannot read",
+    "means": "Rules about draft pull requests, review and merge that CLAUDE.md and AGENTS.md leave unsaid.",
+    "unit": "items",
+    "goal": 0,
+    "near": 1,
+    "direction": "lower",
+    "goal_source": "GitHub Docs, Merge a pull request (read 2026-11-25): a merge can name the head commit it expects, so a later push is refused; template goal: none missing",
+    "source": "each params.part_rules rule matched case-insensitively against the part's files (collectors/code-project/code-project-parts.mjs)",
+    "needs": "none",
+    "chart": "table",
+    "defined": "2026-11-25"
+  },
+  {
+    "id": "code_project.plugins_untrusted",
+    "tab": "code-project",
+    "kind": "quality",
+    "group": "Plugins, skills, connectors",
+    "label": "Plugins and servers a thread skips or cannot trust",
+    "means": "Plugins that are not official or the repo's own, plus .mcp.json servers, which a cloud thread skips.",
+    "unit": "items",
+    "goal": 0,
+    "near": 1,
+    "direction": "lower",
+    "goal_source": "Claude Code docs, plugin security (read 2026-11-25): Claude Code accepts the official names only from github.com/anthropics, and a cloud thread skips .mcp.json; template goal: none",
+    "source": "enabledPlugins of .claude/settings.json against params.plugin_allow, and each server of .mcp.json (collectors/code-project/code-project-parts.mjs)",
+    "needs": "none",
+    "chart": "table",
     "defined": "2026-11-25"
   }
 ]

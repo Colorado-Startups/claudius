@@ -1,5 +1,5 @@
 {
- "comment": "Claudius's Process page (Git Crafter templates/process/config.json; keys: actions/pages/action.yml). Its maps are the pack's own, maps/guard.json, maps/decide.json, maps/equip.json, maps/publish.json, maps/visibility.json and maps/project.json, named by use. CI builds the page from quality/public/process.json, which quality/public.mjs writes from this file: each pack map in full, each step whose metric needs local files left out, and a map with no step left out too.",
+ "comment": "Claudius's Process page (Git Crafter templates/process/config.json; keys: actions/pages/action.yml). Its maps are the pack's own, maps/guard.json, maps/decide.json, maps/equip.json, maps/publish.json, maps/visibility.json, maps/project.json, maps/ship.json, maps/environment.json and maps/remember.json, named by use. CI builds the page from quality/public/process.json, which quality/public.mjs writes from this file: each pack map in full, each step whose metric needs local files left out, and a map with no step left out too.",
  "repos": [
   "claudius"
  ],
@@ -25,6 +25,15 @@
   },
   {
    "use": "project"
+  },
+  {
+   "use": "ship"
+  },
+  {
+   "use": "environment"
+  },
+  {
+   "use": "remember"
   }
  ],
  "quality_config": "quality/config.json",

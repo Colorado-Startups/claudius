@@ -2,6 +2,7 @@
 //   Quality: guard rules a thread reads, instruction length, read-only subagents that can edit.
 //   Speed: minutes from a claude/ branch's first commit to its pull request, hours from that PR to merge.
 //   Consumption: subagents with no model, gh api requests per run.
+//   Parts (code-project-parts.mjs): one group per project part, read from repo files.
 //   Threads (code-project-threads.mjs): PRs opened as drafts, sessions revived after an idle hour, tokens per merged PR.
 // Reads repo files, and gh api for the last 30 days of merged claude/ pull requests. A cloud thread skips a repo's
 // settings.json permissions, hooks and env, so a guard it must obey sits in CLAUDE.md or AGENTS.md (Claude Code docs,
@@ -10,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { ghClient, ownRepo, percentile, redact, useLib } from '../lib/engine.mjs';
+import { partMetrics } from './code-project-parts.mjs';
 import { threadMetrics } from './code-project-threads.mjs';
 
 export const area = 'code-project';
@@ -122,6 +124,7 @@ async function gather({ root = '.', params = TEMPLATE, gh, now = Date.now(), mod
   } catch (err) {
     for (const id of speedIds) if (!out[id]) cnc(id, firstLine(err), prSource);
   }
+  partMetrics({ root, params: { ...TEMPLATE, ...params }, val, cnc });
   await threadMetrics({ root, p: { ...TEMPLATE, ...params }, gh, mode, now, home, projectsDir, val, cnc, count: () => (requests += 1) });
   val('code_project.requests', requests, 'gh api requests this collector made, one per route');
   return Object.fromEntries(metricIds.map((id) => [id, out[id] ?? { could_not_check: 'collector produced no value', source: SOURCE }]));
