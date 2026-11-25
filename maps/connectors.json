@@ -1,0 +1,64 @@
+{
+  "id": "connectors",
+  "name": "Connectors",
+  "why": "A connector, from its sign-in to the tools a thread gets",
+  "ideal": "Every installed connector is signed in, answers within seconds and adds a short tool list.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Connect Claude Code to tools with MCP",
+      "url": "https://code.claude.com/docs/en/mcp",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-25"
+    }
+  ],
+  "critical_path": [
+    "signin",
+    "load"
+  ],
+  "steps": [
+    {
+      "id": "signin",
+      "name": "Sign in",
+      "tools": [
+        "Connectors"
+      ],
+      "rule": "No installed connector waits for a sign-in.",
+      "rule_ref": "https://code.claude.com/docs/en/mcp",
+      "metric": "cp_connectors.incomplete_sign_ins"
+    },
+    {
+      "id": "repair",
+      "name": "Repair",
+      "tools": [
+        "Connectors"
+      ],
+      "rule": "No listed server fails to connect.",
+      "rule_ref": "https://code.claude.com/docs/en/mcp",
+      "metric": "desktop_app.connectors_broken"
+    },
+    {
+      "id": "connect",
+      "name": "Connect",
+      "tools": [
+        "Connectors"
+      ],
+      "rule": "Connectors answer within five seconds of a start.",
+      "rule_ref": "https://code.claude.com/docs/en/mcp",
+      "metric": "cp_connectors.connect_seconds"
+    },
+    {
+      "id": "load",
+      "name": "Load",
+      "tools": [
+        "Connectors"
+      ],
+      "rule": "The tool lists add few tokens to a thread.",
+      "rule_ref": "https://code.claude.com/docs/en/mcp",
+      "metric": "cp_connectors.connector_tool_tokens"
+    }
+  ]
+}

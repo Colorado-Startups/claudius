@@ -1,0 +1,64 @@
+{
+  "id": "context",
+  "name": "Context",
+  "why": "What the Context tab holds, from an uploaded folder to a thread's first read",
+  "ideal": "A thread reads current files from the Context tab, finds them in one read and loads few tokens.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Claude Code Docs: How Claude remembers your project",
+      "url": "https://code.claude.com/docs/en/memory",
+      "date": "2026-11-25"
+    }
+  ],
+  "critical_path": [
+    "copy",
+    "read"
+  ],
+  "steps": [
+    {
+      "id": "copy",
+      "name": "Copy",
+      "tools": [
+        "Context"
+      ],
+      "rule": "No uploaded folder is older than its repo.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_context.stale_copies"
+    },
+    {
+      "id": "limits",
+      "name": "Limits",
+      "tools": [
+        "Instructions"
+      ],
+      "rule": "The longest instruction file stays under the line limit.",
+      "rule_ref": "https://code.claude.com/docs/en/memory",
+      "metric": "code_project.instruction_lines"
+    },
+    {
+      "id": "read",
+      "name": "Read",
+      "tools": [
+        "Context"
+      ],
+      "rule": "A thread finds the file it needs on its first read.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_context.first_read_share"
+    },
+    {
+      "id": "load",
+      "name": "Load",
+      "tools": [
+        "Context"
+      ],
+      "rule": "The tab adds few tokens to a thread at start.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_context.context_tokens"
+    }
+  ]
+}

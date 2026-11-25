@@ -1,0 +1,64 @@
+{
+  "id": "hooks",
+  "name": "Hooks",
+  "why": "A guard hook, from the rule it backs to the call it checks",
+  "ideal": "Each guard is said where a thread reads it, backed by a safe hook that adds little time or text.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Hooks reference",
+      "url": "https://code.claude.com/docs/en/hooks",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-25"
+    }
+  ],
+  "critical_path": [
+    "say",
+    "run"
+  ],
+  "steps": [
+    {
+      "id": "say",
+      "name": "Say",
+      "tools": [
+        "Instructions"
+      ],
+      "rule": "Each guard is said in a file a cloud thread reads.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "code_project.guard_rules_missing"
+    },
+    {
+      "id": "safe",
+      "name": "Safe",
+      "tools": [
+        "Hooks"
+      ],
+      "rule": "No hook runs an unquoted input or a piped download.",
+      "rule_ref": "https://code.claude.com/docs/en/hooks",
+      "metric": "cp_hooks.unsafe_hooks"
+    },
+    {
+      "id": "run",
+      "name": "Run",
+      "tools": [
+        "Hooks"
+      ],
+      "rule": "A hook adds under a second to a call.",
+      "rule_ref": "https://code.claude.com/docs/en/hooks",
+      "metric": "cp_hooks.hook_ms"
+    },
+    {
+      "id": "text",
+      "name": "Text",
+      "tools": [
+        "Hooks"
+      ],
+      "rule": "Hooks inject little text at start.",
+      "rule_ref": "https://code.claude.com/docs/en/hooks",
+      "metric": "cp_hooks.hook_text_tokens"
+    }
+  ]
+}

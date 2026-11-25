@@ -1,0 +1,79 @@
+{
+  "id": "pr-flow",
+  "name": "Pull request flow",
+  "why": "A thread's pull request, from the first draft to a merge",
+  "ideal": "A pull request opens as a draft within minutes, turns green in a few fixes without skipped tests, and merges within a day.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-25"
+    }
+  ],
+  "critical_path": [
+    "draft",
+    "merge"
+  ],
+  "steps": [
+    {
+      "id": "draft",
+      "name": "Draft",
+      "tools": [
+        "Pull request"
+      ],
+      "rule": "A pull request opens as a draft so CI runs first.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "code_project.draft_first_share"
+    },
+    {
+      "id": "open",
+      "name": "Open",
+      "tools": [
+        "Pull request"
+      ],
+      "rule": "The pull request opens within ten minutes of the first commit.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "code_project.draft_pr_minutes"
+    },
+    {
+      "id": "fix",
+      "name": "Fix",
+      "tools": [
+        "Pull request auto fix"
+      ],
+      "rule": "A fix never skips, disables or deletes a test.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_pr_auto_fix.skipped_tests"
+    },
+    {
+      "id": "green",
+      "name": "Green",
+      "tools": [
+        "Pull request auto fix"
+      ],
+      "rule": "A red check turns green within thirty minutes.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_pr_auto_fix.red_to_green_minutes"
+    },
+    {
+      "id": "attempts",
+      "name": "Attempts",
+      "tools": [
+        "Pull request auto fix"
+      ],
+      "rule": "A pull request turns green in about two fix pushes.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_pr_auto_fix.fix_attempts"
+    },
+    {
+      "id": "merge",
+      "name": "Merge",
+      "tools": [
+        "Pull request"
+      ],
+      "rule": "A green pull request merges within a day.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "code_project.ready_to_merge_hours"
+    }
+  ]
+}

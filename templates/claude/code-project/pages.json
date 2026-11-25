@@ -1,0 +1,306 @@
+{
+  "comment": "The 14 pages of a Code Project: each scores Quality, Speed and Consumption from its tabs' metrics (targets/code-project-*.json) and has one process map (maps/<map>.json). A map with map_from lives in that toolkit repo. tests/pages.test.mjs keeps this file and the pack in step.",
+  "pages": [
+    {
+      "id": "overview",
+      "icon": "\ud83d\udef0\ufe0f",
+      "name": "Overview and threads",
+      "tabs": [
+        "cp-conversation",
+        "cp-threads"
+      ],
+      "map": "project",
+      "metrics": {
+        "quality": [
+          "cp_conversation.card_share",
+          "cp_threads.attributed_share"
+        ],
+        "speed": [
+          "cp_conversation.minutes_to_thread",
+          "cp_threads.first_green_minutes"
+        ],
+        "consumption": [
+          "cp_conversation.coordinator_token_share",
+          "cp_threads.threads_per_pr"
+        ]
+      }
+    },
+    {
+      "id": "context",
+      "icon": "\ud83d\udcce",
+      "name": "Context",
+      "tabs": [
+        "cp-context"
+      ],
+      "map": "context",
+      "metrics": {
+        "quality": [
+          "cp_context.stale_copies"
+        ],
+        "speed": [
+          "cp_context.first_read_share"
+        ],
+        "consumption": [
+          "cp_context.context_tokens"
+        ]
+      }
+    },
+    {
+      "id": "general",
+      "icon": "\u2699\ufe0f",
+      "name": "General and Advanced",
+      "tabs": [
+        "cp-general"
+      ],
+      "map": "decide",
+      "metrics": {
+        "quality": [
+          "cp_general.model_fit_share"
+        ],
+        "speed": [
+          "cp_general.high_effort_share"
+        ],
+        "consumption": [
+          "cp_general.above_default_share"
+        ]
+      }
+    },
+    {
+      "id": "memory",
+      "icon": "\ud83e\udde0",
+      "name": "Memory",
+      "tabs": [
+        "cp-memory"
+      ],
+      "map": "guard",
+      "metrics": {
+        "quality": [
+          "cp_memory.stale_notes"
+        ],
+        "speed": [
+          "cp_memory.repeat_questions"
+        ],
+        "consumption": [
+          "cp_memory.start_tokens"
+        ]
+      }
+    },
+    {
+      "id": "environment",
+      "icon": "\ud83c\udf29\ufe0f",
+      "name": "Environment",
+      "tabs": [
+        "cp-environment",
+        "cp-network-access",
+        "cp-network-secrets",
+        "cp-setup-script"
+      ],
+      "map": "setup-check",
+      "metrics": {
+        "quality": [
+          "cp_network_access.blocked_hosts",
+          "cp_network_secrets.secrets_in_logs",
+          "cp_setup_script.smoke_failures",
+          "cp_environment.keys_in_variables"
+        ],
+        "speed": [
+          "cp_network_access.first_fetch_seconds",
+          "cp_network_secrets.key_reprompts",
+          "cp_setup_script.script_seconds",
+          "cp_environment.thread_start_seconds"
+        ],
+        "consumption": [
+          "cp_network_access.unused_hosts",
+          "cp_network_secrets.unused_keys",
+          "cp_setup_script.cache_hit_share",
+          "cp_environment.failed_servers"
+        ]
+      }
+    },
+    {
+      "id": "usage",
+      "icon": "\ud83d\udcca",
+      "name": "Usage",
+      "tabs": [
+        "cp-usage"
+      ],
+      "map": "spend",
+      "map_from": "compute-crafter",
+      "metrics": {
+        "quality": [
+          "cp_usage.unaccounted_threads"
+        ],
+        "speed": [
+          "cp_usage.read_age_days"
+        ],
+        "consumption": [
+          "cp_usage.weekly_limit_used"
+        ]
+      }
+    },
+    {
+      "id": "scheduled-tasks",
+      "icon": "\u23f0",
+      "name": "Scheduled tasks",
+      "tabs": [
+        "cp-scheduled-tasks"
+      ],
+      "map": "scheduled-task",
+      "metrics": {
+        "quality": [
+          "cp_scheduled_tasks.last_run_ok_share"
+        ],
+        "speed": [
+          "cp_scheduled_tasks.on_time_share"
+        ],
+        "consumption": [
+          "cp_scheduled_tasks.connectors_per_task"
+        ]
+      }
+    },
+    {
+      "id": "local-threads",
+      "icon": "\ud83d\udcbb",
+      "name": "Threads on your computer",
+      "tabs": [
+        "cp-work-locally"
+      ],
+      "map": "local-thread",
+      "metrics": {
+        "quality": [
+          "cp_work_locally.unclean_ends"
+        ],
+        "speed": [
+          "cp_work_locally.first_command_minutes"
+        ],
+        "consumption": [
+          "cp_work_locally.folder_context_tokens"
+        ]
+      }
+    },
+    {
+      "id": "pull-requests",
+      "icon": "\ud83d\udd00",
+      "name": "Pull requests and auto-fix",
+      "tabs": [
+        "cp-pr-auto-fix"
+      ],
+      "map": "pr-flow",
+      "metrics": {
+        "quality": [
+          "cp_pr_auto_fix.skipped_tests"
+        ],
+        "speed": [
+          "cp_pr_auto_fix.red_to_green_minutes"
+        ],
+        "consumption": [
+          "cp_pr_auto_fix.fix_attempts"
+        ]
+      }
+    },
+    {
+      "id": "connectors",
+      "icon": "\ud83d\udd0c",
+      "name": "Connectors",
+      "tabs": [
+        "cp-connectors"
+      ],
+      "map": "connectors",
+      "metrics": {
+        "quality": [
+          "cp_connectors.incomplete_sign_ins"
+        ],
+        "speed": [
+          "cp_connectors.connect_seconds"
+        ],
+        "consumption": [
+          "cp_connectors.connector_tool_tokens"
+        ]
+      }
+    },
+    {
+      "id": "plugins",
+      "icon": "\ud83e\udde9",
+      "name": "Plugins",
+      "tabs": [
+        "cp-plugins",
+        "cp-extensions"
+      ],
+      "map": "plugins",
+      "metrics": {
+        "quality": [
+          "cp_plugins.unverified_sets_on",
+          "cp_extensions.unknown_provenance"
+        ],
+        "speed": [
+          "cp_plugins.plugin_load_seconds",
+          "cp_extensions.tools_ready_seconds"
+        ],
+        "consumption": [
+          "cp_plugins.plugin_skill_tokens",
+          "cp_extensions.tool_list_tokens"
+        ]
+      }
+    },
+    {
+      "id": "skills",
+      "icon": "\ud83d\udcda",
+      "name": "Skills",
+      "tabs": [
+        "cp-skills"
+      ],
+      "map": "skills",
+      "metrics": {
+        "quality": [
+          "cp_skills.fired_when_due_share"
+        ],
+        "speed": [
+          "cp_skills.skill_first_try_share"
+        ],
+        "consumption": [
+          "cp_skills.skill_listing_tokens"
+        ]
+      }
+    },
+    {
+      "id": "subagents",
+      "icon": "\ud83e\udd16",
+      "name": "Subagents",
+      "tabs": [
+        "cp-subagents"
+      ],
+      "map": "subagents",
+      "metrics": {
+        "quality": [
+          "cp_subagents.reviewer_real_share"
+        ],
+        "speed": [
+          "cp_subagents.explorer_one_pass_share"
+        ],
+        "consumption": [
+          "cp_subagents.small_model_share"
+        ]
+      }
+    },
+    {
+      "id": "hooks",
+      "icon": "\ud83e\ude9d",
+      "name": "Hooks",
+      "tabs": [
+        "cp-hooks"
+      ],
+      "map": "hooks",
+      "metrics": {
+        "quality": [
+          "cp_hooks.unsafe_hooks"
+        ],
+        "speed": [
+          "cp_hooks.hook_ms"
+        ],
+        "consumption": [
+          "cp_hooks.hook_text_tokens"
+        ]
+      }
+    }
+  ]
+}

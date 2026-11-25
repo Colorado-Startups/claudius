@@ -63,12 +63,26 @@ A cloud scheduled task runs without a conversation. Remove connectors a task doe
 
 ## Pages
 
-Each tab and feature of a Project has a Quality, Speed and Consumption tab in this pack, named `cp-<name>`, with three metrics. Each reads local files, so a metric with no collector reads not measured and the public page leaves it out. Maps: `setup`, `memory`, `schedule` ([maps/README.md](../../../maps/README.md#code-project-page-maps-setup-memory-and-schedule)).
+Each tab and feature of a Project has a Quality, Speed and Consumption tab in this pack, named `cp-<name>`, with three metrics. Each reads local files, so a metric with no collector reads not measured and the public page leaves it out. The 19 tabs form 14 pages, each with one process map ([`pages.json`](pages.json), [maps/README.md](../../../maps/README.md#page-maps-one-per-page)).
 
-| Group | Tabs |
-|---|---|
-| Project tabs (9) | Conversation, Threads, Context, Scheduled tasks, General, Environment, Memory, Usage, Extensions |
-| Features (10) | Connectors, Plugins, Skills, Hooks, Subagents, Pull request auto fix, Work locally, Network access, Network secrets, Setup script |
+| Page | Tabs | Map |
+|---|---|---|
+| 🛰️ Overview and threads | Conversation, Threads | `project` |
+| 📎 Context | Context | `context` |
+| ⚙️ General and Advanced | General | `decide` |
+| 🧠 Memory | Memory | `guard` |
+| 🌩️ Environment | Environment, Network access, Network secrets, Setup script | `setup-check` |
+| 📊 Usage | Usage | `spend` (Compute Crafter) |
+| ⏰ Scheduled tasks | Scheduled tasks | `scheduled-task` |
+| 💻 Threads on your computer | Work locally | `local-thread` |
+| 🔀 Pull requests and auto-fix | Pull request auto fix | `pr-flow` |
+| 🔌 Connectors | Connectors | `connectors` |
+| 🧩 Plugins | Plugins, Extensions | `plugins` |
+| 📚 Skills | Skills | `skills` |
+| 🤖 Subagents | Subagents | `subagents` |
+| 🪝 Hooks | Hooks | `hooks` |
+
+To add a page, copy the [page kit](page/README.md): three files, a checklist and the rule for what 100 means.
 
 ## Limits
 

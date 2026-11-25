@@ -1,0 +1,69 @@
+{
+  "id": "subagents",
+  "name": "Subagents",
+  "why": "A subagent, from its file to a lookup answered on a small model",
+  "ideal": "A read-only subagent cannot edit, names a small model and answers in one pass.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Create custom subagents",
+      "url": "https://code.claude.com/docs/en/sub-agents",
+      "date": "2026-11-25"
+    }
+  ],
+  "critical_path": [
+    "delegate",
+    "route"
+  ],
+  "steps": [
+    {
+      "id": "delegate",
+      "name": "Delegate",
+      "tools": [
+        "Subagents"
+      ],
+      "rule": "A read-only subagent lists no writing tool.",
+      "rule_ref": "https://code.claude.com/docs/en/sub-agents",
+      "metric": "code_project.agents_unsafe"
+    },
+    {
+      "id": "route",
+      "name": "Route",
+      "tools": [
+        "Subagents"
+      ],
+      "rule": "Each subagent names its model.",
+      "rule_ref": "https://code.claude.com/docs/en/sub-agents",
+      "metric": "code_project.agents_without_model"
+    },
+    {
+      "id": "explore",
+      "name": "Explore",
+      "tools": [
+        "Subagents"
+      ],
+      "rule": "An explorer answers a lookup in one pass.",
+      "rule_ref": "https://code.claude.com/docs/en/sub-agents",
+      "metric": "cp_subagents.explorer_one_pass_share"
+    },
+    {
+      "id": "small",
+      "name": "Small",
+      "tools": [
+        "Subagents"
+      ],
+      "rule": "Lookups run on the small model.",
+      "rule_ref": "https://code.claude.com/docs/en/sub-agents",
+      "metric": "cp_subagents.small_model_share"
+    },
+    {
+      "id": "review",
+      "name": "Review",
+      "tools": [
+        "Subagents"
+      ],
+      "rule": "A reviewer's findings are real defects.",
+      "rule_ref": "https://code.claude.com/docs/en/sub-agents",
+      "metric": "cp_subagents.reviewer_real_share"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "id": "plugins",
+  "name": "Plugins",
+  "why": "A plugin, from its source to the skill text it adds to a start",
+  "ideal": "Only verified plugins are on, they load in seconds, and their skill listings add few tokens.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Plugin security",
+      "url": "https://code.claude.com/docs/en/plugins/security",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Claude Code Docs: Plugins overview",
+      "url": "https://code.claude.com/docs/en/plugins/overview",
+      "date": "2026-11-25"
+    }
+  ],
+  "critical_path": [
+    "source",
+    "keep"
+  ],
+  "steps": [
+    {
+      "id": "source",
+      "name": "Source",
+      "tools": [
+        "Plugins"
+      ],
+      "rule": "Every plugin on is official, verified or the repo's own.",
+      "rule_ref": "https://code.claude.com/docs/en/plugins/security",
+      "metric": "cp_plugins.unverified_sets_on"
+    },
+    {
+      "id": "skip",
+      "name": "Skip",
+      "tools": [
+        "Plugins"
+      ],
+      "rule": "A thread skips no plugin or server it cannot load.",
+      "rule_ref": "https://code.claude.com/docs/en/plugins/security",
+      "metric": "code_project.plugins_untrusted"
+    },
+    {
+      "id": "load",
+      "name": "Load",
+      "tools": [
+        "Plugins"
+      ],
+      "rule": "The plugin sets load within three seconds.",
+      "rule_ref": "https://code.claude.com/docs/en/plugins/overview",
+      "metric": "cp_plugins.plugin_load_seconds"
+    },
+    {
+      "id": "keep",
+      "name": "Keep",
+      "tools": [
+        "Plugins"
+      ],
+      "rule": "The skill listings add few tokens to a start.",
+      "rule_ref": "https://code.claude.com/docs/en/plugins/overview",
+      "metric": "cp_plugins.plugin_skill_tokens"
+    },
+    {
+      "id": "clean",
+      "name": "Clean",
+      "tools": [
+        "Plugins"
+      ],
+      "rule": "No install is left off, delisted or abandoned.",
+      "rule_ref": "https://code.claude.com/docs/en/plugins/overview",
+      "metric": "desktop_app.plugins_stale"
+    }
+  ]
+}

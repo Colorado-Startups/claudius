@@ -1,0 +1,69 @@
+{
+  "id": "skills",
+  "name": "Skills",
+  "why": "A skill, from its first line to the thread that uses it",
+  "ideal": "Each skill follows the authoring rules, is proven by three evals, fires when due and costs few listing tokens.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Extend Claude with skills",
+      "url": "https://code.claude.com/docs/en/skills",
+      "date": "2026-11-25"
+    }
+  ],
+  "critical_path": [
+    "write",
+    "fire"
+  ],
+  "steps": [
+    {
+      "id": "write",
+      "name": "Write",
+      "tools": [
+        "Skills"
+      ],
+      "rule": "Names and descriptions follow the authoring rules.",
+      "rule_ref": "https://code.claude.com/docs/en/skills",
+      "metric": "practices.skill_rules"
+    },
+    {
+      "id": "test",
+      "name": "Test",
+      "tools": [
+        "Skills"
+      ],
+      "rule": "Three eval cases prove each skill fired.",
+      "rule_ref": "https://code.claude.com/docs/en/skills",
+      "metric": "practices.skills_under_three_evals"
+    },
+    {
+      "id": "fire",
+      "name": "Fire",
+      "tools": [
+        "Skills"
+      ],
+      "rule": "A thread uses a matching skill when one is due.",
+      "rule_ref": "https://code.claude.com/docs/en/skills",
+      "metric": "cp_skills.fired_when_due_share"
+    },
+    {
+      "id": "find",
+      "name": "Find",
+      "tools": [
+        "Skills"
+      ],
+      "rule": "A skill is found on the first try.",
+      "rule_ref": "https://code.claude.com/docs/en/skills",
+      "metric": "cp_skills.skill_first_try_share"
+    },
+    {
+      "id": "list",
+      "name": "List",
+      "tools": [
+        "Skills"
+      ],
+      "rule": "The skill listing adds few tokens to a start.",
+      "rule_ref": "https://code.claude.com/docs/en/skills",
+      "metric": "cp_skills.skill_listing_tokens"
+    }
+  ]
+}
