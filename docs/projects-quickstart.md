@@ -4,30 +4,19 @@ A Claude Code Project is a beta feature of the Claude desktop app and claude.ai/
 
 ```mermaid
 flowchart LR
-  A[1 Create the Project<br/>attach your repos] --> B[2 Paste the instructions<br/>below] --> C[3 Run the setup check<br/>Code Projects tab] --> D[4 Ask for one change<br/>draft PR comes back]
+  A[1 Create the Project<br/>attach your repos] --> B[2 Paste the instructions<br/>from Git Crafter] --> C[3 Run the setup check<br/>Code Projects tab] --> D[4 Ask for one change<br/>draft PR comes back]
 ```
 
 | # | Do | Where |
 |---|---|---|
 | 1 | Create a Project and attach the one or two repos most tasks touch. Idle projects cost nothing | Code tab of the desktop app, or claude.ai/code |
-| 2 | Paste the instructions below into the Project's instructions | Project settings |
+| 2 | Paste Git Crafter's `instructions.md`, filled in, into the Project's instructions | Project settings |
 | 3 | Check each attached repo against the setup check: `AGENTS.md`, a `CLAUDE.md` that imports it, the main rule, a short PR template, an issue form, CI, valid `.claude/settings.json` | `targets/projects.json` and the Code Projects tab |
 | 4 | Ask for one change. The thread branches, pushes after each step and opens a draft PR | The project chat |
 
-## Instructions to paste
+## Instructions and the setup check
 
-Keep them short: they load in every thread.
-
-```text
-Work on a branch named claude/<topic>. Push after every step.
-Open a draft pull request within 10 minutes of starting.
-Never push to main. Never merge unless I say so.
-Read each repo's CLAUDE.md and AGENTS.md before changing anything.
-Ask before spending money, deleting data, posting outside the repo or touching credentials.
-Never print, copy or commit a key value.
-File every defect as a GitHub issue in the repo whose code is at fault.
-Tables and diagrams first. One idea per sentence.
-```
+Git Crafter holds them, so they live in one place: [templates/projects](https://github.com/SoulCraft-Org/git-crafter/tree/main/templates/projects). Its `instructions.md` is the text to paste, and its README holds the first-message setup check and the smoke test. This repo adds the check of each attached repo's own files, as the Code Projects tab.
 
 ## What it costs
 
