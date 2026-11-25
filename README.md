@@ -20,25 +20,44 @@ Live page, 2026-11-15, commit 116d655.
 
 Claudius is not an Anthropic product and is not affiliated with Anthropic.
 
-## Quickstart
+## Quickstart: 4 steps
 
-```mermaid
-flowchart LR
-  GC[1 Git Crafter templates:<br/>CI, open-repo files, AGENTS.md] --> T[2 templates/claude:<br/>settings, plugins, skills]
-  T --> P[3 Pack pin in quality/config.json:<br/>the tabs of pack.json]
-  P --> M[4 Process maps:<br/>each named by use]
-  P --> L[5 --local run:<br/>your private full page]
-  P --> CP[6 Optional Code Project:<br/>add repo, pick environment, paste prompt]
-```
+The local run on 2026-11-25, in an empty repo with Git Crafter's starter files, read 24 metrics through 20 collectors. The pin and the local run took 2 seconds in that run. `../claudius` and `../git-crafter` are clones beside your repo.
 
 | # | Do | Where |
 |---|---|---|
-| 1 | Adopt Git Crafter: CI, open-repo files, `AGENTS.md` and `CLAUDE.md` | Git Crafter `templates/ci/README.md`, `templates/agents/` |
-| 2 | Copy the Claude files and set the desktop app, every plugin, skill and connector kept on ([All on, app-wide](templates/claude/README.md#all-on-app-wide)) | [templates/claude/README.md](templates/claude/README.md) |
-| 3 | Add the pack (table below) | `quality/config.json` |
-| 4 | Add `{ "use": "<id>" }` to your Process config's `maps` for each map you want, one per file in [`maps/`](maps/) (this repo's own [`quality/process/config.json`](quality/process/config.json) names every one) | [maps/README.md](maps/README.md) |
-| 5 | Run the one local command for the numbers CI never sees | below |
-| 6 | Optional, to run it as a Claude Code Project: add the repo to a project, pick the environment, paste the [setup prompt](docs/projects-quickstart.md#setup-prompt). Then memory seeds, subagents, scheduled tasks and guard placement | [quick start](docs/projects-quickstart.md), [templates/claude/code-project/README.md](templates/claude/code-project/README.md) |
+| 1 | Adopt Git Crafter: CI, open-repo files, `AGENTS.md` and `CLAUDE.md` | Git Crafter's [quickstart](https://github.com/SoulCraft-Org/git-crafter#quickstart-3-steps) |
+| 2 | Copy the Claude files, and keep every plugin, skill and connector on ([All on, app-wide](templates/claude/README.md#all-on-app-wide)) | `cp -r ../claudius/templates/claude/.claude .` |
+| 3 | Pin the latest release in `quality/config.json`. If it lists `tabs`, add the pack's tab ids | the script below |
+| 4 | Check the pack out at that pin. Run the one local command for the full page, with the numbers CI never sees | the script below, and [the command](#the-one-local-command) |
+
+```bash
+U=https://github.com/Colorado-Startups/claudius
+TAG=$(git ls-remote --tags --refs --sort=-v:refname $U 'v*' | head -1 | cut -d/ -f3)
+SHA=$(git ls-remote $U "refs/tags/$TAG" "refs/tags/$TAG^{}" | tail -1 | cut -f1)
+curl -fsS https://raw.githubusercontent.com/Colorado-Startups/claudius/$SHA/pack.json -o /tmp/pack.json
+node -e '
+const fs = require("fs"), c = JSON.parse(fs.readFileSync("quality/config.json"));
+const ids = JSON.parse(fs.readFileSync("/tmp/pack.json")).tabs.map((t) => (Array.isArray(t) ? t[0] : t.id ?? t));
+const own = "Colorado-Startups/claudius@";
+c.packs = [...(c.packs ?? []).filter((p) => !String(p).startsWith(own)), own + process.argv[1]];
+if (Array.isArray(c.tabs)) c.tabs = [...new Set([...c.tabs, ...ids])];
+fs.writeFileSync("quality/config.json", JSON.stringify(c, null, 2) + "\n");' $SHA
+P=.code-os-packs/Colorado-Startups/claudius
+[ -d $P ] || git clone -q $U $P
+git -C $P fetch -q --tags && git -C $P checkout -q $SHA
+for l in .code-os-packs/ quality/data/ quality/history/; do grep -qxF $l .gitignore 2>/dev/null || echo $l >> .gitignore; done
+node ../git-crafter/quality/collect.mjs --config quality/config.json --local
+```
+
+Then, each optional:
+
+| Add | Do |
+|---|---|
+| Process maps | Add `{ "use": "<id>" }` to your Process config's `maps` for each map you want, one per file in [`maps/`](maps/). This repo's own [`quality/process/config.json`](quality/process/config.json) names every one ([maps/README.md](maps/README.md)) |
+| Claude Code Project | Add the repo to a project, pick the environment, paste the [setup prompt](docs/projects-quickstart.md#setup-prompt). Then memory seeds, subagents, scheduled tasks and guard placement ([quick start](docs/projects-quickstart.md), [templates/claude/code-project/README.md](templates/claude/code-project/README.md)) |
+
+The pin, the tab ids and the Pages setup in detail: [Add the pack](#add-the-pack).
 
 ## Build an app
 
