@@ -57,7 +57,7 @@ test('public: each metric that needs local files is dropped but the repo-file on
   const [practices, visibility, codeProject] = [ids('practices.json'), ids('visibility.json'), defs('code-project.json').filter((d) => d.needs !== 'local-files').map((d) => d.id)];
   // The practices and visibility lines all read GitHub or repo files; a code-project line stays public unless it needs local files.
   for (const f of ['practices.json', 'visibility.json']) assert.ok(defs(f).every((d) => d.needs !== 'local-files'), f);
-  assert.deepEqual(kept.sort(), ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr', 'claude.instruction_tokens', 'claude_settings.deny_coverage', 'claude_settings.setup_files', 'claude_settings.valid', 'cp_pr_auto_fix.fix_attempts', 'cp_pr_auto_fix.red_to_green_minutes', 'cp_pr_auto_fix.skipped_tests', 'cp_threads.attributed_share', 'cp_threads.first_green_minutes', 'instructions.description_tokens', 'lead_time.hours', ...practices, ...visibility, ...codeProject].sort());
+  assert.deepEqual(kept.sort(), ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr', 'claude.instruction_tokens', 'claude_settings.deny_coverage', 'claude_settings.setup_files', 'claude_settings.valid', 'cp_hooks.unsafe_hooks', 'cp_pr_auto_fix.fix_attempts', 'cp_pr_auto_fix.red_to_green_minutes', 'cp_pr_auto_fix.skipped_tests', 'cp_threads.attributed_share', 'cp_threads.first_green_minutes', 'instructions.description_tokens', 'lead_time.hours', ...practices, ...visibility, ...codeProject].sort());
 });
 
 test('public: the config is the repo own, its targets and the page files under quality/public', () => {

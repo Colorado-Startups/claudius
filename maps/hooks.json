@@ -36,7 +36,7 @@
       "tools": [
         "Hooks"
       ],
-      "rule": "No hook runs an unquoted input or a piped download.",
+      "rule": "No hook force pushes, skips a check, deletes recursively or pipes a download to a shell.",
       "rule_ref": "https://code.claude.com/docs/en/hooks",
       "metric": "cp_hooks.unsafe_hooks"
     },

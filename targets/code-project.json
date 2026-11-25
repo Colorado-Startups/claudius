@@ -15,7 +15,7 @@
     "needs": "none",
     "chart": "table",
     "params": {
-      "comment": "instruction_files: the files a cloud thread loads. rules: { label, pattern } pairs, each a case-insensitive regular expression. agent_dirs: folders of subagent files, the repo's own and the template's. repo: owner/name, empty for this repo. branch_prefix, window_days, max_prs: which merged pull requests count as thread work. memory_dir, memory_index: the folder of the project memory and its index file, which cp-memory.mjs reads; empty, it is not measured.",
+      "comment": "instruction_files: the files a cloud thread loads. rules: { label, pattern } pairs, each a case-insensitive regular expression. agent_dirs: folders of subagent files, the repo's own and the template's. repo: owner/name, empty for this repo. hook_files: the settings and plugin files whose hooks cp-hooks.mjs reads. unsafe_hooks: { label, pattern } pairs, a hook command that matches one is unsafe. branch_prefix, window_days, max_prs: which merged pull requests count as thread work. memory_dir, memory_index: the folder of the project memory and its index file, which cp-memory.mjs reads; empty, it is not measured.",
       "instruction_files": [
         "CLAUDE.md",
         "AGENTS.md",
@@ -34,6 +34,30 @@
       "agent_dirs": [
         ".claude/agents",
         "templates/claude/code-project/agents"
+      ],
+      "hook_files": [
+        ".claude/settings.json",
+        "hooks/hooks.json",
+        "plugin/hooks/hooks.json",
+        "templates/claude/.claude/settings.json"
+      ],
+      "unsafe_hooks": [
+        {
+          "label": "A force push",
+          "pattern": "\\bgit\\s+push\\b[^|;&\\n]*(\\s--force\\b|\\s-f\\b)"
+        },
+        {
+          "label": "A skipped check",
+          "pattern": "--no-verify\\b"
+        },
+        {
+          "label": "A download piped to a shell",
+          "pattern": "\\b(curl|wget)\\b[^\\n]*\\|\\s*(sudo\\s+)?(ba|z|da)?sh\\b"
+        },
+        {
+          "label": "A recursive delete",
+          "pattern": "\\brm\\s+(-[a-z]+\\s+)*-[a-z]*r[a-z]*\\b"
+        }
       ],
       "repo": "",
       "branch_prefix": "claude/",
