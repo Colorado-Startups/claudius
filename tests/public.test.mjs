@@ -30,7 +30,7 @@ test('public: each metric that needs local files is dropped but the repo-file on
   const pub = read(join(ROOT, 'quality', 'public-params.json'));
   const local = localOnlyIds([join(ROOT, 'targets')]);
   assert.deepEqual(new Set(dropped), new Set([...local].filter((id) => !pub.ids.includes(id))));
-  assert.equal(dropped.length, 117);
+  assert.equal(dropped.length, local.size - pub.ids.filter((id) => local.has(id)).length, 'every local-files id but the ones that read repo files');
   const files = readdirSync(join(ROOT, 'targets')).filter((f) => f.endsWith('.json')).sort();
   assert.deepEqual(readdirSync(join(root, 'quality', 'public', 'targets')).sort(), [...files, DROPS].sort(), 'every targets file, so no collector runs without its targets, and the drops');
   assert.deepEqual(read(join(root, 'quality', 'public', 'targets', DROPS)), [...pub.drop.map((id) => ({ id, drop: true })), ...Object.entries(pub.params_for ?? {}).map(([id, params]) => ({ id, params }))]);
@@ -46,8 +46,10 @@ test('public: each metric that needs local files is dropped but the repo-file on
   }
   const kept = files.flatMap((f) => read(join(root, 'quality', 'public', 'targets', f))).filter((d) => d.drop !== true).map((d) => d.id);
   const ids = (f) => JSON.parse(readFileSync(join(ROOT, 'targets', f), 'utf8')).map((d) => d.id);
-  const [practices, visibility, codeProject] = [ids('practices.json'), ids('visibility.json'), ids('code-project.json').filter((id) => !['code_project.idle_revivals', 'code_project.tokens_per_merged_pr'].includes(id))];
-  assert.deepEqual([practices.length, visibility.length, codeProject.length], [10, 5, 15]);
+  const defs = (f) => JSON.parse(readFileSync(join(ROOT, 'targets', f), 'utf8'));
+  const [practices, visibility, codeProject] = [ids('practices.json'), ids('visibility.json'), defs('code-project.json').filter((d) => d.needs !== 'local-files').map((d) => d.id)];
+  // The practices and visibility lines all read GitHub or repo files; a code-project line stays public unless it needs local files.
+  for (const f of ['practices.json', 'visibility.json']) assert.ok(defs(f).every((d) => d.needs !== 'local-files'), f);
   assert.deepEqual(kept.sort(), ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr', 'claude.instruction_tokens', 'claude_settings.deny_coverage', 'claude_settings.setup_files', 'claude_settings.valid', 'cp_pr_auto_fix.fix_attempts', 'cp_pr_auto_fix.red_to_green_minutes', 'cp_pr_auto_fix.skipped_tests', 'cp_threads.attributed_share', 'cp_threads.first_green_minutes', 'instructions.description_tokens', 'lead_time.hours', ...practices, ...visibility, ...codeProject].sort());
 });
 

@@ -3,7 +3,7 @@
 // and kind, never by the text it matched.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -68,9 +68,14 @@ test('privacy: an email fails; a git remote and a noreply address pass', () => {
   assert.deepEqual(privacyProblems(run, { localIds }), ['line 7: email']);
 });
 
-test('privacy: the pack targets name 119 local-only ids, and a seeded one fails', () => {
-  const ids = localOnlyIds([fileURLToPath(new URL('../targets/', import.meta.url))]);
-  assert.equal(ids.size, 119);
+test('privacy: the pack targets name every needs-local-files id as local-only, and a seeded one fails', () => {
+  const dir = fileURLToPath(new URL('../targets/', import.meta.url));
+  const ids = localOnlyIds([dir]);
+  // Counted here from the targets files, so a new local-files line moves the expected number with it.
+  const entries = readdirSync(dir).filter((f) => f.endsWith('.json')).flatMap((f) => JSON.parse(readFileSync(join(dir, f), 'utf8')));
+  const expected = new Set(entries.filter((d) => d.needs === 'local-files').map((d) => d.id));
+  assert.ok(expected.size > 0, 'the pack has local-files lines to guard');
+  assert.deepEqual([...ids].sort(), [...expected].sort());
   const run = { mode: 'ci', metrics: { 'claude.cost_per_merged_pr_usd': { value: 1.5, source: 'transcripts' } } };
   assert.ok(ids.has('claude.cost_per_merged_pr_usd'));
   assert.deepEqual(privacyProblems(run, { localIds: ids }), ['claude.cost_per_merged_pr_usd needs local files but is in the run']);
