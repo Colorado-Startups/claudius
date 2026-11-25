@@ -1,5 +1,5 @@
 name: Quick fix
-description: "A small change one pull request closes within a day. Anything larger goes on the project board."
+description: "A small change one pull request closes within a day. Anything larger goes in a Feature."
 title: "Area: what to fix"
 type: Task
 body:
