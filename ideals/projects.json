@@ -1,0 +1,13 @@
+{
+  "ideal": "Every repo a Code Project attaches has shared rules, a short pull request template, an issue form and CI, so a fresh thread starts ready.",
+  "sources": [
+    {"title": "Claude Code Projects", "url": "https://code.claude.com/docs/en/claude-projects", "date": "2026-11-25"},
+    {"title": "How Claude remembers your project", "url": "https://code.claude.com/docs/en/memory", "date": "2026-11-25"},
+    {"title": "Manage costs effectively", "url": "https://code.claude.com/docs/en/costs", "date": "2026-11-25"},
+    {"title": "Creating a pull request template for your repository", "url": "https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository", "date": "2026-11-25"},
+    {"title": "Syntax for issue forms", "url": "https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms", "date": "2026-11-25"}
+  ],
+  "quality": "No setup check fails: the rules file, its import, the main rule, the templates, CI and settings are all in place.",
+  "speed": "One setup check reads its files within a second.",
+  "consumption": "The pull request template stays under 150 words, since every thread reads it."
+}

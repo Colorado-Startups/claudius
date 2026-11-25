@@ -25,8 +25,8 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 ```mermaid
 flowchart LR
   GC[1 Git Crafter templates:<br/>CI, open-repo files, AGENTS.md] --> T[2 templates/claude:<br/>settings, plugins, skills]
-  T --> P[3 Pack pin in quality/config.json:<br/>eight tabs]
-  P --> M[4 Process maps:<br/>Guard, Decide, Equip, Publish, Visibility]
+  T --> P[3 Pack pin in quality/config.json:<br/>nine tabs]
+  P --> M[4 Process maps:<br/>Guard, Decide, Equip, Publish, Visibility, Ship]
   P --> L[5 --local run:<br/>your private full page]
 ```
 
@@ -35,8 +35,10 @@ flowchart LR
 | 1 | Adopt Git Crafter: CI, open-repo files, `AGENTS.md` and `CLAUDE.md` | Git Crafter `templates/ci/README.md`, `templates/agents/` |
 | 2 | Copy the Claude files and set the desktop app, every plugin, skill and connector kept on ([All on, app-wide](templates/claude/README.md#all-on-app-wide)) | [templates/claude/README.md](templates/claude/README.md) |
 | 3 | Add the pack (table below) | `quality/config.json` |
-| 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }` and `{ "use": "visibility" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
+| 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }` and `{ "use": "ship" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
 | 5 | Run the one local command for the numbers CI never sees | below |
+
+Open a repo as a Code Project in four steps: [docs/projects-quickstart.md](docs/projects-quickstart.md). What was added and where: [docs/giveback.md](docs/giveback.md).
 
 ## Build an app
 
@@ -57,7 +59,7 @@ flowchart LR
 | --- | --- |
 | Templates | `templates/claude/`: the Claude-only files a repo commits. This repo runs copies of them (`tests/templates.test.mjs`) |
 | Plugin | `plugin/`: the `claudius` Claude Code plugin (skills `plan`, `merge`, `equip`, `find-plugin`, `plain-voice`). Install: `claude plugin marketplace add Colorado-Startups/claudius`, then `claude plugin install claudius@claudius` |
-| Pack | 8 tabs: Claude, Claude settings, Claude desktop app, Blockers, Tokens, Instructions, Best practices, Visibility. Maps: Guard, Decide, Equip, Publish, Visibility |
+| Pack | 9 tabs: Claude, Claude settings, Claude desktop app, Code Projects, Blockers, Tokens, Instructions, Best practices, Visibility. Maps: Guard, Decide, Equip, Publish, Visibility, Ship |
 | Engine | Git Crafter's `actions/pages` and CI standard, pinned by full commit SHA. No engine code lives here |
 | Public pages | Built in CI from `quality/public/`. The Quality page shows only metrics read from GitHub and the repo's files. Each metric that needs local files is dropped: not shown, counted or listed. The exceptions are the ones `quality/public-params.json` reads from committed files alone. A tab left with no metric, Tokens and Claude desktop app, is left off; it shows on a `--local` page (Git Crafter v7.0.1 or later). The Process page shows each map step such a metric does not score |
 | Private numbers | Usage, cost, transcripts and connectors. Read on your own machine only, never uploaded |
@@ -68,8 +70,8 @@ flowchart LR
 | Path | Holds |
 | --- | --- |
 | `templates/claude/` | the Claude templates; `AGENTS.md`, `CLAUDE.md` and `.claude/` at the root are this repo's own |
-| `pack.json` | the eight tabs |
-| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard, Decide, Equip, Publish and Visibility maps |
+| `pack.json` | the nine tabs |
+| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard, Decide, Equip, Publish, Visibility and Ship maps |
 | `collectors/<tab>/`, `fixtures/` | the collectors, their tests and test fixtures |
 | `quality/process/config.json` | the Process page: the Guard, Decide, Equip, Publish and Visibility maps, named by `use` |
 | `quality/public.mjs`, `quality/public-params.json` | write `quality/public/`, the configs CI builds the public pages from. Each metric that needs local files is dropped but the repo-file ones. Each map is written out in full without the steps those metrics score |

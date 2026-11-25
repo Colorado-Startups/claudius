@@ -1,0 +1,21 @@
+{
+ "id": "ship",
+ "name": "Ship",
+ "why": "A Code Project idea, from a fresh thread to a merged pull request",
+ "ideal": "A fresh thread finds the rules and templates ready, pushes in few attempts, and its pull request is live within a day.",
+ "sources": [
+  {"title": "Claude Code Projects", "url": "https://code.claude.com/docs/en/claude-projects", "date": "2026-11-25"},
+  {"title": "How Claude remembers your project", "url": "https://code.claude.com/docs/en/memory", "date": "2026-11-25"},
+  {"title": "Manage costs effectively", "url": "https://code.claude.com/docs/en/costs", "date": "2026-11-25"},
+  {"title": "Creating a pull request template for your repository", "url": "https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository", "date": "2026-11-25"}
+ ],
+ "critical_path": ["ready", "build", "pr", "live"],
+ "steps": [
+  {"id": "ready", "name": "Ready", "tools": ["AGENTS.md", "CLAUDE.md", ".claude/settings.json"], "rule": "A fresh thread finds the shared rules, their import, the main rule, templates, CI and settings in place.", "rule_ref": "https://code.claude.com/docs/en/memory", "metric": "projects.setup_gaps"},
+  {"id": "check", "name": "Check", "tools": ["setup check"], "rule": "The setup check reads its files within a second, so running it costs nothing.", "rule_ref": "https://code.claude.com/docs/en/claude-projects", "metric": "projects.audit_seconds"},
+  {"id": "build", "name": "Build", "tools": ["Cloud thread", "git push"], "rule": "A thread pushes after each step, and each push starts checks, so few pushes means few waits.", "rule_ref": "https://code.claude.com/docs/en/claude-projects", "metric": "blockers.pushes_per_merged_pr"},
+  {"id": "pr", "name": "Pull request", "tools": ["PULL_REQUEST_TEMPLATE.md", "draft PR"], "rule": "The template is a short layout to fill in, since every thread reads it on every pull request.", "rule_ref": "https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository", "metric": "projects.pr_template_words"},
+  {"id": "guard", "name": "Guard", "tools": ["Rulesets", "CI gate"], "rule": "A change to a guard or workflow stays, since an undone one means the first version did not work.", "rule_ref": "https://code.claude.com/docs/en/costs", "metric": "blockers.enforcement_reverts"},
+  {"id": "live", "name": "Live", "tools": ["Review", "Merge"], "rule": "A session's change is live within a day, by the typical time of each step added up.", "rule_ref": "https://code.claude.com/docs/en/claude-projects", "metric": "lead_time.hours"}
+ ]
+}

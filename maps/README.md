@@ -1,6 +1,6 @@
 # Process maps
 
-Five maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }` and `{ "use": "visibility" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
+Six maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }` and `{ "use": "ship" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
 
 ## Guard: a tool call, through the guards, to run or blocked
 
@@ -95,4 +95,22 @@ flowchart LR
 
 Probe and Decide need an admin token: in CI without `ADMIN_READ_TOKEN` they read not measured, never 0. The [`visibility`](../plugin/skills/visibility/SKILL.md) skill runs the same audit in a session.
 
-Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json).
+## Ship: a Code Project idea, from a fresh thread to a merged pull request
+
+```mermaid
+flowchart LR
+  ready["Ready"] --> check["Check"] --> build["Build"] --> pr["Pull request"] --> guard["Guard"] --> live["Live"]
+```
+
+| Step | Ideal | Metric |
+|---|---|---|
+| Ready | A fresh thread finds the shared rules, their import, the main rule, templates, CI and settings in place | `projects.setup_gaps` |
+| Check | The setup check reads its files within a second | `projects.audit_seconds` |
+| Build | A thread pushes after each step, so few pushes means few waits | `blockers.pushes_per_merged_pr` |
+| Pull request | The template is a short layout, since every thread reads it | `projects.pr_template_words` |
+| Guard | A change to a guard or workflow stays | `blockers.enforcement_reverts` |
+| Live | A session's change is live within a day | `lead_time.hours` |
+
+Every Ship step reads the repo's files or GitHub, so the public page shows the map whole. Quickstart: [projects-quickstart.md](../docs/projects-quickstart.md).
+
+Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json), [`ship.json`](ship.json).
