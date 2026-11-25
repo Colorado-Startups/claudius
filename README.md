@@ -94,6 +94,7 @@ flowchart LR
 | `collectors/<tab>/`, `fixtures/` | the collectors, their tests and test fixtures |
 | `quality/process/config.json` | the Process page: each of the pack's maps, named by `use` |
 | `quality/public.mjs`, `quality/public-params.json` | write `quality/public/`, the configs CI builds the public pages from. Each metric that needs local files is dropped but the repo-file ones. Each map is written out in full without the steps those metrics score |
+| `docs/` | [the quick start for a Code Project](docs/projects-quickstart.md) and [which Claude pages the Chrome tool opens](docs/blockers.md), the Blockers tab's record |
 | `tests/moved.json` | where each file came from in Git Crafter |
 | `tests/engine-tests.sh` | CI: each file matches its source or is listed as edited, then the tests run beside the pinned engine |
 | [`docs/upstream.md`](docs/upstream.md) | the pinned upstream release, read only |
