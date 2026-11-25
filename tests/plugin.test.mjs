@@ -29,8 +29,11 @@ test('plugin: manifest, README of 40+ words, and a license, as the directory req
   assert.ok(existsSync(join(ROOT, 'LICENSE')));
 });
 
-test('plugin: nothing that gets held for review: no hooks, MCP servers, bin, symlinks, system files, or non-image files over 256 KiB', () => {
-  for (const p of ['hooks', '.mcp.json', 'bin']) assert.ok(!existsSync(join(ROOT, p)), p);
+// The two guard hooks are the only scripts it ships (tests/guard-hooks.test.mjs holds what they may never do). Hooks are one of the
+// directory's review triggers: a listing of this plugin upstream waits for the maintainer's decision on that.
+test('plugin: nothing that gets held for review but the two guard hooks: no MCP servers, bin, symlinks, system files, or non-image files over 256 KiB', () => {
+  for (const p of ['.mcp.json', 'bin']) assert.ok(!existsSync(join(ROOT, p)), p);
+  assert.deepEqual(readdirSync(join(ROOT, 'hooks')).sort(), ['deny.mjs', 'guard-deny-list.mjs', 'guard-public-write.mjs', 'hooks.json']);
   const files = walk(ROOT);
   assert.ok(files.length <= 512);
   for (const f of files) {

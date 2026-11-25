@@ -1,6 +1,6 @@
 # Privacy
 
-The plugin itself collects nothing, makes no network calls and keeps no files. Its skills run `gh` commands that write to GitHub under your account, and `plan` saves its plan as an Artifact in your claude.ai account. It is six skills: instructions Claude reads, with no hooks, servers or scripts.
+The plugin itself collects nothing, makes no network calls and keeps no files. Its skills run `gh` commands that write to GitHub under your account, and `plan` saves its plan as an Artifact in your claude.ai account. It is six skills, which are instructions Claude reads, and two guard hooks that only refuse a call: they read your own terms file and the repo's deny list, and they print nothing else. It has no servers.
 
 | Data | Claudius does |
 |---|---|

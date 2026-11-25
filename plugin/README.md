@@ -53,7 +53,8 @@ Lift is the mean score with Claudius minus without it, over each skill's three c
 | Component | Count |
 |---|---|
 | Skills (instructions only) | 6 |
-| Hooks, MCP servers, scripts, binaries | 0 |
+| Hooks (deny only, 2 `PreToolUse` guards) | 2 |
+| MCP servers, binaries | 0 |
 
 | Skill | Runs | Changes |
 |---|---|---|
@@ -64,6 +65,11 @@ Lift is the mean score with Claudius minus without it, over each skill's three c
 | `plain-voice` | nothing | Nothing; it returns text |
 | `visibility` | `gh api`, `git clone`, `curl`, all reads | Nothing; it reports counts |
 
-The plugin itself collects nothing, makes no network calls and keeps no files. Its skills run `gh` commands that write to GitHub under your account, and `plan` saves its plan as an Artifact in your claude.ai account. It reads your local Claude Code plugin records and transcripts only when you ask the `equip` skill to measure use. Details: [PRIVACY.md](https://github.com/Colorado-Startups/claudius/blob/main/PRIVACY.md).
+| Guard hook | Runs | Changes |
+|---|---|---|
+| `guard-public-write` | `node`, and local `git log` on a push | Nothing. It refuses a `git push`, a `gh` write or a GitHub connector write whose text matches a key pattern or a term in your own `private-terms.txt` (folder `~/.claude/claudius-guard/`, or `CLAUDIUS_GUARD_DIR`). It never prints the match. `private-repos.txt` there exempts a private repo from the term check only |
+| `guard-deny-list` | `node` | Nothing. It refuses a tool listed in `.claude/claudius-deny.json` of the repo the session runs in, and touches no other session |
+
+Both hooks only deny. They never grant a permission, edit a file or call the network, add no text at session start, and take well under 1000 ms a call ([hooks reference](https://code.claude.com/docs/en/hooks), read 2026-11-25). The plugin makes no network calls and keeps no files. Its skills run `gh` commands that write to GitHub under your account, and `plan` saves its plan as an Artifact in your claude.ai account. It reads your local Claude Code plugin records and transcripts only when you ask the `equip` skill to measure use. Details: [PRIVACY.md](https://github.com/Colorado-Startups/claudius/blob/main/PRIVACY.md).
 
 Claudius is not an Anthropic product and is not affiliated with Anthropic. Source: [Colorado-Startups/claudius](https://github.com/Colorado-Startups/claudius). Credits: [NOTICE](NOTICE).

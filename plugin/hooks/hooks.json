@@ -1,0 +1,27 @@
+{
+  "description": "Claudius guards. Both hooks only deny: they never allow, never edit a file and never call the network.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|mcp__.*github.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}\"/hooks/guard-public-write.mjs",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}\"/hooks/guard-deny-list.mjs",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
