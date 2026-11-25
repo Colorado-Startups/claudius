@@ -56,7 +56,7 @@
       "tools": [
         "Plugins"
       ],
-      "rule": "The skill listings add few tokens to a start.",
+      "rule": "Only skill names and descriptions load up front; bodies wait for use.",
       "rule_ref": "https://code.claude.com/docs/en/plugins/overview",
       "metric": "cp_plugins.plugin_skill_tokens"
     },

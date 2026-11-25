@@ -56,7 +56,7 @@
       "tools": [
         "Connectors"
       ],
-      "rule": "The tool lists add few tokens to a thread.",
+      "rule": "Deferred tool loading keeps the up-front cost of every connector small.",
       "rule_ref": "https://code.claude.com/docs/en/mcp",
       "metric": "cp_connectors.connector_tool_tokens"
     }
