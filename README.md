@@ -37,6 +37,7 @@ flowchart LR
 | 3 | Add the pack (table below) | `quality/config.json` |
 | 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }` and `{ "use": "visibility" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
 | 5 | Run the one local command for the numbers CI never sees | below |
+| 6 | Optional, to run it as a Claude Code Project: memory seeds, subagents, scheduled tasks and guard placement | [templates/claude/code-project/README.md](templates/claude/code-project/README.md) |
 
 ## Build an app
 

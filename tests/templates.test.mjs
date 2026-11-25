@@ -40,3 +40,22 @@ test('templates: the one-way-door deny rules catch each common spelling and leav
   for (const cmd of doors) assert.ok(denies(deny, cmd), cmd);
   for (const cmd of ['rm -rf build/', 'rm -rf ~/proj/build', 'rm -rf ~/.cache/x', 'rm -fr ~/Downloads/old', 'git push origin main', 'git push -u origin claude/fix-force', 'git push --follow-tags', 'git reset --soft HEAD~1']) assert.ok(!denies(deny, cmd), cmd);
 });
+
+test('templates: the Code Project template links its agents, and each agent file is read only with a model', () => {
+  const readme = readFileSync('templates/claude/code-project/README.md', 'utf8');
+  for (const name of ['explorer', 'reviewer']) {
+    assert.ok(readme.includes(`agents/${name}.md`), `${name} is linked`);
+    const text = readFileSync(`templates/claude/code-project/agents/${name}.md`, 'utf8');
+    const front = /^---\n([\s\S]*?)\n---\n/.exec(text)?.[1] ?? '';
+    assert.match(front, new RegExp(`^name: ${name}$`, 'm'));
+    assert.match(front, /^description: .+/m);
+    assert.match(front, /^model: (haiku|sonnet)$/m);
+    assert.doesNotMatch(front, /^tools:.*\b(Edit|Write)\b/m, `${name} must not edit`);
+  }
+});
+
+test('templates: the Code Project template carries no em dash and links Git Crafter instead of copying it', () => {
+  const readme = readFileSync('templates/claude/code-project/README.md', 'utf8');
+  assert.ok(!readme.includes('\u2014'), 'em dash');
+  assert.match(readme, /SoulCraft-Org\/git-crafter\/(tree|blob)\/main\/templates\/projects/);
+});
