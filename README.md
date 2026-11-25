@@ -38,7 +38,7 @@ flowchart LR
 | 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }` and `{ "use": "ship" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
 | 5 | Run the one local command for the numbers CI never sees | below |
 
-Open a repo as a Code Project in four steps: [docs/projects-quickstart.md](docs/projects-quickstart.md). What was added and where: [docs/giveback.md](docs/giveback.md).
+Open a repo as a Code Project in four steps: [docs/projects-quickstart.md](docs/projects-quickstart.md).
 
 ## Build an app
 
