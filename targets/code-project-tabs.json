@@ -138,7 +138,7 @@
     "near": 5000,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: the Projects docs say instructions and files count against a thread's context; Claude Code Docs: Let Claude coordinate ongoing work with Projects (code.claude.com/docs/en/claude-projects, read 2026-11-25)",
-    "source": "the Context tab file sizes, read on the Mac; not measured until a collector reads it",
+    "source": "the Context tab file sizes, read on the Mac; read by collectors/code-project/cp-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -218,7 +218,7 @@
     "near": 30,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: effort no higher than the task needs keeps answers quick; Claude Code Docs: Let Claude coordinate ongoing work with Projects (code.claude.com/docs/en/claude-projects, read 2026-11-25)",
-    "source": "thread records, read on the Mac; not measured until a collector reads it",
+    "source": "thread records, read on the Mac; read by collectors/code-project/cp-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "gauge",
     "defined": "2026-11-25"
@@ -234,7 +234,7 @@
     "near": 25,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: the default model is the cheapest that does the work; Claude Code Docs: Let Claude coordinate ongoing work with Projects (code.claude.com/docs/en/claude-projects, read 2026-11-25)",
-    "source": "thread records, read on the Mac; not measured until a collector reads it",
+    "source": "thread records, read on the Mac; read by collectors/code-project/cp-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "gauge",
     "defined": "2026-11-25"
@@ -266,7 +266,7 @@
     "near": 180,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: a thread is working within a minute; Claude Code Docs: Cloud environments (code.claude.com/docs/en/cloud-environments, read 2026-11-25)",
-    "source": "thread records, read on the Mac; not measured until a collector reads it",
+    "source": "thread records, read on the Mac; read by collectors/code-project/cp-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -275,14 +275,14 @@
     "id": "cp_environment.failed_servers",
     "tab": "cp-environment",
     "kind": "consumption",
-    "label": "Servers that failed to connect",
-    "means": "Plugin or connector servers that failed to connect in the latest thread.",
+    "label": "Needed servers that failed to connect",
+    "means": "Servers the project needs (params.needed_servers) that failed to connect in the latest thread.",
     "unit": "servers",
     "goal": 0,
     "near": 3,
     "direction": "lower",
-    "goal_source": "template goal, no public benchmark: a failed server is a tool list loaded for nothing; Claude Code Docs: Cloud environments (code.claude.com/docs/en/cloud-environments, read 2026-11-25)",
-    "source": "the start of the latest thread, read on the Mac; not measured until a collector reads it",
+    "goal_source": "template goal, no public benchmark: a needed server that fails is a tool list the thread lacks; Claude Code Docs: Cloud environments (code.claude.com/docs/en/cloud-environments, read 2026-11-25). Redefined 2026-11-25 from every failed server, since most of the failures listed in a thread are servers of plugins the project never uses",
+    "source": "the start text of the latest thread, read on the Mac by collectors/code-project/cp-local.mjs; not measured until params.needed_servers lists the servers the project needs",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -298,7 +298,7 @@
     "near": 2,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: the memory docs have each note stay true or be deleted; Claude Code Docs: How Claude remembers your project (code.claude.com/docs/en/memory, read 2026-11-25)",
-    "source": "the project memory files, read on the Mac; not measured until a collector reads it",
+    "source": "the project memory files, read on the Mac; read by collectors/code-project/cp-memory.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -362,7 +362,7 @@
     "near": 14,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: a weekly read catches a spike while it can still be fixed; Claude Code Docs: Manage costs effectively (code.claude.com/docs/en/costs, read 2026-11-25)",
-    "source": "the score-read task log, read on the Mac; not measured until a collector reads it",
+    "source": "the score-read task log, read on the Mac; read by collectors/code-project/cp-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -378,7 +378,7 @@
     "near": 100,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: with usage credits off, the plan limit is the spend cap; Claude Code Docs: Manage costs effectively (code.claude.com/docs/en/costs, read 2026-11-25)",
-    "source": "the Usage tab, read in Claude in Chrome; not measured until a collector reads it",
+    "source": "the Usage tab, read in Claude in Chrome; read by collectors/code-project/cp-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "gauge",
     "defined": "2026-11-25"

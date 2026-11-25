@@ -15,7 +15,7 @@
     "needs": "none",
     "chart": "table",
     "params": {
-      "comment": "instruction_files: the files a cloud thread loads. rules: { label, pattern } pairs, each a case-insensitive regular expression. agent_dirs: folders of subagent files, the repo's own and the template's. repo: owner/name, empty for this repo. hook_files: the settings and plugin files whose hooks cp-hooks.mjs reads. unsafe_hooks: { label, pattern } pairs, a hook command that matches one is unsafe. branch_prefix, window_days, max_prs: which merged pull requests count as thread work. memory_dir, memory_index: the folder of the project memory and its index file, which cp-memory.mjs reads; empty, it is not measured.",
+      "comment": "instruction_files: the files a cloud thread loads. rules: { label, pattern } pairs, each a case-insensitive regular expression. agent_dirs: folders of subagent files, the repo's own and the template's. repo: owner/name, empty for this repo. hook_files: the settings and plugin files whose hooks cp-hooks.mjs reads. unsafe_hooks: { label, pattern } pairs, a hook command that matches one is unsafe. branch_prefix, window_days, max_prs: which merged pull requests count as thread work. memory_dir, memory_index: the folder of the project memory and its index file, which cp-memory.mjs reads; empty, it is not measured. stale_days: the age at which a memory note's dated fact is stale. context_dir: the folder of the Context tab files; folder_dirs: the folders a local thread starts in; plan_usage_file: the plan usage a desktop session saved; default_model: the project's default model family. needed_servers: the plugin or connector servers the project needs, by the name a start text lists (plugin:name:server); a failure of any other server is not counted. These are read by cp-local.mjs, on the machine that holds them.",
       "instruction_files": [
         "CLAUDE.md",
         "AGENTS.md",
@@ -64,7 +64,14 @@
       "window_days": 30,
       "max_prs": 10,
       "memory_dir": "",
-      "memory_index": "MEMORY.md"
+      "memory_index": "MEMORY.md",
+      "stale_days": 30,
+      "context_dir": "",
+      "folder_dirs": [],
+      "plan_usage_file": "quality/data/plan-usage.json",
+      "default_model": "sonnet",
+      "needed_servers": [],
+      "hook_files": [".claude/settings.json", "plugin/hooks/hooks.json"]
     }
   },
   {

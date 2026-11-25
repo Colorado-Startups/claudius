@@ -90,7 +90,7 @@
     "near": 8000,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark; every plugin stays on and the cost is reported, never fixed by turning one off: the skill listing holds every skill name and its description is cut to fit a budget of 1% of the context window, and the full skill loads only when invoked; Claude Code Docs: Extend Claude with skills, Skill content lifecycle (code.claude.com/docs/en/skills, read 2026-11-25)",
-    "source": "the start of recent threads, read on the Mac; not measured until a collector reads it",
+    "source": "the start of recent threads, read on the Mac; read by collectors/code-project/cp-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -138,7 +138,7 @@
     "near": 5000,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: the skills docs say descriptions load at start, so a long one costs every thread; Claude Code Docs: Skills (code.claude.com/docs/en/skills, read 2026-11-25)",
-    "source": "the start of recent threads, read on the Mac; not measured until a collector reads it",
+    "source": "the start of recent threads, read on the Mac; read by collectors/code-project/cp-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -170,7 +170,7 @@
     "near": 3000,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: under one second so a guard is never skipped for speed; Claude Code Docs: Hooks reference (code.claude.com/docs/en/hooks, read 2026-11-25)",
-    "source": "hook timings in recent threads, read on the Mac; not measured until a collector reads it",
+    "source": "hook timings in recent threads, read on the Mac; read by collectors/code-project/cp-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -186,7 +186,7 @@
     "near": 2000,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: text a hook injects is read by every thread; Claude Code Docs: Hooks reference (code.claude.com/docs/en/hooks, read 2026-11-25)",
-    "source": "the start of recent threads, read on the Mac; not measured until a collector reads it",
+    "source": "the start of recent threads, read on the Mac; read by collectors/code-project/cp-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -314,7 +314,7 @@
     "near": 5,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: the folder is approved before the thread starts; Claude Code Docs: Let Claude coordinate ongoing work with Projects (code.claude.com/docs/en/claude-projects, read 2026-11-25)",
-    "source": "Mac thread records, read on the Mac; not measured until a collector reads it",
+    "source": "Mac thread records, read on the Mac; read by collectors/code-project/cp-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -330,7 +330,7 @@
     "near": 6000,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: the memory docs say longer files use more context; Claude Code Docs: Let Claude coordinate ongoing work with Projects (code.claude.com/docs/en/claude-projects, read 2026-11-25)",
-    "source": "the folder instruction files, read on the Mac; not measured until a collector reads it",
+    "source": "the folder instruction files, read on the Mac; read by collectors/code-project/cp-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
