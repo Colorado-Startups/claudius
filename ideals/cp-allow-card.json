@@ -1,5 +1,5 @@
 {
-  "ideal": "A Mac thread gets one Allow once card, in a worktree if its folder is shared, and the card is answered inside its thread within minutes.",
+  "ideal": "A Mac thread gets one Allow once card, in a worktree if its folder is shared; the card is answered inside its thread within minutes.",
   "sources": [
     {
       "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",

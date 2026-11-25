@@ -1,8 +1,8 @@
 {
-  "ideal": "Every running task lives in a project, a waiting thread is two clicks from the sidebar, and a project idle for 30 days is archived. Search and pinned projects are shown in the app's sidebar (read there 2026-11-25) and the docs do not name them.",
+  "ideal": "Every running task lives in a project, a waiting thread is two clicks from the sidebar, and a project idle for 30 days is archived.",
   "sources": [
     {
-      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects (Search and pinned projects: read in the app's sidebar 2026-11-25, not named in the docs)",
       "url": "https://code.claude.com/docs/en/claude-projects",
       "date": "2026-11-25"
     }
