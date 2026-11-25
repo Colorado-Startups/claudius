@@ -1,0 +1,126 @@
+{
+ "id": "ship",
+ "name": "Ship",
+ "why": "An idea, planned, tracked, built in a cloud thread, checked, reviewed, merged and given back",
+ "ideal": "A plan is approved as first shown, a thread opens a draft pull request, a separate reviewer approves it, and tokens per merge fall.",
+ "sources": [
+  {
+   "title": "Claude Code: Projects",
+   "url": "https://code.claude.com/docs/en/claude-projects",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "Claude Code: cloud sessions and auto-fix",
+   "url": "https://code.claude.com/docs/en/claude-code-on-the-web",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "Claude Code: best practices",
+   "url": "https://code.claude.com/docs/en/best-practices",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "Claude Code: prompt caching",
+   "url": "https://code.claude.com/docs/en/prompt-caching",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "Git Crafter: tracking issues and cards",
+   "url": "https://github.com/SoulCraft-Org/git-crafter/blob/main/templates/projects/tracking.md",
+   "date": "2026-11-25"
+  }
+ ],
+ "critical_path": [
+  "plan",
+  "build",
+  "review",
+  "merge"
+ ],
+ "steps": [
+  {
+   "id": "plan",
+   "name": "Plan",
+   "model": "Opus 5.5",
+   "effort": "high",
+   "tools": [
+    "Idea in Discussions or a card",
+    "Claudius plan skill",
+    "Opus 5.5, high effort"
+   ],
+   "rule": "An idea becomes a written plan the owner approves as first shown, then a fresh session builds from it.",
+   "rule_ref": "https://code.claude.com/docs/en/best-practices#brainstorm-with-claude-first",
+   "metric": "desktop_app.plans_first_pass"
+  },
+  {
+   "id": "track",
+   "name": "Track",
+   "model": "Haiku 5.5",
+   "effort": "low",
+   "tools": [
+    "Issue typed Task or Bug",
+    "Card on the org project",
+    "Haiku 5.5, low effort for the search"
+   ],
+   "rule": "Each piece of work is an issue or a card, searched for first, and its pull request names it and is merged, not closed.",
+   "rule_ref": "https://github.com/SoulCraft-Org/git-crafter/blob/main/templates/projects/tracking.md",
+   "metric": "claude.pr_merge_share"
+  },
+  {
+   "id": "build",
+   "name": "Build",
+   "model": "Sonnet 5.5",
+   "effort": "high",
+   "tools": [
+    "Claude Code Projects cloud thread",
+    "Project instructions",
+    "Sonnet 5.5, high effort"
+   ],
+   "rule": "A thread builds on its own claude/ branch from the project's instructions, and a thread idle past the cache lifetime is replaced, not revived.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects#see-and-reduce-a-projects-usage",
+   "metric": "code_projects.idle_revivals"
+  },
+  {
+   "id": "check",
+   "name": "Check",
+   "model": "Haiku 5.5",
+   "effort": "low",
+   "tools": [
+    "Draft pull request",
+    "CI",
+    "Auto-fix",
+    "Haiku 5.5, low effort for log lookups"
+   ],
+   "rule": "The thread opens its pull request as a draft and watches CI with auto-fix, so a person reads it after the checks.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-code-on-the-web#auto-fix-pull-requests",
+   "metric": "code_projects.draft_first_share"
+  },
+  {
+   "id": "review",
+   "name": "Review",
+   "model": "Opus 5.5",
+   "effort": "medium",
+   "tools": [
+    "Claudius merge skill",
+    "A reviewer that did not write the change",
+    "Opus 5.5, medium effort"
+   ],
+   "rule": "A separate reviewer, which has not seen how the code was written, reads the pull request at its head commit, so few bugs escape.",
+   "rule_ref": "https://code.claude.com/docs/en/best-practices#give-claude-a-check-to-run",
+   "metric": "claude.escaped_bugs_per_10_prs"
+  },
+  {
+   "id": "merge",
+   "name": "Merge",
+   "model": "Opus 5.5",
+   "effort": "medium",
+   "tools": [
+    "Squash merge on green CI",
+    "Pull request to the public repo for a generic fix",
+    "Opus 5.5, medium effort"
+   ],
+   "rule": "A green, reviewed pull request squash merges, any fix other repos can use goes upstream, and each merged one costs fewer tokens.",
+   "rule_ref": "https://github.com/Colorado-Startups/claudius/blob/main/plugin/skills/merge/SKILL.md",
+   "metric": "code_projects.tokens_per_merged_pr"
+  }
+ ]
+}

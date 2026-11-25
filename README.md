@@ -25,8 +25,8 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 ```mermaid
 flowchart LR
   GC[1 Git Crafter templates:<br/>CI, open-repo files, AGENTS.md] --> T[2 templates/claude:<br/>settings, plugins, skills]
-  T --> P[3 Pack pin in quality/config.json:<br/>eight tabs]
-  P --> M[4 Process maps:<br/>Guard, Decide, Equip, Publish, Visibility]
+  T --> P[3 Pack pin in quality/config.json:<br/>nine tabs]
+  P --> M[4 Process maps:<br/>Guard, Decide, Equip, Publish, Visibility, Ship]
   P --> L[5 --local run:<br/>your private full page]
 ```
 
@@ -35,8 +35,19 @@ flowchart LR
 | 1 | Adopt Git Crafter: CI, open-repo files, `AGENTS.md` and `CLAUDE.md` | Git Crafter `templates/ci/README.md`, `templates/agents/` |
 | 2 | Copy the Claude files and set the desktop app, every plugin, skill and connector kept on ([All on, app-wide](templates/claude/README.md#all-on-app-wide)) | [templates/claude/README.md](templates/claude/README.md) |
 | 3 | Add the pack (table below) | `quality/config.json` |
-| 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }` and `{ "use": "visibility" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
+| 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }` and `{ "use": "ship" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
 | 5 | Run the one local command for the numbers CI never sees | below |
+
+## Open as a Code Project
+
+Claude Code Projects (beta) runs a coordinator and cloud threads, each a branch and a draft pull request. Full steps: Git Crafter's [Projects setup](https://github.com/SoulCraft-Org/git-crafter/blob/main/templates/projects/README.md).
+
+| # | Do |
+|---|---|
+| 1 | Create the project and attach this repo |
+| 2 | Install the Claude GitHub App on it |
+| 3 | Paste the instructions from the setup |
+| 4 | Send the setup check as the first message |
 
 ## Build an app
 
@@ -57,7 +68,7 @@ flowchart LR
 | --- | --- |
 | Templates | `templates/claude/`: the Claude-only files a repo commits. This repo runs copies of them (`tests/templates.test.mjs`) |
 | Plugin | `plugin/`: the `claudius` Claude Code plugin (skills `plan`, `merge`, `equip`, `find-plugin`, `plain-voice`). Install: `claude plugin marketplace add Colorado-Startups/claudius`, then `claude plugin install claudius@claudius` |
-| Pack | 8 tabs: Claude, Claude settings, Claude desktop app, Blockers, Tokens, Instructions, Best practices, Visibility. Maps: Guard, Decide, Equip, Publish, Visibility |
+| Pack | 9 tabs: Claude, Claude settings, Claude desktop app, Blockers, Tokens, Instructions, Best practices, Visibility, Claude Code Projects. Maps: Guard, Decide, Equip, Publish, Visibility, Ship |
 | Engine | Git Crafter's `actions/pages` and CI standard, pinned by full commit SHA. No engine code lives here |
 | Public pages | Built in CI from `quality/public/`. The Quality page shows only metrics read from GitHub and the repo's files. Each metric that needs local files is dropped: not shown, counted or listed. The exceptions are the ones `quality/public-params.json` reads from committed files alone. A tab left with no metric, Tokens and Claude desktop app, is left off; it shows on a `--local` page (Git Crafter v7.0.1 or later). The Process page shows each map step such a metric does not score |
 | Private numbers | Usage, cost, transcripts and connectors. Read on your own machine only, never uploaded |
@@ -68,10 +79,10 @@ flowchart LR
 | Path | Holds |
 | --- | --- |
 | `templates/claude/` | the Claude templates; `AGENTS.md`, `CLAUDE.md` and `.claude/` at the root are this repo's own |
-| `pack.json` | the eight tabs |
-| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard, Decide, Equip, Publish and Visibility maps |
+| `pack.json` | the nine tabs |
+| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard, Decide, Equip, Publish, Visibility and Ship maps |
 | `collectors/<tab>/`, `fixtures/` | the collectors, their tests and test fixtures |
-| `quality/process/config.json` | the Process page: the Guard, Decide, Equip, Publish and Visibility maps, named by `use` |
+| `quality/process/config.json` | the Process page: the Guard, Decide, Equip, Publish, Visibility and Ship maps, named by `use` |
 | `quality/public.mjs`, `quality/public-params.json` | write `quality/public/`, the configs CI builds the public pages from. Each metric that needs local files is dropped but the repo-file ones. Each map is written out in full without the steps those metrics score |
 | `tests/moved.json` | where each file came from in Git Crafter |
 | `tests/engine-tests.sh` | CI: each file matches its source or is listed as edited, then the tests run beside the pinned engine |
@@ -82,7 +93,7 @@ flowchart LR
 | --- | --- |
 | 1 | Adopt Git Crafter: its `templates/ci/README.md` |
 | 2 | In `quality/config.json`, add `"packs": ["Colorado-Startups/claudius@<40-hex sha>"]`, the commit of the latest [release](https://github.com/Colorado-Startups/claudius/releases) |
-| 3 | If `quality/config.json` lists `tabs`, add the pack's ids too (`claude`, `claude-settings`, `desktop-app`, `blockers`, `tokens`, `instructions`, `practices`): a pack's tabs join only the default list (Git Crafter `quality/CONFIG.md`) |
+| 3 | If `quality/config.json` lists `tabs`, add the pack's ids too (`claude`, `claude-settings`, `desktop-app`, `blockers`, `tokens`, `instructions`, `practices`, `visibility`, `code-projects`): a pack's tabs join only the default list (Git Crafter `quality/CONFIG.md`) |
 | 4 | Pass that same file as `actions/pages`' `quality-config`, and name it as the Process config's `quality_config`: only that file's packs are fetched, so a map from the pack is found there alone |
 | 5 | `actions/pages` checks the pack out at that SHA and runs its collectors |
 | 6 | For a `--local` run, clone the pack at that SHA into `$CODE_OS_PACKS/Colorado-Startups/claudius` (default `.code-os-packs/` in the repo), with no SHA folder (Git Crafter `quality/packs.mjs`) |
@@ -113,3 +124,4 @@ flowchart LR
 | Decide | none, so the public page leaves it out | all four steps read local-only metrics |
 | Equip | none, so the public page leaves it out | all six steps read local-only metrics |
 | Publish | all six | every step reads the repo's committed files |
+| Ship | `check` only | its other five steps read local-only metrics |

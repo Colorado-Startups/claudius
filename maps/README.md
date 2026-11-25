@@ -1,6 +1,6 @@
 # Process maps
 
-Five maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }` and `{ "use": "visibility" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
+Six maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }` and `{ "use": "ship" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
 
 ## Guard: a tool call, through the guards, to run or blocked
 
@@ -95,4 +95,22 @@ flowchart LR
 
 Probe and Decide need an admin token: in CI without `ADMIN_READ_TOKEN` they read not measured, never 0. The [`visibility`](../plugin/skills/visibility/SKILL.md) skill runs the same audit in a session.
 
-Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json).
+## Ship: an idea to merged code, through a Claude Code Project
+
+```mermaid
+flowchart LR
+  plan["🔒 Plan"] --> track["🔒 Track"] --> build["🔒 Build"] --> check["Check"] --> review["🔒 Review"] --> merge["🔒 Merge"]
+```
+
+| Step | Ideal | Model, effort | Metric |
+|---|---|---|---|
+| Plan | An idea becomes a written plan the owner approves as first shown | Opus 5.5, high | `desktop_app.plans_first_pass` |
+| Track | Each piece of work is an issue or a card, and its PR is merged, not closed | Haiku 5.5, low | `claude.pr_merge_share` |
+| Build | A cloud thread builds on its own `claude/` branch; one idle past the cache lifetime is replaced, not revived | Sonnet 5.5, high | `code_projects.idle_revivals` |
+| Check | The thread opens a draft PR and watches CI with auto-fix | Haiku 5.5, low | `code_projects.draft_first_share` (public) |
+| Review | A separate reviewer reads the PR at its head commit | Opus 5.5, medium | `claude.escaped_bugs_per_10_prs` |
+| Merge | A green, reviewed PR squash merges and a generic fix goes upstream; each costs fewer tokens | Opus 5.5, medium | `code_projects.tokens_per_merged_pr` |
+
+The engine's map check allows six steps at most, so Idea joins Plan and Give back joins Merge. Sources, one per step, are in [`ship.json`](ship.json): the Projects, cloud session and best-practices docs (read 2026-11-25), and Git Crafter's [tracking template](https://github.com/SoulCraft-Org/git-crafter/blob/main/templates/projects/tracking.md). Only Check reads a metric that works from GitHub alone, so the public page shows that one step.
+
+Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json), [`ship.json`](ship.json).
