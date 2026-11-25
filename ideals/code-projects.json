@@ -1,0 +1,23 @@
+{
+  "ideal": "Each thread opens a draft pull request, stays under an hour idle, and costs fewer tokens per merged pull request each week.",
+  "sources": [
+    {
+      "title": "Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Use Claude Code in the cloud",
+      "url": "https://code.claude.com/docs/en/claude-code-on-the-web",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Prompt caching: cache lifetime",
+      "url": "https://code.claude.com/docs/en/prompt-caching#cache-lifetime",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "Every thread opens its pull request as a draft, as the Projects docs' example instructions say.",
+  "speed": "A thread starts from the project's instructions, so no rule is restated to it.",
+  "consumption": "A thread idle past the one-hour cache lifetime is replaced by a fresh one, and tokens per merged pull request fall."
+}
