@@ -51,6 +51,9 @@ test('public: each metric that needs local files is dropped but the repo-file on
   assert.deepEqual(task(join(ROOT, 'targets')).params, undefined, 'targets/ is what adopters load');
   assert.deepEqual(task(join(root, 'quality', 'public', 'targets')).params, { tasks_files: ['templates/claude/code-project/README.md'] });
   assert.deepEqual(read(join(ROOT, 'targets', 'code-project.json')).find((d) => d.params?.part_rules).params.tasks_files, []);
+  const emails = read(join(root, 'quality', 'public', 'targets', 'visibility.json')).find((d) => d.id === 'visibility.personal_author_emails');
+  assert.deepEqual(emails.params, { upstream_domains: ['coloradostartups.org'] }, 'this fork exempts its upstream\'s domain on its public page only');
+  assert.equal(read(join(ROOT, 'targets', 'visibility.json')).find((d) => d.params?.upstream_domains).params.upstream_domains.length, 0, 'the pack keeps none');
   const kept = files.flatMap((f) => read(join(root, 'quality', 'public', 'targets', f))).filter((d) => d.drop !== true).map((d) => d.id);
   const ids = (f) => JSON.parse(readFileSync(join(ROOT, 'targets', f), 'utf8')).map((d) => d.id);
   const defs = (f) => JSON.parse(readFileSync(join(ROOT, 'targets', f), 'utf8'));

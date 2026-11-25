@@ -113,10 +113,11 @@ async function gather({ root = '.', mode, params = TEMPLATE, gh, fetchPage = sig
 
   // Scan: personal author emails in every commit of every branch of every public repo. Forks keep a copy whatever
   // is rewritten. One repo at a time and four branches at a time, clear of GitHub's secondary rate limits.
-  // A personal profile's own site or email is a personal address, so only an org's profile domains are exempt.
-  const domains = [...(params.org_domains ?? []), ...(user ? [] : orgDomains(org))];
+  // A personal profile's own site or email is a personal address, so only an org's profile domains are exempt. A fork
+  // carries its upstream's commits, which its owner cannot rewrite, so params.upstream_domains exempts the upstream's.
+  const domains = [...(params.org_domains ?? []), ...(params.upstream_domains ?? []), ...(user ? [] : orgDomains(org))];
   const bots = Array.isArray(params.bot_emails) ? params.bot_emails : BOT_EMAILS;
-  const emailSource = `gh api --paginate repos/<repo>/branches, then every commit of each branch, every page, of every public repo, one repo and four branches at a time; distinct author emails neither GitHub noreply, nor in params.bot_emails, nor at params.org_domains or an org profile's site or email domain; counts only`;
+  const emailSource = `gh api --paginate repos/<repo>/branches, then every commit of each branch, every page, of every public repo, one repo and four branches at a time; distinct author emails neither GitHub noreply, nor in params.bot_emails, nor at params.org_domains, params.upstream_domains or an org profile's site or email domain; counts only`;
   try {
     if (publicShort) throw new Error(publicShort);
     const hit = [];

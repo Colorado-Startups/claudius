@@ -95,6 +95,15 @@ test('visibility: the address Claude Code cloud sessions commit as is a tool, no
   assert.equal(none['visibility.personal_author_emails'].value, 1, 'both skipped: only the first repo\'s own address is left');
 });
 
+test('visibility: an upstream domain is exempt, so a fork\'s inherited authors are not counted, and any other address still is', async () => {
+  const routes = { ...ROUTES, 'repos/acme/tools/branches?per_page=100': [{ name: 'main' }], 'repos/acme/tools/commits?sha=main&per_page=100': [commit('dev@upstream.example'), commit('Other@Upstream.example'), commit('me@mail.example')] };
+  assert.equal((await run({ routes }))['visibility.personal_author_emails'].value, 4, 'with no upstream domain, both upstream authors count');
+  const exempt = await collect({ params: { ...params, upstream_domains: ['upstream.example'] }, gh: fakeGh({ routes }), fetchPage: async () => false });
+  assert.equal(exempt['visibility.personal_author_emails'].value, 2, 'both upstream authors are exempt, whatever their case; the site address and a stranger\'s still count');
+  assert.match(exempt['visibility.personal_author_emails'].source, /params\.upstream_domains/);
+  assert.ok(!JSON.stringify(exempt).includes('upstream.example'), 'no address or domain in the output');
+});
+
 // A personal account: orgs/<owner> answers 404, so the account is read through users/<owner> and user/repos.
 const MINE = { login: 'jo' };
 const PERSONAL_REPOS = [
