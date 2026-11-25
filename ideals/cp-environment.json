@@ -1,0 +1,13 @@
+{
+  "ideal": "The cloud environment passes its setup check, holds no key in a variable and starts a thread quickly.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Cloud environments",
+      "url": "https://code.claude.com/docs/en/cloud-environments",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "No key sits in an environment variable, and the setup check passes.",
+  "speed": "A thread starts within a minute.",
+  "consumption": "No server the environment loads fails to connect."
+}

@@ -1,0 +1,13 @@
+{
+  "ideal": "The reviewer finds real defects, the explorer answers in one pass and side work runs on small models.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Create custom subagents",
+      "url": "https://code.claude.com/docs/en/sub-agents",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "A reviewer finding is a real defect.",
+  "speed": "The explorer answers a lookup in one pass.",
+  "consumption": "Most lookups run on the small model."
+}

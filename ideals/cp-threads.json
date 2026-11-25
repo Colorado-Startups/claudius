@@ -1,0 +1,13 @@
+{
+  "ideal": "Each thread ships one draft pull request with its attribution lines, green on the first push, and stops when it merges.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "Every thread pull request carries its attribution lines and is green on the first push.",
+  "speed": "A thread reaches its first green check within minutes of its draft.",
+  "consumption": "One thread ships one merged pull request."
+}

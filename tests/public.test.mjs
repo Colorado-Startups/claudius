@@ -30,7 +30,7 @@ test('public: each metric that needs local files is dropped but the repo-file on
   const pub = read(join(ROOT, 'quality', 'public-params.json'));
   const local = localOnlyIds([join(ROOT, 'targets')]);
   assert.deepEqual(new Set(dropped), new Set([...local].filter((id) => !pub.ids.includes(id))));
-  assert.equal(dropped.length, 47);
+  assert.equal(dropped.length, 104);
   const files = readdirSync(join(ROOT, 'targets')).filter((f) => f.endsWith('.json')).sort();
   assert.deepEqual(readdirSync(join(root, 'quality', 'public', 'targets')).sort(), [...files, DROPS].sort(), 'every targets file, so no collector runs without its targets, and the drops');
   assert.deepEqual(read(join(root, 'quality', 'public', 'targets', DROPS)), [...pub.drop.map((id) => ({ id, drop: true })), ...Object.entries(pub.params_for ?? {}).map(([id, params]) => ({ id, params }))]);
@@ -78,7 +78,7 @@ test('public: the Process config writes each pack map in full, without the steps
   const dropped = new Set(writePublic(root));
   const mine = read(join(ROOT, 'quality', 'process', 'config.json'));
   const pub = read(join(root, 'quality', 'public', 'process.json'));
-  assert.deepEqual(mine.maps, [{ use: 'guard' }, { use: 'decide' }, { use: 'equip' }, { use: 'publish' }, { use: 'visibility' }, { use: 'project' }, { use: 'ship' }, { use: 'environment' }, { use: 'remember' }]);
+  assert.deepEqual(mine.maps, [{ use: 'guard' }, { use: 'decide' }, { use: 'equip' }, { use: 'publish' }, { use: 'visibility' }, { use: 'project' }, { use: 'ship' }, { use: 'environment' }, { use: 'remember' }, { use: 'setup' }, { use: 'memory' }, { use: 'schedule' }]);
   assert.deepEqual({ ...pub, comment: mine.comment, maps: mine.maps }, {
     ...mine,
     docs: { maps: 'quality/public/process.json' },

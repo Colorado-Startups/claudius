@@ -1,0 +1,13 @@
+{
+  "ideal": "Every thread shows on the Usage tab, which is read weekly and stays under the plan limit with no overage.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Manage costs effectively",
+      "url": "https://code.claude.com/docs/en/costs",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "Every thread has a usage line.",
+  "speed": "The Usage tab is read every week.",
+  "consumption": "The weekly plan share stays under its limit, with no usage credit billed."
+}

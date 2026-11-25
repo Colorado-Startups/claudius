@@ -1,0 +1,13 @@
+{
+  "ideal": "The project chat sends the owner one card per decision, starts threads in minutes and spends few tokens on coordination.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "Every question that reaches the owner is one card with options and a pick.",
+  "speed": "A thread starts within minutes of the owner's message.",
+  "consumption": "The coordinator spends a small share of the project tokens."
+}

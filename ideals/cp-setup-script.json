@@ -1,0 +1,13 @@
+{
+  "ideal": "The setup script passes its smoke test, adds little time to a start and is cached.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Cloud environments",
+      "url": "https://code.claude.com/docs/en/cloud-environments",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "The smoke test passes after every change to the script.",
+  "speed": "The script adds little time to a start.",
+  "consumption": "Most runs hit the cache."
+}

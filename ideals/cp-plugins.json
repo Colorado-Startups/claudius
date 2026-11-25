@@ -1,0 +1,13 @@
+{
+  "ideal": "Only verified plugin sets are on, and they load fast with little skill text.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Plugins",
+      "url": "https://code.claude.com/docs/en/plugins/overview",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "Only plugin sets with a verified listing are on.",
+  "speed": "Plugin sets load within seconds of a thread's start.",
+  "consumption": "Plugin skill text per start stays small."
+}

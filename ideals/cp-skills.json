@@ -1,0 +1,13 @@
+{
+  "ideal": "Skills fire when their task comes up, are found on the first try and add little text at start.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Skills",
+      "url": "https://code.claude.com/docs/en/skills",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "A skill fires whenever its task comes up.",
+  "speed": "A thread finds the skill it needs on the first try.",
+  "consumption": "The skill listing stays small."
+}

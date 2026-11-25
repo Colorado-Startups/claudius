@@ -1,0 +1,13 @@
+{
+  "ideal": "Every plugin, skill and connector has a known source, signs in and is ready when a thread starts.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Plugins",
+      "url": "https://code.claude.com/docs/en/plugins/overview",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "Every installed set has a known publisher and a complete sign-in.",
+  "speed": "Tools are ready when a thread starts.",
+  "consumption": "The tool list is small."
+}

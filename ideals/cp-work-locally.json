@@ -1,0 +1,13 @@
+{
+  "ideal": "A Mac thread ends with a clean tree, pushed work and a logged step list, and starts quickly with small context.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "A Mac thread ends clean and pushed, and each Remote Control and Chrome step is logged.",
+  "speed": "A Mac thread runs its first command within minutes.",
+  "consumption": "The folder context stays small."
+}

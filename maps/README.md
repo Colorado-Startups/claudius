@@ -175,3 +175,13 @@ Each part is a group on the Code Project tab. The engine's tab parts table holds
 | Shipping and merging | Ship | Finished from the drafts |
 
 Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json), [`project.json`](project.json), [`ship.json`](ship.json), [`environment.json`](environment.json), [`remember.json`](remember.json).
+
+## Code Project page maps: Setup, Memory and Schedule
+
+Each lane scores one tab or feature of a Claude Code Project. A map holds six steps at most, so 18 lanes fit in three maps. The Usage tab has no lane in these maps. Every lane reads local files, so the public page leaves all three maps out.
+
+| Map | Lanes |
+|---|---|
+| `setup` | General, Environment, Network access, Network secrets, Setup script, Work locally |
+| `memory` | Conversation, Context, Memory, Extensions, Connectors, Plugins |
+| `schedule` | Threads, Scheduled tasks, Hooks, Subagents, Pull request auto fix, Skills |

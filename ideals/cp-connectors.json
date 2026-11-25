@@ -1,0 +1,13 @@
+{
+  "ideal": "Each connector is signed in, from a verified publisher and ready at the start of a thread.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Connect Claude Code to tools with MCP",
+      "url": "https://code.claude.com/docs/en/mcp",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "No connector has an incomplete sign-in, and each publisher is verified.",
+  "speed": "Connector tools are ready at the start of a thread.",
+  "consumption": "Connector tool lists stay small."
+}
