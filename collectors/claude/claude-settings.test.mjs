@@ -50,6 +50,10 @@ test('settingsProblems: unknown keys, modes a project file cannot set, bad lists
   assert.match(settingsProblems({ permissions: { defaultMode: 'yolo' } })[0].problem, /unknown mode/);
   assert.deepEqual(settingsProblems({ newKey: 1 }, ['newKey']), [], 'extra_keys admits a key newer than the index');
   assert.match(settingsProblems([])[0].problem, /not a JSON object/);
+  // Keys on the settings index (code.claude.com/docs/en/settings-reference, read 2026-11-25), one from each group the check once missed.
+  assert.deepEqual(settingsProblems({ skillListingBudgetFraction: 0.02, skipDangerousModePermissionPrompt: true, skillOverrides: {}, spinnerVerbs: {}, showTurnDuration: false, enforceAnthropicSignIn: true }), []);
+  // A key no public page lists stays unknown, and so does a misspelling of a listed one.
+  assert.deepEqual(settingsProblems({ skipWorkflowUsageWarning: true, skillListingBudgetFractions: 0.02 }).map((p) => p.where), ['skipWorkflowUsageWarning', 'skillListingBudgetFractions']);
 });
 
 test('decisions: a prompt is a user source; asking tools and config decisions are not', () => {
