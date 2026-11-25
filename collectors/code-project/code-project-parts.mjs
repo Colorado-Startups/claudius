@@ -40,9 +40,12 @@ export function setupMiss(root, check) {
   return check.pattern ? !new RegExp(check.pattern, 'im').test(text) : false;
 }
 
+// The files a part's rules are read from: its own list, or the param named by files_param (empty when unset).
+export const partFiles = (set, params = {}) => (set.files_param ? params[set.files_param] ?? [] : set.files ?? []);
+
 // The rules a part's files leave unsaid, by label. null when none of the part's files exists.
-export function ruleMisses(root, set) {
-  const texts = (set.files ?? []).map((f) => read(root, f)).filter((t) => t !== null);
+export function ruleMisses(root, set, params = {}) {
+  const texts = partFiles(set, params).map((f) => read(root, f)).filter((t) => t !== null);
   if (!texts.length) return null;
   const all = texts.join('\n');
   return (set.rules ?? []).filter((r) => !new RegExp(r.pattern, 'i').test(all)).map((r) => r.label);
@@ -80,8 +83,10 @@ export function partMetrics({ root, params, val, cnc }) {
 
   const sets = params.part_rules ?? {};
   for (const [id, set] of Object.entries(sets)) {
-    const miss = ruleMisses(root, set);
-    if (miss === null) cnc(id, `none of ${(set.files ?? []).join(', ')} exists`);
+    const files = partFiles(set, params);
+    const miss = ruleMisses(root, set, params);
+    if (!files.length) cnc(id, `no file to read: set params.${set.files_param ?? 'part_rules'} on targets/code-project.json`);
+    else if (miss === null) cnc(id, `none of ${files.join(', ')} exists`);
     else val(id, miss.length, undefined, lines(miss));
   }
 

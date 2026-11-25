@@ -8,7 +8,7 @@ import path from 'node:path';
 import { after, test } from 'node:test';
 import { CHARTS, loadTargets } from '../lib/engine.mjs';
 import { area, collect, metricIds } from './code-project.mjs';
-import { draftFirst, mergedByWeek, openedAsDraft, threadPulls } from './code-project-pulls.mjs';
+import { draftFirst, mergedByWeek, openedAsDraft, readMerged, threadPulls, withDraftState } from './code-project-pulls.mjs';
 
 const THREAD_IDS = ['code_project.draft_first_share', 'code_project.idle_revivals', 'code_project.tokens_per_merged_pr'];
 const PARAMS = Object.assign({}, ...JSON.parse(fs.readFileSync(new URL('../../targets/code-project.json', import.meta.url), 'utf8')).map((t) => t.params ?? {}));
@@ -20,26 +20,41 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'code-project-threads-'));
 after(() => fs.rmSync(tmp, { recursive: true, force: true }));
 const jsonl = (rows) => `${rows.map((r) => JSON.stringify(r)).join('\n')}\n`;
 
-// A PR from a thread: draft true opened as a draft (its first draft event is ready for review).
+// A PR from a thread, as repos/<repo>/pulls returns it, with the issue events repos/<repo>/issues/<n>/events returns:
+// draft true opened as a draft (its first draft event is ready_for_review).
 const pr = (number, { branch = 'claude/thread-x', mergedDaysAgo, draft = true, events }) => ({
   number,
-  headRefName: branch,
-  createdAt: iso(mergedDaysAgo + 1),
-  mergedAt: iso(mergedDaysAgo),
-  timelineItems: { nodes: events ?? (draft ? [{ __typename: 'ReadyForReviewEvent', createdAt: iso(mergedDaysAgo + 0.5) }] : []) },
+  head: { ref: branch },
+  created_at: iso(mergedDaysAgo + 1),
+  merged_at: iso(mergedDaysAgo),
+  events: events ?? [{ event: 'labeled', created_at: iso(mergedDaysAgo + 0.9) }, ...(draft ? [{ event: 'ready_for_review', created_at: iso(mergedDaysAgo + 0.5) }] : [])],
 });
 const PULLS = [
   pr(1, { mergedDaysAgo: 1 }),
   pr(2, { mergedDaysAgo: 2, draft: false }),
   pr(3, { mergedDaysAgo: 3 }),
-  pr(4, { mergedDaysAgo: 4, events: [{ __typename: 'ConvertToDraftEvent', createdAt: iso(4.5) }, { __typename: 'ReadyForReviewEvent', createdAt: iso(4.2) }] }), // opened ready, then draft, then ready
+  pr(4, { mergedDaysAgo: 4, events: [{ event: 'ready_for_review', created_at: iso(4.2) }, { event: 'convert_to_draft', created_at: iso(4.5) }].reverse() }), // opened ready, then draft, then ready
   pr(5, { mergedDaysAgo: 5, branch: 'feature/by-hand', draft: false }), // not a thread's branch
   pr(6, { mergedDaysAgo: 40 }), // older than 30 days
   pr(7, { mergedDaysAgo: 10 }),
   pr(8, { mergedDaysAgo: 17 }),
   pr(9, { mergedDaysAgo: 24 }),
+  { ...pr(10, { mergedDaysAgo: 30 }), merged_at: null }, // closed, never merged
 ];
-const gh = (nodes = PULLS) => ({ graphql: async () => ({ repository: { pullRequests: { nodes } } }) });
+// A fake gh client: REST only, the way a cloud thread reads it. GraphQL is refused, as it is there.
+const gh = (list = PULLS) => ({
+  rest: async (route) => {
+    if (/^repos\/acme\/site\/pulls\?/.test(route)) return list.map(({ events, ...rest }) => rest);
+    const m = /^repos\/acme\/site\/issues\/(\d+)\/events\?/.exec(route);
+    const one = m && list.find((p) => p.number === Number(m[1]));
+    if (one) return one.events;
+    throw Object.assign(new Error(`HTTP 404: ${route}`), { status: 404 });
+  },
+  graphql: async () => {
+    throw new Error('GitHub GraphQL is not available from Claude Code sessions');
+  },
+});
+const merged = (list = PULLS) => readMerged(gh(list), 'acme/site');
 
 // Transcripts: one main session s1 with a subagent, in a folder naming the project.
 const home = path.join(tmp, 'home');
@@ -107,19 +122,26 @@ test('targets: valid, on the tab, plain means, a goal basis; two need local file
   }
 });
 
-test('pulls: a PR opened as a draft has ready-for-review as its first draft event', () => {
-  assert.equal(openedAsDraft(PULLS[0]), true);
-  assert.equal(openedAsDraft(PULLS[1]), false);
-  assert.equal(openedAsDraft(PULLS[3]), false, 'converted to draft after opening');
-  const mine = threadPulls(PULLS, { prefix: 'claude/', now: NOW, days: 30 });
+test('pulls: a PR opened as a draft has ready_for_review as its first draft event', async () => {
+  assert.equal(openedAsDraft(PULLS[0].events), true);
+  assert.equal(openedAsDraft(PULLS[1].events), false);
+  assert.equal(openedAsDraft(PULLS[3].events), false, 'converted to draft after opening');
+  assert.equal(openedAsDraft(undefined), false);
+  const all = await merged();
+  assert.deepEqual(all.map((p) => p.number), [1, 2, 3, 4, 5, 6, 7, 8, 9], 'a PR closed unmerged is left out');
+  const mine = threadPulls(all, { prefix: 'claude/', now: NOW, days: 30 });
   assert.deepEqual(mine.map((p) => p.number), [1, 2, 3, 4, 7, 8, 9]);
-  assert.deepEqual(draftFirst(mine), { share: 71.4, drafts: 5, total: 7 });
+  assert.deepEqual(draftFirst(await withDraftState(gh(), 'acme/site', mine)), { share: 71.4, drafts: 5, total: 7 });
   assert.equal(draftFirst([]), null);
-  assert.deepEqual(mergedByWeek(threadPulls(PULLS, { prefix: 'claude/', now: NOW }), { now: NOW, weeks: 4 }), [1, 1, 1, 4]);
+  assert.deepEqual(mergedByWeek(threadPulls(all, { prefix: 'claude/', now: NOW }), { now: NOW, weeks: 4 }), [1, 1, 1, 4]);
 });
 
 test('CI: the draft share is read, the two local metrics are named not measured, never 0', async () => {
-  const r = await collect({ root: tmp, mode: 'ci', params: { ...PARAMS, repo: 'acme/site' }, gh: gh(), now: new Date(NOW), home });
+  const reads = [];
+  const client = gh();
+  const counted = { ...client, rest: async (route) => (reads.push(route), client.rest(route)) };
+  const r = await collect({ root: tmp, mode: 'ci', params: { ...PARAMS, repo: 'acme/site' }, gh: counted, now: new Date(NOW), home });
+  assert.equal(reads.filter((route) => route.includes('/issues/')).length, 7, 'one events read for each thread PR of the window, and no GraphQL');
   assert.deepEqual(Object.keys(r).sort(), [...metricIds].sort());
   assert.equal(result_(r, 'draft_first_share').value, 71.4);
   assert.deepEqual(result_(r, 'draft_first_share').detail.map((d) => d.value), [5, 2]);
@@ -154,10 +176,10 @@ test('local: a trend needs two weeks with both; a missing folder or PR read says
   const middle = await collect({ ...base, params: { ...PARAMS, repo: 'acme/site', project_match: 'mid-site' }, gh: gh() });
   assert.match(result_(middle, 'idle_revivals').could_not_check, /no session transcript written in the last 7 days/);
   assert.doesNotMatch(result_(middle, 'tokens_per_merged_pr').could_not_check ?? '', /no session transcript/, 'a 10-day-old transcript still feeds the 4-week trend');
-  const broken = await collect({ ...base, params: { ...PARAMS, repo: 'acme/site', project_match: 'acme-site' }, gh: { graphql: async () => { throw new Error('boom\nsecret'); } } });
-  assert.match(result_(broken, 'draft_first_share').could_not_check, /^gh api graphql failed: boom$/);
+  const broken = await collect({ ...base, params: { ...PARAMS, repo: 'acme/site', project_match: 'acme-site' }, gh: { rest: async () => { throw new Error('boom\nsecret'); } } });
+  assert.match(result_(broken, 'draft_first_share').could_not_check, /^gh api failed: boom$/);
   assert.equal(result_(broken, 'idle_revivals').value, 1);
-  assert.match(result_(broken, 'tokens_per_merged_pr').could_not_check, /gh api graphql failed/);
+  assert.match(result_(broken, 'tokens_per_merged_pr').could_not_check, /gh api failed/);
   const bare = await collect({ ...base, params: { ...PARAMS, repo: 'acme/site', project_match: '/' }, gh: gh() });
   assert.match(result_(bare, 'idle_revivals').could_not_check, /would read every project folder/);
 });

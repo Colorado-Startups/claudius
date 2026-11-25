@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { ghClient, ownRepo, percentile, redact, useLib } from '../lib/engine.mjs';
+import { closedPullsRoute } from './code-project-pulls.mjs';
 import { partMetrics } from './code-project-parts.mjs';
 import { threadMetrics } from './code-project-threads.mjs';
 
@@ -97,6 +98,7 @@ async function gather({ root = '.', params = TEMPLATE, gh, now = Date.now(), mod
   // Threads: merged pull requests from a claude/ branch in the window.
   const prSource = `gh api repos/<repo>/pulls?state=closed, merged ${params.window_days} days or fewer ago from a branch starting ${params.branch_prefix}; first commit time from repos/<repo>/pulls/<n>/commits (at most ${params.max_prs} pull requests)`;
   let requests = 0;
+  let listed; // the closed pull request list, read once and shared with the thread metrics
   const speedIds = ['code_project.draft_pr_minutes', 'code_project.ready_to_merge_hours'];
   try {
     const repo = params.repo || (await ownRepo(root, {}));
@@ -104,7 +106,8 @@ async function gather({ root = '.', params = TEMPLATE, gh, now = Date.now(), mod
     const client = gh ?? ghClient();
     const rest = (route) => (requests += 1, client.rest(route));
     const since = now - params.window_days * 86400000;
-    const pulls = (await rest(`repos/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100`))
+    listed = await rest(closedPullsRoute(repo));
+    const pulls = listed
       .filter((p) => p.merged_at && Date.parse(p.merged_at) >= since && String(p.head?.ref ?? '').startsWith(params.branch_prefix))
       .slice(0, params.max_prs);
     if (!pulls.length) {
@@ -125,7 +128,7 @@ async function gather({ root = '.', params = TEMPLATE, gh, now = Date.now(), mod
     for (const id of speedIds) if (!out[id]) cnc(id, firstLine(err), prSource);
   }
   partMetrics({ root, params: { ...TEMPLATE, ...params }, val, cnc });
-  await threadMetrics({ root, p: { ...TEMPLATE, ...params }, gh, mode, now, home, projectsDir, val, cnc, count: () => (requests += 1) });
+  await threadMetrics({ root, p: { ...TEMPLATE, ...params }, gh, mode, now, home, projectsDir, val, cnc, count: () => (requests += 1), listed });
   val('code_project.requests', requests, 'gh api requests this collector made, one per route');
   return Object.fromEntries(metricIds.map((id) => [id, out[id] ?? { could_not_check: 'collector produced no value', source: SOURCE }]));
 }

@@ -37,7 +37,9 @@ export const readPublicParams = (root) => {
 export const publicTargets = (list, pub = NO_PUBLIC) => {
   const scoped = list.some((d) => pub.ids.includes(d.id));
   return list.map((def) => {
-    const out = scoped && def.params ? { ...def, params: { ...def.params, ...pub.params } } : def;
+    const own = pub.params_pack?.[def.id];
+    const mine = own ? { ...def, params: { ...def.params, ...own } } : def;
+    const out = scoped && mine.params ? { ...mine, params: { ...mine.params, ...pub.params } } : mine;
     if (pub.ids.includes(def.id)) return { ...out, needs: 'none' };
     return def.needs === 'local-files' ? { ...out, drop: true } : out;
   });

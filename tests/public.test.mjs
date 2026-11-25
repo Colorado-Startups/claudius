@@ -38,12 +38,19 @@ test('public: each metric that needs local files is dropped but the repo-file on
     const mine = read(join(ROOT, 'targets', f));
     const scoped = mine.some((d) => pub.ids.includes(d.id));
     const want = mine.map((d) => {
-      const out = scoped && d.params ? { ...d, params: { ...d.params, ...pub.params } } : d;
+      const own = pub.params_pack?.[d.id];
+      const withOwn = own ? { ...d, params: { ...d.params, ...own } } : d;
+      const out = scoped && withOwn.params ? { ...withOwn, params: { ...withOwn.params, ...pub.params } } : withOwn;
       if (pub.ids.includes(d.id)) return { ...out, needs: 'none' };
       return d.needs === 'local-files' ? { ...out, drop: true } : out;
     });
     assert.deepEqual(read(join(root, 'quality', 'public', 'targets', f)), want, f);
   }
+  // The pack keeps an empty tasks file list for an adopting repo; only this repo's public page names its template README.
+  const task = (dir) => read(join(dir, 'code-project.json')).find((d) => d.id === 'code_project.tasks_missing');
+  assert.deepEqual(task(join(ROOT, 'targets')).params, undefined, 'targets/ is what adopters load');
+  assert.deepEqual(task(join(root, 'quality', 'public', 'targets')).params, { tasks_files: ['templates/claude/code-project/README.md'] });
+  assert.deepEqual(read(join(ROOT, 'targets', 'code-project.json')).find((d) => d.params?.part_rules).params.tasks_files, []);
   const kept = files.flatMap((f) => read(join(root, 'quality', 'public', 'targets', f))).filter((d) => d.drop !== true).map((d) => d.id);
   const ids = (f) => JSON.parse(readFileSync(join(ROOT, 'targets', f), 'utf8')).map((d) => d.id);
   const defs = (f) => JSON.parse(readFileSync(join(ROOT, 'targets', f), 'utf8'));

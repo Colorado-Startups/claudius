@@ -1,5 +1,5 @@
 {
-  "comment": "Read by quality/public.mjs. Each id in ids goes on the public page with needs none, and its targets file's params take params below; every other entry that needs local files is dropped. repo_only (collectors/instructions/instructions.mjs) reads only the files the repo commits, so CI reads them too. AGENTS.md counts because CLAUDE.md imports it (code.claude.com/docs/en/memory, read 2026-11-13). drop: Git Crafter metrics that cannot apply to this repo, written to quality/public/targets/repo-drops.json, never to targets/, which adopters load as the pack. security.claude_review_share counts only the Claude GitHub App's reviews, and this repo runs no paid review (#12); the lockfile, dependency and install-step ones read a package.json and an npm install this repo does not have. The ten security, settings and idle-access ones that need a github-admin token are dropped because that token needs a stored App key, which the owner forbids (#32). tools.adopters_latest_share and tools.latest_dependency_pr_ci_minutes need adopters and a merged dependency PR this repo does not have. params_for: this repo's params for a Git Crafter metric, as a repo override would set them.",
+  "comment": "Read by quality/public.mjs. Each id in ids goes on the public page with needs none, and its targets file's params take params below; every other entry that needs local files is dropped. repo_only (collectors/instructions/instructions.mjs) reads only the files the repo commits, so CI reads them too. AGENTS.md counts because CLAUDE.md imports it (code.claude.com/docs/en/memory, read 2026-11-13). drop: Git Crafter metrics that cannot apply to this repo, written to quality/public/targets/repo-drops.json, never to targets/, which adopters load as the pack. security.claude_review_share counts only the Claude GitHub App's reviews, and this repo runs no paid review (#12); the lockfile, dependency and install-step ones read a package.json and an npm install this repo does not have. The ten security, settings and idle-access ones that need a github-admin token are dropped because that token needs a stored App key, which the owner forbids (#32). tools.adopters_latest_share and tools.latest_dependency_pr_ci_minutes need adopters and a merged dependency PR this repo does not have. params_for: this repo's params for a Git Crafter metric, as a repo override would set them. params_pack: this repo's params for a metric of its own pack, set on that metric's entry in the public targets only, because targets/ is what adopters load. code_project.tasks_missing reads the Code Project template README this repo ships (tasks_files); a repo that adopts the pack keeps the empty default and reads not measured there.",
   "ids": [
     "claude.instruction_tokens",
     "instructions.description_tokens"
@@ -46,6 +46,13 @@
         "templates/claude/.claude"
       ],
       "threat_model_grace_days": 7
+    }
+  },
+  "params_pack": {
+    "code_project.tasks_missing": {
+      "tasks_files": [
+        "templates/claude/code-project/README.md"
+      ]
     }
   }
 }

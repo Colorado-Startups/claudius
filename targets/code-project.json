@@ -131,10 +131,10 @@
     "label": "API requests per read",
     "means": "gh api requests one read of the thread metrics spends.",
     "unit": "requests",
-    "goal": 15,
-    "near": 30,
+    "goal": 25,
+    "near": 40,
     "direction": "lower",
-    "goal_source": "template goal: one pull request list and one commit read per pull request, ten at most, a small share of the workflow token's 1,000 requests an hour (GitHub Docs, Rate limits for the REST API, read 2026-11-19)",
+    "goal_source": "template goal: one pull request list, then one commit read and one events read per pull request, ten at most, which is 21 and a small share of the workflow token's 1,000 requests an hour (GitHub Docs, Rate limits for the REST API, read 2026-11-19)",
     "source": "gh api requests collectors/code-project/code-project.mjs made",
     "needs": "gh",
     "chart": "number"
@@ -159,7 +159,7 @@
     "near": 80,
     "direction": "higher",
     "goal_source": "goal from the Projects docs: the example project instructions say \"Branch from main and open one draft pull request per thread\" (code.claude.com/docs/en/claude-projects, Write project instructions, read 2026-11-25), so every thread's PR starts as a draft",
-    "source": "gh api graphql: the merged pullRequests of the last params.window_days (30) days whose branch starts with params.branch_prefix, up to the latest 100 by update; a PR counts as opened as a draft when its first ready-for-review or convert-to-draft event is ready-for-review (state, N = 100 PRs at most) (collectors/code-project/code-project-threads.mjs)",
+    "source": "gh api repos pulls and issues events: the merged pull requests of the last params.window_days (30) days whose branch starts with params.branch_prefix, the latest params.max_prs (10) read; a PR counts as opened as a draft when its first ready_for_review or convert_to_draft event is ready_for_review (state, N = 10 PRs at most) (collectors/code-project/code-project-threads.mjs)",
     "needs": "gh",
     "chart": "gauge",
     "defined": "2026-11-25"
@@ -193,7 +193,7 @@
     "near": 25,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: the Projects docs say a project uses plan limits faster than one session and show usage by thread (code.claude.com/docs/en/claude-projects, See and reduce a project's usage, read 2026-11-25), so the cost of a merged PR falls or holds, never rises; zero change is the goal",
-    "source": "params.weeks (4) buckets of 7 days: billable tokens (input, output and cache write, one count per message id, cache reads left out) of this repo's session transcripts, subagents included, divided by the merged PRs from params.branch_prefix branches of the same week (gh api graphql, up to the latest 100 by update); the change from the oldest bucket with both to the latest; N = 4 weeks (collectors/code-project/code-project-threads.mjs)",
+    "source": "params.weeks (4) buckets of 7 days: billable tokens (input, output and cache write, one count per message id, cache reads left out) of this repo's session transcripts, subagents included, divided by the merged PRs from params.branch_prefix branches of the same week (gh api repos pulls, up to the latest 100 by update); the change from the oldest bucket with both to the latest; N = 4 weeks (collectors/code-project/code-project-threads.mjs)",
     "needs": "local-files",
     "chart": "bar",
     "defined": "2026-11-25"
@@ -201,7 +201,7 @@
   {
     "id": "code_project.setup_missing",
     "params": {
-      "comment": "setup_checks: { label, and one of file, dir, json or pattern }. part_rules: one entry per rule metric, { files, rules: [{ label, pattern }] }, each pattern a case-insensitive regular expression. settings_file and plugin_allow: the plugins a repo may turn on.",
+      "comment": "setup_checks: { label, and one of file, dir, json or pattern }. part_rules: one entry per rule metric, { files, rules: [{ label, pattern }] }, each pattern a case-insensitive regular expression; an entry with files_param reads its files from that param instead. tasks_files: the files that list the project's scheduled tasks, empty for a repo that keeps no such list, so the metric is not measured there; this repo sets its template README in quality/public-params.json. settings_file and plugin_allow: the plugins a repo may turn on.",
       "setup_checks": [
         {
           "label": "AGENTS.md",
@@ -230,6 +230,7 @@
           "json": true
         }
       ],
+      "tasks_files": [],
       "part_rules": {
         "code_project.cloud_rules_missing": {
           "files": [
@@ -274,9 +275,8 @@
           ]
         },
         "code_project.tasks_missing": {
-          "files": [
-            "templates/claude/code-project/README.md"
-          ],
+          "files": [],
+          "files_param": "tasks_files",
           "rules": [
             {
               "label": "Scheduled tasks are listed",
