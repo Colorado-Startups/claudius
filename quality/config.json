@@ -113,6 +113,22 @@
       "cp-setup-script",
       "Setup script"
     ],
+    [
+      "cp-notifications",
+      "Notifications"
+    ],
+    [
+      "cp-library",
+      "Library and artifacts"
+    ],
+    [
+      "cp-newer-features",
+      "Newer features"
+    ],
+    [
+      "cp-kept-off",
+      "Features kept off"
+    ],
     "dependabot",
     "scanning",
     "insights",

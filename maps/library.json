@@ -1,0 +1,79 @@
+{
+  "id": "library",
+  "name": "Library and artifacts",
+  "why": "How a dashboard goes from data to a link you open",
+  "ideal": "A data change rebuilds a private page within minutes, with one URL per page and a few API requests.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Publish a page from a session (Artifacts)",
+      "url": "https://code.claude.com/docs/en/artifacts",
+      "date": "2026-11-25"
+    }
+  ],
+  "critical_path": [
+    "data",
+    "refresh"
+  ],
+  "steps": [
+    {
+      "id": "data",
+      "name": "Data",
+      "tools": [
+        "Collector"
+      ],
+      "rule": "A metrics read makes few API requests.",
+      "rule_ref": "https://code.claude.com/docs/en/artifacts",
+      "metric": "cp_library.api_requests_per_read"
+    },
+    {
+      "id": "build",
+      "name": "Build",
+      "tools": [
+        "Page"
+      ],
+      "rule": "The page builds from the data in one pass.",
+      "rule_ref": "https://code.claude.com/docs/en/artifacts",
+      "metric": "cp_library.publish_minutes"
+    },
+    {
+      "id": "check",
+      "name": "Check",
+      "tools": [
+        "Page"
+      ],
+      "rule": "A check reads the built page before it goes live.",
+      "rule_ref": "https://code.claude.com/docs/en/artifacts",
+      "metric": "cp_library.current_share"
+    },
+    {
+      "id": "publish",
+      "name": "Publish",
+      "tools": [
+        "Artifact"
+      ],
+      "rule": "A change reaches the published page within ten minutes.",
+      "rule_ref": "https://code.claude.com/docs/en/artifacts",
+      "metric": "cp_library.publish_minutes"
+    },
+    {
+      "id": "link",
+      "name": "Link",
+      "tools": [
+        "Library"
+      ],
+      "rule": "Each page keeps one URL and stays private.",
+      "rule_ref": "https://code.claude.com/docs/en/artifacts",
+      "metric": "cp_library.current_share"
+    },
+    {
+      "id": "refresh",
+      "name": "Refresh",
+      "tools": [
+        "Artifact"
+      ],
+      "rule": "A merge rebuilds the page within a day.",
+      "rule_ref": "https://code.claude.com/docs/en/artifacts",
+      "metric": "cp_library.current_share"
+    }
+  ]
+}

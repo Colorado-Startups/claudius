@@ -1,0 +1,23 @@
+{
+  "ideal": "Claude Ship, PR Steward and Approvals stay off, their prices are re-read monthly and nothing bills per use.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Claude Ship",
+      "url": "https://code.claude.com/docs/en/claude-ship",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Claude Code Docs: PR Steward",
+      "url": "https://code.claude.com/docs/en/pr-steward",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Claude Code Docs: Claude Approvals",
+      "url": "https://code.claude.com/docs/en/approvals",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "The changelog and prices are re-read every month.",
+  "speed": "A price change reaches a decision within a week.",
+  "consumption": "Nothing bills per use."
+}

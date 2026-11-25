@@ -1,0 +1,69 @@
+{
+  "id": "notifications",
+  "name": "Notifications",
+  "why": "What raises an alert and how fast you clear it",
+  "ideal": "Only a wait, an error or a reply raises an alert, and the oldest wait clears within a day.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-25"
+    }
+  ],
+  "critical_path": [
+    "event",
+    "clear"
+  ],
+  "steps": [
+    {
+      "id": "event",
+      "name": "Event",
+      "tools": [
+        "Thread"
+      ],
+      "rule": "Only a wait, an error or a reply is an event that can alert.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_notifications.needed_alert_share"
+    },
+    {
+      "id": "sort",
+      "name": "Sort",
+      "tools": [
+        "Notifications"
+      ],
+      "rule": "The default set of three events stays on; one per finished turn stays off.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_notifications.alerts_per_day"
+    },
+    {
+      "id": "alert",
+      "name": "Alert",
+      "tools": [
+        "Desktop app"
+      ],
+      "rule": "An alert shows unless you are already viewing the project.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_notifications.needed_alert_share"
+    },
+    {
+      "id": "act",
+      "name": "You act",
+      "tools": [
+        "Threads tab"
+      ],
+      "rule": "A thread in Waiting on you gets your answer within a day.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_notifications.oldest_waiting_hours"
+    },
+    {
+      "id": "clear",
+      "name": "Clear",
+      "tools": [
+        "Threads tab"
+      ],
+      "rule": "The thread leaves Waiting on you once you answer.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_notifications.oldest_waiting_hours"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Page kit: add a Code Project page
 
-A page is one tab or feature scored on Quality, Speed and Consumption, with one process map. Copy these three files, fill each `<placeholder>`, and the page and its map build with the rest of the pack. The 14 pages the pack ships are listed in [`../pages.json`](../pages.json).
+A page is one tab or feature scored on Quality, Speed and Consumption, with one process map. Copy these three files, fill each `<placeholder>`, and the page and its map build with the rest of the pack. The 18 pages the pack ships are listed in [`../pages.json`](../pages.json).
 
 ```mermaid
 flowchart LR

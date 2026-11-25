@@ -1,0 +1,79 @@
+{
+  "id": "newer-features",
+  "name": "Newer features",
+  "why": "How a new Claude Code feature is tried, measured and kept or dropped",
+  "ideal": "A new feature is read, tried on one thread, measured, then kept or dropped with a note.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Manage multiple agents with agent view",
+      "url": "https://code.claude.com/docs/en/agent-view",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Claude Code Docs: Keep Claude working toward a goal",
+      "url": "https://code.claude.com/docs/en/goal",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Claude Code Docs: Configure auto mode",
+      "url": "https://code.claude.com/docs/en/auto-mode-config",
+      "date": "2026-11-25"
+    }
+  ],
+  "critical_path": [
+    "read",
+    "note"
+  ],
+  "steps": [
+    {
+      "id": "read",
+      "name": "Read changelog",
+      "tools": [
+        "Changelog"
+      ],
+      "rule": "Each new feature is read in the changelog before a thread tries it.",
+      "rule_ref": "https://code.claude.com/docs/en/agent-view",
+      "metric": "cp_newer_features.nudged_threads"
+    },
+    {
+      "id": "try",
+      "name": "Try on one thread",
+      "tools": [
+        "/goal"
+      ],
+      "rule": "One long thread tries the feature with a clear condition.",
+      "rule_ref": "https://code.claude.com/docs/en/agent-view",
+      "metric": "cp_newer_features.finish_share"
+    },
+    {
+      "id": "measure",
+      "name": "Measure",
+      "tools": [
+        "Agent view"
+      ],
+      "rule": "Prompts and nudges are counted for that thread.",
+      "rule_ref": "https://code.claude.com/docs/en/agent-view",
+      "metric": "cp_newer_features.prompts_per_thread"
+    },
+    {
+      "id": "keep",
+      "name": "Keep or drop",
+      "tools": [
+        "Auto mode rules"
+      ],
+      "rule": "A feature that lowers prompts and nudges is kept; the rest is dropped.",
+      "rule_ref": "https://code.claude.com/docs/en/agent-view",
+      "metric": "cp_newer_features.nudged_threads"
+    },
+    {
+      "id": "note",
+      "name": "Note",
+      "tools": [
+        "Project memory"
+      ],
+      "rule": "The decision and its reason are saved to project memory.",
+      "rule_ref": "https://code.claude.com/docs/en/agent-view",
+      "metric": "cp_newer_features.finish_share"
+    }
+  ]
+}

@@ -330,7 +330,7 @@
     "near": 4000,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: the memory docs say a longer file uses more context; Claude Code Docs: How Claude remembers your project (code.claude.com/docs/en/memory, read 2026-11-25)",
-    "source": "the memory file sizes, read on the Mac; not measured until a collector reads it",
+    "source": "the project memory index in params.memory_dir, read on the machine that holds it; read by collectors/code-project/cp-memory.mjs",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"

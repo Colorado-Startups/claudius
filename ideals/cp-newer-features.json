@@ -1,0 +1,23 @@
+{
+  "ideal": "Agent view shows every session, a goal runs to its condition, and auto mode rules cut the prompts a thread shows.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Manage multiple agents with agent view",
+      "url": "https://code.claude.com/docs/en/agent-view",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Claude Code Docs: Keep Claude working toward a goal",
+      "url": "https://code.claude.com/docs/en/goal",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Claude Code Docs: Configure auto mode",
+      "url": "https://code.claude.com/docs/en/auto-mode-config",
+      "date": "2026-11-25"
+    }
+  ],
+  "quality": "A goal runs to its condition with no nudge.",
+  "speed": "Long threads finish without a stop.",
+  "consumption": "Auto mode rules keep permission prompts low."
+}

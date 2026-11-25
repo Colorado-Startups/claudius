@@ -1,0 +1,69 @@
+{
+  "id": "kept-off",
+  "name": "Features kept off",
+  "why": "Why a billed feature stays off until a decision turns it on",
+  "ideal": "A billed feature stays off, its price is re-read monthly, and only a billing card can turn it on.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Claude Ship",
+      "url": "https://code.claude.com/docs/en/claude-ship",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Claude Code Docs: PR Steward",
+      "url": "https://code.claude.com/docs/en/pr-steward",
+      "date": "2026-11-25"
+    },
+    {
+      "title": "Claude Code Docs: Claude Approvals",
+      "url": "https://code.claude.com/docs/en/approvals",
+      "date": "2026-11-25"
+    }
+  ],
+  "critical_path": [
+    "changelog",
+    "decide"
+  ],
+  "steps": [
+    {
+      "id": "changelog",
+      "name": "Read changelog",
+      "tools": [
+        "Changelog"
+      ],
+      "rule": "The changelog is re-read every month.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-ship",
+      "metric": "cp_kept_off.days_since_reread"
+    },
+    {
+      "id": "price",
+      "name": "Check price",
+      "tools": [
+        "Claude Ship"
+      ],
+      "rule": "Each price and plan rule is read again with the changelog.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-ship",
+      "metric": "cp_kept_off.decision_days"
+    },
+    {
+      "id": "test",
+      "name": "Test the billing rule",
+      "tools": [
+        "Approvals"
+      ],
+      "rule": "Observe mode bills, so the rule is read before anything is tried.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-ship",
+      "metric": "cp_kept_off.per_use_spend"
+    },
+    {
+      "id": "decide",
+      "name": "Billing card or stay off",
+      "tools": [
+        "PR Steward"
+      ],
+      "rule": "A feature stays off unless a billing card is approved.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-ship",
+      "metric": "cp_kept_off.per_use_spend"
+    }
+  ]
+}

@@ -15,7 +15,7 @@
     "needs": "none",
     "chart": "table",
     "params": {
-      "comment": "instruction_files: the files a cloud thread loads. rules: { label, pattern } pairs, each a case-insensitive regular expression. agent_dirs: folders of subagent files, the repo's own and the template's. repo: owner/name, empty for this repo. branch_prefix, window_days, max_prs: which merged pull requests count as thread work.",
+      "comment": "instruction_files: the files a cloud thread loads. rules: { label, pattern } pairs, each a case-insensitive regular expression. agent_dirs: folders of subagent files, the repo's own and the template's. repo: owner/name, empty for this repo. branch_prefix, window_days, max_prs: which merged pull requests count as thread work. memory_dir, memory_index: the folder of the project memory and its index file, which cp-memory.mjs reads; empty, it is not measured.",
       "instruction_files": [
         "CLAUDE.md",
         "AGENTS.md",
@@ -38,7 +38,9 @@
       "repo": "",
       "branch_prefix": "claude/",
       "window_days": 30,
-      "max_prs": 10
+      "max_prs": 10,
+      "memory_dir": "",
+      "memory_index": "MEMORY.md"
     }
   },
   {

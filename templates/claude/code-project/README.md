@@ -63,7 +63,7 @@ A cloud scheduled task runs without a conversation. Remove connectors a task doe
 
 ## Pages
 
-Each tab and feature of a Project has a Quality, Speed and Consumption tab in this pack, named `cp-<name>`, with three metrics. Each reads local files, so a metric with no collector reads not measured and the public page leaves it out. The 19 tabs form 14 pages, each with one process map ([`pages.json`](pages.json), [maps/README.md](../../../maps/README.md#page-maps-one-per-page)).
+Each tab and feature of a Project has a Quality, Speed and Consumption tab in this pack, named `cp-<name>`, with three metrics. Each reads local files, so a metric with no collector reads not measured and the public page leaves it out. The 23 tabs form 18 pages, each with one process map ([`pages.json`](pages.json), [maps/README.md](../../../maps/README.md#page-maps-one-per-page)).
 
 | Page | Tabs | Map |
 |---|---|---|
@@ -81,6 +81,10 @@ Each tab and feature of a Project has a Quality, Speed and Consumption tab in th
 | 📚 Skills | Skills | `skills` |
 | 🤖 Subagents | Subagents | `subagents` |
 | 🪝 Hooks | Hooks | `hooks` |
+| 🔔 Notifications | Notifications | `notifications` |
+| 📚 Library and artifacts | Library and artifacts | `library` |
+| 🆕 Newer features | Newer features | `newer-features` |
+| 🚫 Features kept off | Features kept off | `kept-off` |
 
 To add a page, copy the [page kit](page/README.md): three files, a checklist and the rule for what 100 means.
 
