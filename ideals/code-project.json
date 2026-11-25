@@ -1,0 +1,18 @@
+{
+  "ideal": "A cloud thread reads every guard in CLAUDE.md, carries short instructions, and hands side work to read-only subagents on small models.",
+  "sources": [
+    {"title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects", "url": "https://code.claude.com/docs/en/claude-projects", "date": "2026-11-25"},
+    {"title": "Claude Code Docs: How Claude remembers your project", "url": "https://code.claude.com/docs/en/memory", "date": "2026-11-25"},
+    {"title": "Claude Code Docs: Create custom subagents", "url": "https://code.claude.com/docs/en/sub-agents", "date": "2026-11-25"},
+    {"title": "DORA: Working in small batches", "url": "https://dora.dev/capabilities/working-in-small-batches/", "date": "2025-12-08"}
+  ],
+  "quality": "Every guard sits in a file a cloud thread reads, each instruction file stays under 200 lines, and no read-only subagent can edit.",
+  "speed": "A thread opens its pull request within 10 minutes of its first commit, and a green one merges within a day.",
+  "consumption": "Every subagent names a model, and one read of the thread metrics spends few gh api requests.",
+  "parts": [
+    {"part": "Guards", "ideal": "Each guard sits in CLAUDE.md or AGENTS.md, since a cloud thread skips settings.json rules and hooks", "setup": "Say each rule in CLAUDE.md; back it with a GitHub ruleset and secret scanning"},
+    {"part": "Instructions", "ideal": "Each instruction file stays under 200 lines; part-time rules move to path-scoped rules", "setup": "Move rules for one folder into .claude/rules with a paths line"},
+    {"part": "Subagents", "ideal": "A read-only agent lists reading tools only and names a small model", "setup": "Copy the explorer and reviewer agents from templates/claude/code-project/agents"},
+    {"part": "Threads", "ideal": "Draft pull request within 10 minutes, merge within a day", "setup": "Use a claude/ branch, push after each step, open the draft pull request early"}
+  ]
+}
