@@ -87,6 +87,15 @@ jobs:
             for (const [id, m] of unread) console.log(`  ${id}: ${String(m.could_not_check).replace(/\s+/g, " ").slice(0, 160)}`);
           ' || true
 
+      # The master score and the metrics short of their goal, ranked by the points each adds (quality/score-log.mjs),
+      # so a cloud thread, which cannot reach the deployed page, reads where the score stands from this log. It reads
+      # the run the privacy gate has checked, runs from the pages action's own checkout of Git Crafter, and never
+      # fails the build.
+      - name: Score
+        run: |
+          engine=$(ls -d "$(dirname "$RUNNER_WORKSPACE")"/_actions/SoulCraft-Org/git-crafter/*/ 2>/dev/null | head -1)
+          node quality/score-log.mjs "${engine%/}" --config quality/public/config.json || true
+
       # The scored run, for the issue-sync job below. Main only, like the deploy.
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
