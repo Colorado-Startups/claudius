@@ -58,7 +58,7 @@ flowchart LR
 | Part | Is |
 | --- | --- |
 | Templates | `templates/claude/`: the Claude-only files a repo commits. This repo runs copies of them (`tests/templates.test.mjs`) |
-| Plugin | `plugin/`: the `claudius` Claude Code plugin (skills `plan`, `merge`, `equip`, `find-plugin`, `plain-voice`). Install: `claude plugin marketplace add Colorado-Startups/claudius`, then `claude plugin install claudius@claudius` |
+| Plugin | `plugin/`: the `claudius` Claude Code plugin (skills `plan`, `merge`, `equip`, `find-plugin`, `plain-voice`, `visibility`). Install: `claude plugin marketplace add Colorado-Startups/claudius`, then `claude plugin install claudius@claudius` |
 | Pack | The tabs in [`pack.json`](pack.json): the seven Claude tabs (Claude, Claude settings, Claude desktop app, Blockers, Tokens, Instructions, Best practices), Visibility, Code Project, and one `cp-` tab for each Code Project tab and feature. Maps: one file each in [`maps/`](maps/), listed in [maps/README.md](maps/README.md) |
 | Engine | Git Crafter's `actions/pages` and CI standard, pinned by full commit SHA. No engine code lives here |
 | Public pages | Built in CI from `quality/public/`. The Quality page shows only metrics read from GitHub and the repo's files. Each metric that needs local files is dropped: not shown, counted or listed. The exceptions are the ones `quality/public-params.json` reads from committed files alone. A tab left with no metric (Tokens, Claude desktop app and every `cp-` tab but Threads and Pull request auto fix) is left off; it shows on a `--local` page (Git Crafter v7.0.1 or later). The Process page shows each map step such a metric does not score |
