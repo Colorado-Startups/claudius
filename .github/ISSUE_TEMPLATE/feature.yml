@@ -1,0 +1,27 @@
+name: Feature
+description: "A new capability or an improvement. It becomes a card on the project board."
+title: "Area: what it adds"
+type: Feature
+labels: [enhancement]
+body:
+  - type: textarea
+    id: table
+    attributes:
+      label: Feature
+      description: "A table with these rows: Who, Need, Change, Done when. Add a screenshot, chart or diagram where it helps. No paragraphs."
+      placeholder: |
+        | Field | Value |
+        |---|---|
+        | Who | the user or agent that gains |
+        | Need | |
+        | Change | |
+        | Done when | a check that passes |
+    validations:
+      required: true
+  - type: checkboxes
+    id: public
+    attributes:
+      label: Public repository
+      options:
+        - label: "This text holds no key, private name, personal path or account detail."
+          required: true

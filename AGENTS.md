@@ -16,3 +16,5 @@ Instructions for every coding agent in this repo, from Git Crafter `templates/ag
 | Templates | A file in `templates/claude/` and its copy at the root change together (`tests/templates.test.mjs`) |
 | Plugins, skills, connectors, agents | Never turned off app-wide; a session ignores what it doesn't need ([All on, app-wide](templates/claude/README.md#all-on-app-wide)) |
 | Writing | One idea per sentence, no em dashes. Attribute every figure in its sentence |
+| Tracking | A bug or quick fix is an issue in the repo whose code is at fault. A feature or improvement is an issue typed Feature, which becomes a project card. Log done and still-to-do work |
+| Public repo | Never put a key, a private name, a personal path or an account detail in a commit, issue or comment. The gitleaks job scans the whole history on every push and pull request |

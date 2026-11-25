@@ -1,0 +1,22 @@
+# Secrets anywhere in this repository's history: the shared gitleaks job
+# (SoulCraft-Org/.github/.github/workflows/gitleaks.yml, pinned to a full commit SHA). A false positive goes in
+# .gitleaksignore, one finding fingerprint per line.
+name: gitleaks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer commit on the same branch or pull request cancels the older scan (it scans the whole history anyway).
+concurrency:
+  group: gitleaks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gitleaks:
+    uses: SoulCraft-Org/.github/.github/workflows/gitleaks.yml@ef092daa91e6a1d6449baaf8678f5a8b5c8a3f6f # main
