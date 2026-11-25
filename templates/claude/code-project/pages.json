@@ -1,5 +1,5 @@
 {
-  "comment": "The 18 pages of a Code Project: each scores Quality, Speed and Consumption from its tabs' metrics (targets/code-project-*.json) and has one process map (maps/<map>.json). A map with map_from lives in that toolkit repo. tests/pages.test.mjs keeps this file and the pack in step.",
+  "comment": "The 20 pages of a Code Project: each scores Quality, Speed and Consumption from its tabs' metrics (targets/code-project-*.json) and has one process map (maps/<map>.json). A map with map_from lives in that toolkit repo. tests/pages.test.mjs keeps this file and the pack in step.",
   "pages": [
     {
       "id": "overview",
@@ -379,6 +379,46 @@
         ],
         "consumption": [
           "cp_kept_off.per_use_spend"
+        ]
+      }
+    },
+    {
+      "id": "allow-cards",
+      "icon": "\ud83d\udee1\ufe0f",
+      "name": "Allow cards",
+      "tabs": [
+        "cp-allow-card"
+      ],
+      "map": "allow-card",
+      "metrics": {
+        "quality": [
+          "cp_allow_card.shared_folder_threads"
+        ],
+        "speed": [
+          "cp_allow_card.card_wait_minutes"
+        ],
+        "consumption": [
+          "cp_allow_card.prompts_per_thread"
+        ]
+      }
+    },
+    {
+      "id": "projects-list",
+      "icon": "\ud83e\udded",
+      "name": "Projects list",
+      "tabs": [
+        "cp-projects-list"
+      ],
+      "map": "projects-list",
+      "metrics": {
+        "quality": [
+          "cp_projects_list.loose_sessions"
+        ],
+        "speed": [
+          "cp_projects_list.clicks_to_waiting_thread"
+        ],
+        "consumption": [
+          "cp_projects_list.idle_active_projects"
         ]
       }
     }

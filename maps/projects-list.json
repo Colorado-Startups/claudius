@@ -1,0 +1,63 @@
+{
+  "id": "projects-list",
+  "name": "Projects list",
+  "why": "How work gets into a project, how you find a waiting thread, and when an idle project is archived",
+  "ideal": "Every running task lives in a project, a waiting thread is two clicks away, and an idle project is archived.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-25"
+    }
+  ],
+  "critical_path": [
+    "continue",
+    "find",
+    "open",
+    "archive"
+  ],
+  "steps": [
+    {
+      "id": "continue",
+      "name": "Continue",
+      "tools": [
+        "Continue in project"
+      ],
+      "rule": "Move a running cloud session into its project instead of leaving it loose.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_projects_list.loose_sessions"
+    },
+    {
+      "id": "find",
+      "name": "Find",
+      "tools": [
+        "Sidebar Search",
+        "Pinned projects"
+      ],
+      "rule": "Reach a project from the sidebar in one click.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_projects_list.clicks_to_waiting_thread"
+    },
+    {
+      "id": "open",
+      "name": "Open",
+      "tools": [
+        "Projects page",
+        "Threads tab"
+      ],
+      "rule": "Open the project and read Waiting on you first.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_projects_list.clicks_to_waiting_thread"
+    },
+    {
+      "id": "archive",
+      "name": "Archive",
+      "tools": [
+        "Project settings"
+      ],
+      "rule": "Archive a project idle for 30 days. That stops its watching threads and scheduled tasks.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_projects_list.idle_active_projects"
+    }
+  ]
+}

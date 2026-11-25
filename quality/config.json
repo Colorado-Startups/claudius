@@ -129,6 +129,14 @@
       "cp-kept-off",
       "Features kept off"
     ],
+    [
+      "cp-allow-card",
+      "Allow cards"
+    ],
+    [
+      "cp-projects-list",
+      "Projects list"
+    ],
     "dependabot",
     "scanning",
     "insights",

@@ -30,7 +30,7 @@ test('public: each metric that needs local files is dropped but the repo-file on
   const pub = read(join(ROOT, 'quality', 'public-params.json'));
   const local = localOnlyIds([join(ROOT, 'targets')]);
   assert.deepEqual(new Set(dropped), new Set([...local].filter((id) => !pub.ids.includes(id))));
-  assert.equal(dropped.length, 111);
+  assert.equal(dropped.length, 117);
   const files = readdirSync(join(ROOT, 'targets')).filter((f) => f.endsWith('.json')).sort();
   assert.deepEqual(readdirSync(join(root, 'quality', 'public', 'targets')).sort(), [...files, DROPS].sort(), 'every targets file, so no collector runs without its targets, and the drops');
   assert.deepEqual(read(join(root, 'quality', 'public', 'targets', DROPS)), [...pub.drop.map((id) => ({ id, drop: true })), ...Object.entries(pub.params_for ?? {}).map(([id, params]) => ({ id, params }))]);
@@ -78,7 +78,7 @@ test('public: the Process config writes each pack map in full, without the steps
   const dropped = new Set(writePublic(root));
   const mine = read(join(ROOT, 'quality', 'process', 'config.json'));
   const pub = read(join(root, 'quality', 'public', 'process.json'));
-  const PAGE_MAPS = ['context', 'setup-check', 'scheduled-task', 'local-thread', 'pr-flow', 'connectors', 'plugins', 'skills', 'subagents', 'hooks', 'notifications', 'library', 'newer-features', 'kept-off'];
+  const PAGE_MAPS = ['context', 'setup-check', 'scheduled-task', 'local-thread', 'pr-flow', 'connectors', 'plugins', 'skills', 'subagents', 'hooks', 'notifications', 'library', 'newer-features', 'kept-off', 'allow-card', 'projects-list'];
   assert.deepEqual(mine.maps, [...['guard', 'decide', 'equip', 'publish', 'visibility', 'project', 'ship', 'environment', 'remember', 'setup', 'memory', 'schedule', ...PAGE_MAPS].map((use) => ({ use }))]);
   assert.deepEqual({ ...pub, comment: mine.comment, maps: mine.maps }, {
     ...mine,
