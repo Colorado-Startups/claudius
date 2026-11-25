@@ -10,7 +10,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { after, test } from 'node:test';
 import { loadTargets } from '../lib/engine.mjs';
-import { area, collect, LAST, metricIds, remoteRepo, returnedTokens, scope } from './tokens.mjs';
+import { area, collect, LAST, metricIds, remoteRepo, returnedTokens, reposInScope } from './tokens.mjs';
 
 // Only this collector's targets files, so another collector's file never fails these tests.
 function ownTargets(...files) {
@@ -220,12 +220,12 @@ test('the collector holds no repo-specific value: every one is in its targets pa
 });
 
 
-test('scope: with no owners or repos set, this repo alone counts', () => {
-  const own = scope({}, 'acme/site');
+test('reposInScope: with no owners or repos set, this repo alone counts', () => {
+  const own = reposInScope({}, 'acme/site');
   assert.ok(own.ours('acme', 'site'));
   assert.ok(!own.ours('acme', 'other'), "another of the owner's repos is not this repo");
-  assert.ok(scope({}, '').empty, 'nothing to count');
-  assert.ok(scope({ owners: ['acme'] }).ours('acme', 'other'));
+  assert.ok(reposInScope({}, '').empty, 'nothing to count');
+  assert.ok(reposInScope({ owners: ['acme'] }).ours('acme', 'other'));
 });
 
 test('a repo with no owners, repos or GitHub origin reads as not measured', async () => {
@@ -273,4 +273,9 @@ test('plan_file: empty defaults to plan-usage.json in the data folder the engine
   assert.equal(def['tokens.plan_used'].value, 82);
   const moved = await collect({ ...base, exec: fakeExec(), params: bare, data: path.join(root, 'data', 'quality') });
   assert.match(moved['tokens.plan_used'].could_not_check, /data\/quality\/plan-usage\.json: absent/);
+});
+
+test('the collector exports no scope: the engine reads that name as the levels it runs at', async () => {
+  const mod = await import('./tokens.mjs');
+  assert.equal(mod.scope, undefined, 'an exported scope function leaves this collector out of every level, so Tokens never reads');
 });
