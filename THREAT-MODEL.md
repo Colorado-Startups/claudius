@@ -2,7 +2,7 @@
 
 | Read | Covers |
 |---|---|
-| 2026-11-14 | Every row below, against `main`; [Microsoft SDL](https://www.microsoft.com/en-us/securityengineering/sdl/practices) practice 3. Git Crafter's [THREAT-MODEL.md](https://github.com/SoulCraft-Org/git-crafter/blob/main/THREAT-MODEL.md) covers the engine, guards and sync tool |
+| 2026-11-25 | Every row below, against `main`; [Microsoft SDL](https://www.microsoft.com/en-us/securityengineering/sdl/practices) practice 3. Git Crafter's [THREAT-MODEL.md](https://github.com/SoulCraft-Org/git-crafter/blob/main/THREAT-MODEL.md) covers the engine, guards and sync tool |
 | Each PR | Adds a row for a new threat, secret, write scope or collector input |
 | Weekly | `security.threat_model_current` reads off past 7 days of grace (`quality/public-params.json` `params_for`) |
 
@@ -25,4 +25,9 @@ flowchart LR
 | [.github/workflows/](.github/workflows/) | PR code gets secrets or writes | Elevation | No `pull_request_target`; read-only default token; deploy only from `main` | None known |
 | [.github/workflows/](.github/workflows/) | An action tag moves | Tampering | Full-SHA pins; Dependabot with a 14-day cooldown | None known |
 | [templates/claude/.claude/](templates/claude/.claude/) | An adopter's agent reads a key | Disclosure | Deny rules for `.env`, `*.pem`, `*.key`, `secrets/`, `~/.ssh`, `~/.aws`; `claude_settings.deny_coverage` scores them | Deny rules cover reads, not every tool |
+| Admin App token in [pages.yml](.github/workflows/pages.yml) | A pull request or fork run mints the claudius-quality-reader token, or its key leaks | Elevation | The step runs on `main` only. The key sits in the `quality-read` environment secret, set to admit `main` alone (issue 32 confirms). The token lasts one hour and is read-only. Its repository scope is this repo, and it also asks for the organization administration and members reads | The App and its variable are not set up on this fork yet (issue 32), so the step is skipped. Once set up, the two organization reads reach beyond this repo |
+| [pages.yml](.github/workflows/pages.yml) deploy job | A pull request deploys a page | Tampering | `pages: write` and `id-token: write` sit on the deploy job alone. Its `if` admits a push or a manual run on `main` only. The privacy gate runs before the upload | None known |
+| Unread-metrics log step in [pages.yml](.github/workflows/pages.yml) | The build log prints a home path, name or error text | Disclosure | It runs after the privacy gate that checked the file it reads. Each reason is cut to 160 characters | A reason can hold the first line of an error, such as one from `lead-time.mjs` or `practices.mjs`, and a repo or owner name, which is already public |
+| [private-terms.yml](.github/workflows/private-terms.yml) | The private-term list leaks, or a fork's run reads it | Disclosure | The names live in the `PRIVATE_TERMS` repository secret, never in a file. A fork's or Dependabot's pull request gets no secret. That run notes the skip. A push to `main` always runs | A repo with no secret set passes with a notice. A same-repo branch pull request gets the secret, so its code could print it |
+| [secret-scan.yml](.github/workflows/secret-scan.yml) | A secret reaches history unscanned | Disclosure | The shared gitleaks workflow, pinned by full SHA, scans the whole history on every push and pull request. A scan running on `main` is never cancelled | A queued scan on `main` is replaced by the next push, whose scan reads the whole history. The pin names `main` in its comment, so a bump needs a fresh SHA read |
 | Secrets (`PRIVACY_NAMES`) | A session prints a secret | Disclosure | Set from a file on stdin through the Git Crafter guard route; never on a command line | None known |
