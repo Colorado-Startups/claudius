@@ -58,8 +58,8 @@
     "near": 90,
     "direction": "higher",
     "goal_source": "template goal, no public benchmark: the Projects docs have each thread pull request name its project thread; Claude Code Docs: Let Claude coordinate ongoing work with Projects (code.claude.com/docs/en/claude-projects, read 2026-11-25)",
-    "source": "gh api repos pulls, bodies of the last 30 days of merged claude/ pull requests; not measured until a collector reads it",
-    "needs": "local-files",
+    "source": "gh api repos pulls, bodies of the last 30 days of merged claude/ pull requests; read by collectors/code-project/cp-pulls.mjs",
+    "needs": "gh",
     "chart": "gauge",
     "defined": "2026-11-25"
   },
@@ -74,8 +74,8 @@
     "near": 30,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: CI is the gate, so a short wait keeps the thread cache warm (cache lifetime is one hour); Claude Code Docs: Let Claude coordinate ongoing work with Projects (code.claude.com/docs/en/claude-projects, read 2026-11-25)",
-    "source": "gh api repos check-runs of merged claude/ pull requests; not measured until a collector reads it",
-    "needs": "local-files",
+    "source": "gh api repos check-runs of merged claude/ pull requests; read by collectors/code-project/cp-pulls.mjs",
+    "needs": "gh",
     "chart": "number",
     "defined": "2026-11-25"
   },

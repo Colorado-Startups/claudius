@@ -120,5 +120,8 @@
   ],
   "targets": "targets",
   "collectors": "collectors",
-  "ideals": "ideals"
+  "ideals": "ideals",
+  "issue_sync": {
+    "label": "quality"
+  }
 }

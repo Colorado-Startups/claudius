@@ -30,7 +30,7 @@ test('public: each metric that needs local files is dropped but the repo-file on
   const pub = read(join(ROOT, 'quality', 'public-params.json'));
   const local = localOnlyIds([join(ROOT, 'targets')]);
   assert.deepEqual(new Set(dropped), new Set([...local].filter((id) => !pub.ids.includes(id))));
-  assert.equal(dropped.length, 104);
+  assert.equal(dropped.length, 99);
   const files = readdirSync(join(ROOT, 'targets')).filter((f) => f.endsWith('.json')).sort();
   assert.deepEqual(readdirSync(join(root, 'quality', 'public', 'targets')).sort(), [...files, DROPS].sort(), 'every targets file, so no collector runs without its targets, and the drops');
   assert.deepEqual(read(join(root, 'quality', 'public', 'targets', DROPS)), [...pub.drop.map((id) => ({ id, drop: true })), ...Object.entries(pub.params_for ?? {}).map(([id, params]) => ({ id, params }))]);
@@ -48,7 +48,7 @@ test('public: each metric that needs local files is dropped but the repo-file on
   const ids = (f) => JSON.parse(readFileSync(join(ROOT, 'targets', f), 'utf8')).map((d) => d.id);
   const [practices, visibility, codeProject] = [ids('practices.json'), ids('visibility.json'), ids('code-project.json').filter((id) => !['code_project.idle_revivals', 'code_project.tokens_per_merged_pr'].includes(id))];
   assert.deepEqual([practices.length, visibility.length, codeProject.length], [10, 5, 15]);
-  assert.deepEqual(kept.sort(), ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr', 'claude.instruction_tokens', 'claude_settings.deny_coverage', 'claude_settings.setup_files', 'claude_settings.valid', 'instructions.description_tokens', 'lead_time.hours', ...practices, ...visibility, ...codeProject].sort());
+  assert.deepEqual(kept.sort(), ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr', 'claude.instruction_tokens', 'claude_settings.deny_coverage', 'claude_settings.setup_files', 'claude_settings.valid', 'cp_pr_auto_fix.fix_attempts', 'cp_pr_auto_fix.red_to_green_minutes', 'cp_pr_auto_fix.skipped_tests', 'cp_threads.attributed_share', 'cp_threads.first_green_minutes', 'instructions.description_tokens', 'lead_time.hours', ...practices, ...visibility, ...codeProject].sort());
 });
 
 test('public: the config is the repo own, its targets and the page files under quality/public', () => {

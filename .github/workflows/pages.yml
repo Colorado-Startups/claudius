@@ -87,6 +87,14 @@ jobs:
             for (const [id, m] of unread) console.log(`  ${id}: ${String(m.could_not_check).replace(/\s+/g, " ").slice(0, 160)}`);
           ' || true
 
+      # The scored run, for the issue-sync job below. Main only, like the deploy.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        with:
+          name: quality-run
+          path: quality/public/data/latest.json
+          retention-days: 1
+
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
@@ -106,3 +114,50 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  # issue-sync: Git Crafter's quality/sync-issues.mjs keeps one issue per metric that misses its goal
+  # (quality/config.json issue_sync), so a miss is recorded as work to do and closes when the metric meets its
+  # goal (Git Crafter templates/projects/tracking.md). It reads the run the build job scored, so it adds no
+  # collection. Main only, with the one write grant it needs. A metric the run could not read is left alone.
+  issue-sync:
+    if: ${{ !cancelled() && needs.build.result == 'success' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+    needs: build
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+      pages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: SoulCraft-Org/git-crafter
+          ref: 8023bd4683416f6d420bd20d137960b09c06b91e # v7.0.2
+          path: .git-crafter
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+          cache: npm
+          cache-dependency-path: .git-crafter/package-lock.json
+
+      - name: Install the engine's packages
+        run: npm ci --prefix .git-crafter --ignore-scripts --no-audit --no-fund --loglevel=error
+
+      - name: Public config
+        run: node quality/public.mjs
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: quality-run
+          path: quality/public/data
+
+      - name: Sync missed metrics to issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .git-crafter/quality/sync-issues.mjs --config quality/public/config.json
