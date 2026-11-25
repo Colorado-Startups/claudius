@@ -69,7 +69,7 @@ export const LAST = { calls: 1000, prs: 20, sessions: 5, results: 20, consumptio
 // params.repos, or this repo alone when neither is set; params.alias names a
 // renamed repo by its current name; params.folder_repos gives folder-name
 // patterns, matched without case, for checkouts git can no longer find.
-export function scope(params, own = '') {
+export function reposInScope(params, own = '') {
   const alias = params.alias ?? {};
   const owners = new Set(params.owners ?? []);
   const extra = new Set([...(params.repos ?? []), ...(owners.size || params.repos?.length ? [] : [own])].filter(Boolean).map((r) => String(r).toLowerCase()));
@@ -99,7 +99,7 @@ async function gather({ root = '.', data, mode, home = os.homedir(), projectsDir
   reviewer ??= pinnedReviewer(allParams, p);
   if (mode !== 'local') return all(CI_REASON);
   const own = p.owners?.length || p.repos?.length ? '' : await ownRepo(root, p, exec);
-  const repos = scope(p, own);
+  const repos = reposInScope(p, own);
   if (repos.empty) return all('no repo to count: set params.owners or params.repos on quality/targets/tokens.json, or give the checkout a GitHub origin');
   const dir = projectsDir ?? resolvePath(projects, { home, root });
   let folders;
