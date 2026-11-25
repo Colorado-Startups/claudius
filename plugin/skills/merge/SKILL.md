@@ -31,6 +31,20 @@ flowchart LR
 | 8 | Conflict | A PR the queue drops for a conflict goes back: merge `main` into its branch, resolve each hunk, push, review the delta (step 4) and queue the new head |
 | 9 | After | If the merge deploys, load the live page once |
 
+## In a cloud thread
+
+A Claude Code Project cloud thread refuses GraphQL with HTTP 403 (observed 2026-11-25), so `gh pr checks`, `gh pr view`, `gh pr diff`, `gh pr merge` and the queue mutation fail. Use the REST form of each step.
+
+| Step | REST form |
+|---|---|
+| 1 Checks | `gh api repos/{owner}/{repo}/commits/<sha>/check-runs`, and `gh api repos/{owner}/{repo}/commits/<sha>/status` for a status that a local run posts |
+| 3 Head SHA | `gh api repos/{owner}/{repo}/pulls/N --jq .head.sha` |
+| 3 Diff | `gh api -H 'Accept: application/vnd.github.diff' repos/{owner}/{repo}/pulls/N` |
+| 5 Verdict | `gh api repos/{owner}/{repo}/issues/N/comments -f body=...` |
+| 6 and 7 Merge | `gh api -X PUT repos/{owner}/{repo}/pulls/N/merge -f merge_method=squash -f sha=<sha>`, one pull request at a time, because the queue is GraphQL only |
+
+A merge returned 5xx, then 405 `Merge already in progress` for about 8 minutes, then 200 (observed 2026-11-25). Retry once a minute. A REST branch delete returned 403 (observed 2026-11-25), so leave it to the repo's delete-on-merge setting.
+
 | Repo setup | Rule |
 |---|---|
 | Ruleset on `main` | A merge queue: squash, only non-failing PRs grouped (`ALLGREEN`), up to 5 built and merged together |

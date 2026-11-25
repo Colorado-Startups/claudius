@@ -28,6 +28,7 @@ flowchart LR
   T --> P[3 Pack pin in quality/config.json:<br/>nine tabs]
   P --> M[4 Process maps:<br/>Guard, Decide, Equip, Publish, Visibility, Project]
   P --> L[5 --local run:<br/>your private full page]
+  P --> CP[6 Optional Code Project:<br/>add repo, pick environment, paste prompt]
 ```
 
 | # | Do | Where |
@@ -37,7 +38,7 @@ flowchart LR
 | 3 | Add the pack (table below) | `quality/config.json` |
 | 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }` and `{ "use": "remember" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
 | 5 | Run the one local command for the numbers CI never sees | below |
-| 6 | Optional, to run it as a Claude Code Project: memory seeds, subagents, scheduled tasks and guard placement | [templates/claude/code-project/README.md](templates/claude/code-project/README.md), [quick start](docs/projects-quickstart.md) |
+| 6 | Optional, to run it as a Claude Code Project: add the repo to a project, pick the environment, paste the [setup prompt](docs/projects-quickstart.md#setup-prompt). Then memory seeds, subagents, scheduled tasks and guard placement | [quick start](docs/projects-quickstart.md), [templates/claude/code-project/README.md](templates/claude/code-project/README.md) |
 
 ## Build an app
 
