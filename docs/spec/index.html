@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claudius fork spec</title>
+<style>
+:root{--bg:#fbfbfa;--fg:#1c1f24;--mut:#5a6270;--card:#fff;--line:#d9dde3;--acc:#0b5fc4;--ok:#1e7a3a;--warn:#b35a00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171c;--fg:#e8eaee;--mut:#9aa3b2;--card:#1c2027;--line:#2c333d;--acc:#6aa6ff;--ok:#5cc47a;--warn:#f0a050}}
+:root[data-theme="dark"]{--bg:#14171c;--fg:#e8eaee;--mut:#9aa3b2;--card:#1c2027;--line:#2c333d;--acc:#6aa6ff;--ok:#5cc47a;--warn:#f0a050}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:860px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:1.7rem;margin:0 0 4px}
+h2{font-size:1.15rem;margin:32px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+p{margin:8px 0}
+.sub{color:var(--mut);margin:0 0 16px}
+.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.8rem;color:var(--mut);margin-right:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.card b{display:block;font-size:1.5rem;color:var(--acc)}
+.card span{color:var(--mut);font-size:.9rem}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;font-size:.93rem}
+th{color:var(--mut);font-weight:600}
+tr:last-child td{border-bottom:0}
+.ok{color:var(--ok)} .warn{color:var(--warn)}
+.scroll{overflow-x:auto}
+svg{width:100%;height:auto;display:block}
+svg text{fill:var(--fg);font:13px system-ui,sans-serif}
+svg .b{fill:var(--card);stroke:var(--line)}
+svg .a{stroke:var(--acc);fill:none;stroke-width:1.6}
+svg .d{stroke:var(--mut);fill:none;stroke-width:1.4;stroke-dasharray:5 4}
+.q{border-left:4px solid var(--acc)}
+a{color:var(--acc)}
+</style>
+</head>
+<body>
+<main>
+<h1>Claudius fork spec</h1>
+<p class="sub">One page: what this fork is for, how it works, where it stands, and what the owner decided. <span class="pill">Decided</span><span class="pill">Read 2026-11-25</span></p>
+
+<h2>Purpose</h2>
+<p>This repo is the Soul-Craft fork of Colorado-Startups/claudius, the Claude pack for Git Crafter (README.md, read 2026-11-25). The pack holds Claude Code templates, Quality tabs and Process maps for a repo that agents drive from the Claude desktop app.</p>
+<p>Upstream is an outside public repo. We use the Claudius templates as they are and contribute upstream as an ordinary outside contributor (owner, 2026-11-25; issue 73).</p>
+<p>The fork is only a vehicle for pull requests. It keeps no features of its own and publishes no releases of its own.</p>
+
+<h2>Who it is for</h2>
+<table>
+<tr><th>User</th><th>Wants</th><th>Gets</th></tr>
+<tr><td>A repo that runs agents from the Claude desktop app</td><td>Claude templates, tabs and maps it can adopt by a pinned commit</td><td>The upstream pack, pinned by a full commit SHA (README.md)</td></tr>
+<tr><td>A person who runs a Code Project</td><td>Pages and a quick start for the Code Project</td><td>The Code Project tab, its page templates and the quick start, once upstream merges them</td></tr>
+<tr><td>The upstream maintainers</td><td>Small, tested changes they can review</td><td>One pull request per change, each linked to its fork issue (issues 73, 77)</td></tr>
+</table>
+
+<h2>How it works</h2>
+<div class="scroll"><svg style="min-width:640px" viewBox="0 0 820 120" role="img" aria-label="A change is built on a branch in the fork, opened as a draft pull request, sent upstream as a pull request, reviewed and merged by the upstream maintainers, then used from the upstream release">
+<rect class="b" x="6" y="30" width="136" height="56" rx="8"/><text x="74" y="62" text-anchor="middle">Change on a branch</text>
+<rect class="b" x="170" y="30" width="136" height="56" rx="8"/><text x="238" y="55" text-anchor="middle">Draft PR in</text><text x="238" y="72" text-anchor="middle">the fork</text>
+<rect class="b" x="334" y="30" width="136" height="56" rx="8"/><text x="402" y="55" text-anchor="middle">Pull request to</text><text x="402" y="72" text-anchor="middle">upstream</text>
+<rect class="b" x="498" y="30" width="150" height="56" rx="8"/><text x="573" y="55" text-anchor="middle">Upstream maintainers</text><text x="573" y="72" text-anchor="middle">review and merge</text>
+<rect class="b" x="676" y="30" width="136" height="56" rx="8"/><text x="744" y="55" text-anchor="middle">Everyone uses the</text><text x="744" y="72" text-anchor="middle">upstream release</text>
+<path class="a" d="M142 58H170M306 58H334M470 58H498M648 58H676"/>
+</svg></div>
+<p>The fork never merges, tags or changes settings upstream. The upstream maintainers decide what lands (issue 73).</p>
+<p>In the fork, a branch merges only to carry a change toward upstream. It waits for green CI and a review at the head commit, then goes by REST with the head SHA as its guard (AGENTS.md). Nothing is pushed to main.</p>
+
+<h2>What is in scope</h2>
+<table>
+<tr><th>In</th><th>Out</th></tr>
+<tr><td>Branches and draft pull requests that become upstream pull requests (issues 73, 75, 76, 77)</td><td>Merging, tagging or changing settings in Colorado-Startups/claudius</td></tr>
+<tr><td>Pins to upstream commits and upstream release tags once they exist</td><td>Our own releases, a maintained distribution, or features kept only on the fork</td></tr>
+<tr><td>The pack as upstream ships it: tabs in pack.json, Process maps, collectors, Claude templates and the plugin</td><td>Engine code: the Git Crafter engine is pinned by full commit SHA and none lives here (README.md)</td></tr>
+<tr><td>Generic public text only</td><td>Any key, private name, personal path or account detail, and local-only numbers (AGENTS.md, README.md, tests/privacy.mjs)</td></tr>
+</table>
+
+<h2>Where it stands (read 2026-11-25)</h2>
+<div class="grid">
+<div class="card"><b>34</b><span>tabs in pack.json (file read)</span></div>
+<div class="card"><b>6</b><span>plugin skills in plugin/skills (directory read)</span></div>
+<div class="card"><b>7</b><span>test files in tests/ named *.test.* (directory read)</span></div>
+<div class="card"><b>28</b><span>commits on fork main that upstream main lacks, and 0 the other way (git log read 2026-11-25)</span></div>
+<div class="card"><b>28</b><span>open issues, pull requests excluded (REST read)</span></div>
+<div class="card"><b>14</b><span>open pull requests in the fork (REST read)</span></div>
+</div>
+<p>SCORECARD.md reports 63% of graded tasks passed with Claudius and 11% without, a lift of 52 points, plus or minus 12 at 95%. It measured 18 tasks on three models on 2026-11-15, with `plan` re-measured and `visibility` measured on 2026-11-19.</p>
+<p>Closed issue 81 holds the fork's own Quality baseline at commit cfd71d2: 59 metrics over 13 tabs, 56 read and 3 unread. Upstream tags stop at v1.2.0. The fork's tag v1.3.0-soulcraft.1 holds 18 of the fork-only commits (release notes) and is due to retire.</p>
+
+<h2>Gaps, worked in this order</h2>
+<table>
+<tr><th>Gap</th><th>Why it matters</th><th>Issue</th></tr>
+<tr><td>No record of which upstream release the fork follows</td><td>It is unclear which upstream state the pack builds on</td><td>100</td></tr>
+<tr><td>Give-back pull requests wait on upstream review</td><td>Every fork-only commit stays unused by others until upstream merges it</td><td>73, 75, 76, 77</td></tr>
+<tr><td>The fork's deployed Quality page cannot be read from a cloud thread</td><td>Closed by printing the master score in the pages build log (issue 81, PR 109); the page host stays unreachable from a cloud thread</td><td>81</td></tr>
+<tr><td>63 Code Project lines have no collector, and a cloud collect read 44 of 188 metrics</td><td>Most of the new tab is not measured yet</td><td>86</td></tr>
+<tr><td>The settings check reports 16 keys as unknown</td><td>A valid settings file reads as broken</td><td>98</td></tr>
+<tr><td>The README quick start has 6 steps</td><td>The first run is longer than it needs to be. The visibility skill is now listed (closed issue 95)</td><td>99, 111</td></tr>
+<tr><td>2 personal author emails in public history, goal 0</td><td>The public repo should show none</td><td>47</td></tr>
+<tr><td>No scheduled re-read of the cited docs</td><td>A figure without a fresh date is not verified</td><td>102</td></tr>
+</table>
+
+<h2 id="question">The owner's decision, made 2026-11-25</h2>
+<div class="card q">
+<p><b style="font-size:1.05rem;color:inherit">We do not run a diverging fork.</b></p>
+<p>We use the Claudius templates as they are and contribute upstream as an outside open-source contributor. The fork is a pull-request vehicle only: no releases of its own, no maintained distribution, no extra features kept on it.</p>
+</div>
+
+<h2>To retire or send upstream</h2>
+<table>
+<tr><th>Item</th><th>Today</th><th>Recommendation</th></tr>
+<tr><td>Release v1.3.0-soulcraft.1</td><td>Holds 18 fork-only commits. At least one repo pins its commit</td><td>Publish no more fork releases. Keep this one only as a bridge. When upstream merges the work and tags a release, move the pin to that upstream commit, then delete the tag and the release</td></tr>
+<tr><td>The 18 commits in that release</td><td>On the fork only</td><td>Send them upstream in batches of small pull requests. A batch that upstream declines is dropped, not kept</td></tr>
+<tr><td>The other 10 fork-only commits on main</td><td>On the fork only</td><td>Same rule: an upstream pull request, or dropped</td></tr>
+<tr><td>Fork main</td><td>28 commits ahead of upstream main</td><td>After upstream merges a batch, re-create fork main from upstream main, so the fork holds only branches for open pull requests</td></tr>
+</table>
+
+<h2>Decided already</h2>
+<table>
+<tr><th>Decision</th><th>Source</th></tr>
+<tr><td>Changes go upstream as ordinary pull requests, and the fork never merges or changes settings there</td><td>Issue 73</td></tr>
+<tr><td>No diverging fork: use the templates as they are, contribute upstream, keep the fork as a pull-request vehicle</td><td>The owner, 2026-11-25</td></tr>
+<tr><td>Public repo: generic text only, and nothing is filed in the upstream repo</td><td>Issue 77, AGENTS.md</td></tr>
+<tr><td>Never push to main: branch, commit, open a draft pull request</td><td>AGENTS.md</td></tr>
+<tr><td>Local-only numbers are never committed or uploaded</td><td>README.md, tests/privacy.mjs</td></tr>
+</table>
+</main>
+</body>
+</html>
