@@ -96,6 +96,7 @@ flowchart LR
 | `quality/public.mjs`, `quality/public-params.json` | write `quality/public/`, the configs CI builds the public pages from. Each metric that needs local files is dropped but the repo-file ones. Each map is written out in full without the steps those metrics score |
 | `tests/moved.json` | where each file came from in Git Crafter |
 | `tests/engine-tests.sh` | CI: each file matches its source or is listed as edited, then the tests run beside the pinned engine |
+| [`docs/upstream.md`](docs/upstream.md) | the pinned upstream release, read only |
 
 ## Add the pack
 
