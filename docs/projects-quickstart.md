@@ -14,6 +14,14 @@ flowchart LR
 | 3 | Check each attached repo against the setup check: `AGENTS.md`, a `CLAUDE.md` that imports it, the main rule, a short PR template, an issue form, CI, valid `.claude/settings.json` | `targets/code-project.json` and the Code Project tab |
 | 4 | Ask for one change. The thread branches, pushes after each step and opens a draft PR | The project chat |
 
+## What a cloud thread loads
+
+| Thread loads | Thread does not load | Do |
+|---|---|---|
+| Plugins, skills and connectors enabled on your claude.ai account | Plugins and MCP servers installed on your machine | Enable each at [claude.ai/customize/plugins](https://claude.ai/customize/plugins) or [claude.ai/customize/connectors](https://claude.ai/customize/connectors), or run the thread as a Remote Control session |
+
+Source: [Claude Code Projects](https://code.claude.com/docs/en/claude-projects), "Get skills, plugins, connectors, and tools into threads", read 2026-11-25.
+
 ## Instructions and the setup check
 
 Git Crafter holds them, so they live in one place: [templates/projects](https://github.com/SoulCraft-Org/git-crafter/tree/main/templates/projects). Its `instructions.md` is the text to paste, and its README holds the first-message setup check and the smoke test. This repo adds the check of each attached repo's own files, as the Code Project tab.
