@@ -20,4 +20,4 @@ Colorado Startups owns the project. AI agents run its day-to-day work under Git 
 | What stays Colorado Startups' | The merge policy, the gates, secrets, deploy settings and production |
 | How it ends | Stepping down at any time, or six months with no review; Colorado Startups can end it |
 
-Every seat is held by a person. AI agents never hold one and never approve a pull request.
+Every seat is held by a person. AI agents never hold one. An AI review is the approval: when the required checks pass and two separate AI reviews pass at the head commit, an AI agent merges the pull request, naming that commit as its guard. A PR on a maintainer-only path also waits for a maintainer's merge.
