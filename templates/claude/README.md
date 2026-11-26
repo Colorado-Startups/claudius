@@ -48,9 +48,9 @@ The deny list is a backstop, not a full blocklist. Claude Code's built-in check 
 |---|---|---|
 | 1 | Copy Git Crafter `templates/agents/AGENTS.md` and `CLAUDE.md`; fill the `<...>` cells | Claude |
 | 2 | Copy this folder's files; skip `REVIEW.md` without Code Review. Install the plugins once per machine, at user scope ([Plugins](#plugins)) | Claude |
-| 3 | Desktop app settings (table below) | owner, once |
+| 3 | Desktop app settings (table below) | Claude, driving the app or Chrome; the owner only for a step the platform keeps for a person |
 | 4 | Install Git Crafter's guards and `merging` skill user-level: `tools/claude_os_sync.py`. Each guard's header gives its hook entry for `~/.claude/settings.json` | Claude |
-| 5 | Optional `@claude` in CI: Git Crafter `templates/ci/claude-review.yml`. It reads `CLAUDE_CODE_OAUTH_TOKEN`, made by `claude setup-token` on a Pro, Max, Ultra, Team or Enterprise plan. Never an API key | owner: the token |
+| 5 | Optional `@claude` in CI: Git Crafter `templates/ci/claude-review.yml`. It reads `CLAUDE_CODE_OAUTH_TOKEN`, made by `claude setup-token` on a Pro, Max, Ultra, Team or Enterprise plan. Never an API key | Claude, except the token, which `claude setup-token` makes for the owner (a step the platform forces) |
 | 6 | Add the Claudius pack for the Quality page: the [root README](../../README.md). Its Best practices tab scores your plugin and skills against Anthropic's directory checks and authoring rules, in CI too | Claude |
 
 No hooks sit in the repo's `settings.json`: a hook that points at a guard the machine lacks fails every call.
