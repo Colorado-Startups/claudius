@@ -28,6 +28,11 @@
    "title": "Claude Code: settings files and precedence",
    "url": "https://code.claude.com/docs/en/settings",
    "date": "2026-11-23"
+  },
+  {
+   "title": "Claude Code: override skill visibility from settings (skillOverrides: on, name-only, user-invocable-only, off)",
+   "url": "https://code.claude.com/docs/en/skills#override-skill-visibility-from-settings",
+   "date": "2026-11-26"
   }
  ],
  "critical_path": [
