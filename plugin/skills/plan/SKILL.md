@@ -26,7 +26,7 @@ flowchart LR
 | 2 | Equip | Map: list the session's skills (the listing), plugins (`claude plugin list --json`) and connectors (tool search by area). Pick: each step names its skill, plugin or connector, with a one-line reason; this feeds the Equipped check. Load on use: a step invokes its picks when it runs (Skill tool, tool search `select:`), and nothing else loads. Add mid-task: a step that needs more searches, loads it and adds a row | Skill listing, `claude plugin list`, tool search |
 | 3 | Split | In plan mode, cut the work into steps. Each step is one PR of at most 200 changed lines, with its test, touching files no other step touches. If superpowers is installed, its `writing-plans` is the method for design and step-by-step plans | Plan mode |
 | 4 | Show | Publish the plan as an Artifact: a flow diagram, then one row per step (step, issue title, files, test, runs with or after, metric it moves). Labels, not paragraphs | Artifacts |
-| 5 | Approve | Run the Check table once; if it fixed anything, republish the Artifact. Then ExitPlanMode with the `Checked:` line, the steps and the Artifact link. On a yes, file the issues (step 6), then start one session per independent step on a brief under 150 words; steps that share files run in order | Sessions, worktrees |
+| 5 | Approve | Run the Check table once; if it fixed anything, republish the Artifact. Then ExitPlanMode with the `Checked:` line, the steps and the Artifact link. On a yes, file the issues (step 6), then start one session per independent step on a brief under 150 words plus the worker contract; steps that share files run in order | Sessions, worktrees |
 | 6 | File | After the yes, one issue per step: `gh issue create`, its body the step's row and the Artifact link. A fix step gets `--type Task`. A feature step gets `--type Feature --label enhancement`, so the board's auto-add cards it. Pass `--type` only when `gh api orgs/<owner>/issue-types` lists it; a 404 means the label alone. Where the board has no auto-add, add each feature issue (`gh project item-add`, Status Todo; `gh project item-edit`). Link every issue in the plan page. Use the board where the repo's owner keeps one (`gh project list --owner <owner>`). None, or `gh` lacks the `project` scope: skip quietly and say so in the plan | `gh` |
 | 7 | Build | A worker branches, tests, pushes once, and opens a PR that says `Closes #<issue>` with a table body. It stops at the open PR. A bug becomes an issue typed Bug (`--type Bug` where `gh api orgs/<owner>/issue-types` lists it, else label `bug`), in the repo at fault, and stays off the board. An idea becomes a draft card (`gh project item-create`), or an issue labelled `enhancement`, which the board's auto-add cards. File each the moment it is found, after a search (`gh issue list --search`) shows no duplicate, and list it in the PR body's Left table | Auto-fix, `gh` |
 | 8 | Merge | The orchestrator reviews and merges each PR with the `merge` skill | pr-review-toolkit |
@@ -41,6 +41,17 @@ flowchart LR
 | Card, user board | `gh api user/<user id>/projectsV2/<board>/drafts -f title=<t> -f body=<b>` |
 | It fails | List the item in a `To card` table in the PR body; the orchestrator files it |
 | Source | Git Crafter `templates/agents/AGENTS.md`, which wins where the two differ |
+
+Paste the worker contract into every brief. A cloud session loads the repo's `CLAUDE.md` but no user files or user-scope plugins ([cloud environments](https://code.claude.com/docs/en/cloud-environments), read 2026-11-23), so the brief is the only place a worker sees it.
+
+| Worker contract | The worker |
+|---|---|
+| Model | Runs on the model and effort the brief names; on anything else, says so in the PR body |
+| Files | Touches only the files the brief names |
+| Questions | Puts them in the PR body and decides everything else |
+| Repo rules | Follows the repo's `AGENTS.md` and `CLAUDE.md` where present. Never pushes to main, force-pushes or commits a secret |
+| Findings | Files each bug as an issue in the repo at fault, and each idea as a draft card (`gh project item-create`), when found and after a search for a duplicate. Lists each in the PR body |
+| Done when | Stops at the open PR once the goal the brief states is met. Never merges or approves its own PR |
 
 | Check once, before Approve | Passes when |
 |---|---|
