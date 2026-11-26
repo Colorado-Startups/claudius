@@ -19,6 +19,16 @@ flowchart LR
 | 2 | Copy `agents/` to `.claude/agents/` in each attached repo. Paste the [memory seeds](#memory-seeds) into the first message. Create the [scheduled tasks](#scheduled-tasks) | Claude |
 | 3 | Send the setup check from Git Crafter [`templates/projects/README.md`](https://github.com/SoulCraft-Org/git-crafter/blob/main/templates/projects/README.md#steps) | owner |
 
+## Pages
+
+Each tab or feature of a Project gets a Quality, Speed and Consumption page. [`pages.json`](pages.json) names the 20 pages, one metric and goal for each of the three, with no data. [`pages.html`](pages.html) draws them as tiles: grey until a `readings.json` beside it fills a dial. Keep the readings in the project's private repo, never here.
+
+| Copy | To | Then |
+|---|---|---|
+| `pages.json`, `pages.html` | The project's private repo | Write `readings.json` as `{"<page id>": {"quality": {"value": "92%", "met": true}}}` and serve the folder |
+
+A page's `map` names its GitHub side in Git Crafter [`pages/maps`](https://github.com/SoulCraft-Org/git-crafter/tree/main/pages/maps), or `spend` in Compute Crafter. `null` means Claude only.
+
 ## Where a guard lives
 
 A cloud thread skips a repo's `.claude/settings.json` permission rules, hooks and `env`, and its `.mcp.json` servers. A guard that must hold in every thread goes where the thread reads it.
@@ -74,4 +84,4 @@ These tasks are suggestions to set up as scheduled tasks. A task ignores the con
 
 ## Sources
 
-Read 2026-11-25: [Projects](https://code.claude.com/docs/en/claude-projects) for what a thread loads, memory, the 500 thread limit, the one hour cache and plan availability. [Cloud environments](https://code.claude.com/docs/en/cloud-environments) for variables and network secrets. [Sub-agents](https://code.claude.com/docs/en/sub-agents) for agent files.
+Read 2026-11-26: [Projects](https://code.claude.com/docs/en/claude-projects) for the Overview pane, the Context tab and the 16,000 character instructions cap, and [Cloud environments](https://code.claude.com/docs/en/cloud-environments) for the setup script's 5 minute cache window. Read 2026-11-25: [Projects](https://code.claude.com/docs/en/claude-projects) for what a thread loads, memory, the 500 thread limit, the one hour cache and plan availability. [Cloud environments](https://code.claude.com/docs/en/cloud-environments) for variables and network secrets. [Sub-agents](https://code.claude.com/docs/en/sub-agents) for agent files.
