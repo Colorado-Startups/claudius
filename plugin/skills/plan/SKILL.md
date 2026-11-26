@@ -28,7 +28,7 @@ flowchart LR
 | 4 | Show | Publish the plan as an Artifact: a flow diagram, then one row per step (step, issue title, files, test, runs with or after, metric it moves). Labels, not paragraphs | Artifacts |
 | 5 | Approve | Run the Check table once; if it fixed anything, republish the Artifact. Then ExitPlanMode with the `Checked:` line, the steps and the Artifact link. On a yes, file the issues (step 6), then start one session per independent step on a brief under 150 words plus the worker contract; steps that share files run in order | Sessions, worktrees |
 | 6 | File | After the yes, one issue per step: `gh issue create`, its body the step's row and the Artifact link. A fix step gets `--type Task`. A feature step gets `--type Feature --label enhancement`, so the board's auto-add cards it. Pass `--type` only when `gh api orgs/<owner>/issue-types` lists it; a 404 means the label alone. Where the board has no auto-add, add each feature issue (`gh project item-add`, Status Todo; `gh project item-edit`). Link every issue in the plan page. Use the board where the repo's owner keeps one (`gh project list --owner <owner>`). None, or `gh` lacks the `project` scope: skip quietly and say so in the plan | `gh` |
-| 7 | Build | A worker branches, tests, pushes once, and opens a PR that says `Closes #<issue>` with a table body. It stops at the open PR. A bug becomes an issue typed Bug (`--type Bug` where `gh api orgs/<owner>/issue-types` lists it, else label `bug`), in the repo at fault, and stays off the board. An idea becomes a draft card (`gh project item-create`), or an issue labelled `enhancement`, which the board's auto-add cards. File each the moment it is found, after a search (`gh issue list --search`) shows no duplicate, and list it in the PR body's Left table | Auto-fix, `gh` |
+| 7 | Build | A worker branches, tests, pushes once, and opens a PR that says `Closes #<issue>` with a table body. It stops at the open PR. A bug becomes an issue typed Bug (`--type Bug` where `gh api orgs/<owner>/issue-types` lists it, else label `bug`), in the repo at fault, and stays off the board. An idea becomes a draft card (`gh project item-create`), or an issue labelled `enhancement`, which the board's auto-add cards. File each the moment it is found, after a search (`gh issue list --search`) shows no duplicate, and list it in the PR body | Auto-fix, `gh` |
 | 8 | Merge | The orchestrator reviews and merges each PR with the `merge` skill | pr-review-toolkit |
 | 9 | Live | Load the live page in the app's browser. Mark the step done in the Artifact and republish it | Browser, Artifacts |
 | 10 | Wrap up | Before a session ends, reconcile: each merged PR closed its issue, each touched card is moved, each finding is linked | `gh` |
@@ -50,7 +50,7 @@ Paste the worker contract into every brief. A cloud session loads the repo's `CL
 | Files | Touches only the files the brief names |
 | Questions | Puts them in the PR body and decides everything else |
 | Repo rules | Follows the repo's `AGENTS.md` and `CLAUDE.md` where present. Never pushes to main, force-pushes or commits a secret |
-| Findings | Files each bug as an issue in the repo at fault, and each idea as a draft card (`gh project item-create`), when found and after a search for a duplicate. Lists each in the PR body |
+| Findings | Files each bug as an issue in the repo at fault, and each idea as a draft card by the Filing table's REST route, or a `To card` row in the PR body when that fails. Files each when found and after a search for a duplicate, and lists each in the PR body |
 | Done when | Stops at the open PR once the goal the brief states is met. Never merges or approves its own PR |
 
 | Check once, before Approve | Passes when |
@@ -60,7 +60,7 @@ Paste the worker contract into every brief. A cloud session loads the repo's `CL
 | Small | Nothing beyond the ask. Where the repo has a Quality page, each step names the metric it moves |
 | Equipped | Each step names the skill, plugin or connector it uses. A missing one is listed to add |
 | Owner | Only product and billing items wait for the owner, each with a default |
-| Tracked | Every step has an issue, every feature a card |
+| Tracked | Every step has an issue, and every feature a card where the repo keeps a board |
 
 Fix what fails. Then put one line above the plan, each row marked ✅ for a pass or ❌ for a fail: `Checked: True ✅ · Whole ✅ · Small ✅ · Equipped ✅ · Owner ✅ · Tracked ✅ · Changed: <what the check fixed>`. A row that still fails after the pass keeps its ❌, with the reason in that line. One pass, never a loop. The check runs for any plan in plan mode, even one with no issues or sessions to follow. When the owner says "check", run the same table.
 
