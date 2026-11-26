@@ -217,6 +217,8 @@ test('off_switches: a settings file that does not parse is not measured, with a 
   write(path.join(broken, '.claude', 'settings.json'), '{ "syncClaudeAiSkills": false, secret-looking-text');
   write(path.join(broken, '.claude', 'settings.local.json'), JSON.stringify({ disableClaudeAiConnectors: true }));
   assert.throws(() => offSwitches({ home: path.join(tmp, 'none'), root: broken, params: PARAMS }), /^Error: a settings file does not parse$/);
-  const got = (await collect({ ...base, home: path.join(tmp, 'none'), root: broken }))['desktop_app.off_switches'];
-  assert.equal(got.could_not_check, 'a settings file does not parse');
+  const bare = path.join(tmp, 'broken-settings-home');
+  write(path.join(bare, '.claude', 'projects', '-Users-someone-Developer-acme-site', 'c1.jsonl'), jsonl([call('c1', 0, 'Read')]));
+  const got = (await collect({ ...base, home: bare, root: broken }))['desktop_app.off_switches'];
+  assert.equal(got.could_not_check, 'could not read (a settings file does not parse)');
 });
