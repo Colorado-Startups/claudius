@@ -14,12 +14,15 @@ const DEFAULT_ORIGINS = ['https://claude.ai', 'https://claude.com'];
 
 const text = (status, body, headers = {}) => new Response(body, { status, headers });
 const json = (status, body) => text(status, JSON.stringify(body), { 'content-type': 'application/json' });
-const fail = (status, id, code, message, data) => json(status, { jsonrpc: '2.0', id: id ?? null, error: { code, message, ...(data ? { data } : {}) } });
+// A reply to a message with no usable id carries no id (the base protocol forbids a null id).
+const fail = (status, id, code, message, data) => json(status, { jsonrpc: '2.0', ...(id == null ? {} : { id }), error: { code, message, ...(data ? { data } : {}) } });
 
 // Mcp-Name may arrive as =?base64?...?= when the value is not plain ASCII.
+// A value that does not decode is null, which never equals a URI, so the caller answers with a header mismatch.
 function headerValue(v) {
   const m = /^=\?base64\?(.*)\?=$/.exec(v ?? '');
-  return m ? new TextDecoder().decode(Uint8Array.from(atob(m[1]), (c) => c.charCodeAt(0))) : v;
+  if (!m) return v;
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(atob(m[1]), (c) => c.charCodeAt(0))); } catch { return null; }
 }
 
 export function createHandler(catalog, { allowedOrigins = [] } = {}) {
@@ -33,15 +36,18 @@ export function createHandler(catalog, { allowedOrigins = [] } = {}) {
   });
   const byUri = new Map(skills.map((s) => [s.entry.uri, s]));
   const files = new Map(skills.flatMap((s) => s.files.map((f) => [`skill://${s.name}/${f.path}`, f])));
+  // A SKILL.md resource carries the skill's name and description; any other file its path.
+  const resourceName = (uri) => { const s = byUri.get(uri); return s ? { name: s.frontmatter.name, description: s.frontmatter.description } : { name: uri.slice('skill://'.length) }; };
   const info = catalog.serverInfo ?? { name: 'skills-server', version: '1.0.0' };
-  const cache = { ttlMs: TTL_MS, cacheScope: 'public' };
+  // Every result names the server in _meta, as the base protocol asks; cache fields are for the cacheable results.
+  const meta = { _meta: { 'io.modelcontextprotocol/serverInfo': info } };
+  const cache = { ttlMs: TTL_MS, cacheScope: 'public', ...meta };
 
   // Each method returns a result object, or throws {code, message} for a JSON-RPC error.
-  const methods = {
+  const methods = Object.assign(Object.create(null), {
     'server/discover': () => ({
       supportedVersions: [VERSION],
       capabilities: { resources: {}, extensions: { [SKILLS_EXT]: {} } },
-      _meta: { 'io.modelcontextprotocol/serverInfo': info },
       instructions: 'Each skill is read with skills/get, then its files with resources/read. Every file carries a sha256 digest and a size.',
       ...cache,
     }),
@@ -51,14 +57,15 @@ export function createHandler(catalog, { allowedOrigins = [] } = {}) {
       if (!s) throw { code: -32602, message: `Unknown skill: ${p?.uri}` };
       return { skill: s.entry, ...cache };
     },
-    'resources/list': () => ({ resources: [...files.entries()].map(([uri, f]) => ({ uri, name: uri.slice('skill://'.length), mimeType: f.mimeType, size: f.size })), ...cache }),
+    'resources/list': () => ({ resources: [...files.entries()].map(([uri, f]) => ({ uri, ...resourceName(uri), mimeType: f.mimeType, size: f.size })), ...cache }),
     'resources/read': (p) => {
       const f = files.get(p?.uri);
       if (!f) throw { code: -32602, message: `Unknown resource: ${p?.uri}` };
       return { contents: [{ uri: p.uri, mimeType: f.mimeType, ...(f.text !== undefined ? { text: f.text } : { blob: f.blob }) }], ...cache };
     },
-    ping: () => ({}),
-  };
+  });
+  // ping was removed in 2026-07-28; the older-revision shim still answers it.
+  const legacyOnly = Object.assign(Object.create(null), { ping: () => ({}) });
 
   return async function fetch(request, env = {}) {
     const extra = (env.ALLOWED_ORIGINS ?? '').split(',').map((o) => o.trim()).filter(Boolean);
@@ -71,14 +78,18 @@ export function createHandler(catalog, { allowedOrigins = [] } = {}) {
     if (!msg || Array.isArray(msg) || typeof msg !== 'object' || typeof msg.method !== 'string') return fail(400, null, -32600, 'Invalid request');
     const { id, method, params } = msg;
     if (id === undefined) return text(202, ''); // a notification takes no reply
+    if (typeof id !== 'string' && typeof id !== 'number') return fail(400, null, -32600, 'Invalid request: id must be a string or a number');
 
     const header = request.headers.get(`mcp-protocol-version`);
     const body = params?._meta?.[META];
     // Legacy: an initialize call, or a request that names an older revision and carries no per-request version.
-    const legacy = method === 'initialize' || (body === undefined && LEGACY.includes(header));
+    // A request with no version anywhere is the 2025-03-26 form, which the transport page lets a server treat as legacy.
+    const legacy = method === 'initialize' || (body === undefined && (header === null || LEGACY.includes(header)));
     if (!legacy) {
+      const caps = params?._meta?.['io.modelcontextprotocol/clientCapabilities'];
+      if (typeof body !== 'string' || !caps || typeof caps !== 'object' || Array.isArray(caps)) return fail(400, id, -32602, 'Invalid params: _meta needs io.modelcontextprotocol/protocolVersion and io.modelcontextprotocol/clientCapabilities');
       if (!header || header !== body) return fail(400, id, -32020, `Header mismatch: MCP-Protocol-Version ${JSON.stringify(header)} does not match _meta ${JSON.stringify(body)}`);
-      if (body !== VERSION) return fail(400, id, -32022, `Unsupported protocol version ${body}`, { supported: [VERSION] });
+      if (body !== VERSION) return fail(400, id, -32022, `Unsupported protocol version ${JSON.stringify(body)}`, { supported: [VERSION] });
       if (request.headers.get('mcp-method') !== method) return fail(400, id, -32020, 'Header mismatch: Mcp-Method does not match the request method');
       if (method === 'resources/read' && headerValue(request.headers.get('mcp-name')) !== params?.uri) return fail(400, id, -32020, 'Header mismatch: Mcp-Name does not match params.uri');
     }
@@ -90,7 +101,7 @@ export function createHandler(catalog, { allowedOrigins = [] } = {}) {
         capabilities: methods['server/discover']().capabilities, serverInfo: info,
       } });
     }
-    const run = methods[method];
+    const run = methods[method] ?? (legacy ? legacyOnly[method] : undefined);
     if (!run) return fail(legacy ? 200 : 404, id, -32601, `Method not found: ${method}`);
     try {
       const result = run(params);

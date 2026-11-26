@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -14,6 +14,8 @@ import { createHandler } from '../templates/claude/guides/skills-server/worker.m
 const V = '2026-07-28';
 const catalog = buildCatalog('plugin/skills', 'claudius-skills');
 const handle = createHandler(catalog);
+// The skills on disk, so adding a skill to the plugin does not break these tests.
+const NAMES = readdirSync('plugin/skills').filter((n) => existsSync(join('plugin/skills', n, 'SKILL.md'))).sort();
 
 // A request the way a 2026-07-28 client sends it: the version in the body and the header, the method in its header.
 function call(method, params = {}, { headers = {}, version = V, verb = 'POST', body } = {}) {
@@ -24,7 +26,8 @@ function call(method, params = {}, { headers = {}, version = V, verb = 'POST', b
 const ok = async (res) => { assert.equal(res.status, 200); const j = await res.json(); assert.ok(j.result, JSON.stringify(j)); return j.result; };
 
 test('catalog: every plugin skill is served, and each digest and size match the file on disk', () => {
-  assert.deepEqual(catalog.skills.map((s) => s.name), ['equip', 'find-plugin', 'merge', 'plain-voice', 'plan', 'visibility']);
+  assert.ok(NAMES.length >= 6);
+  assert.deepEqual(catalog.skills.map((s) => s.name), NAMES);
   for (const s of catalog.skills) for (const f of s.files) {
     const bytes = readFileSync(join('plugin/skills', s.name, f.path));
     assert.equal(f.size, bytes.length, f.path);
@@ -34,15 +37,59 @@ test('catalog: every plugin skill is served, and each digest and size match the 
   assert.ok(catalog.skills.find((s) => s.name === 'plan').files.some((f) => f.path === 'scripts/watch_workers.py'));
 });
 
-test('catalog: the frontmatter is verbatim, and a name that is not the folder name fails the build', () => {
-  const equip = catalog.skills.find((s) => s.name === 'equip');
-  assert.equal(equip.frontmatter.name, 'equip');
-  assert.match(equip.frontmatter.description, /^Keeps every plugin, skill and connector on/);
-  assert.throws(() => parseFrontmatter('---\nname: a\ndescription: >\n  folded\n---\n', 'x'), /flat/);
+// A skill folder in a temp dir: flat frontmatter with every scalar kind, a CRLF SKILL.md, a PNG, and a file with a BOM.
+function fixture(files) {
   const dir = mkdtempSync(join(tmpdir(), 'skills-'));
-  mkdirSync(join(dir, 'one'));
-  writeFileSync(join(dir, 'one', 'SKILL.md'), '---\nname: two\ndescription: d\n---\nbody\n');
-  assert.throws(() => buildCatalog(dir), /must equal the folder name/);
+  for (const [path, content] of Object.entries(files)) {
+    mkdirSync(join(dir, path, '..'), { recursive: true });
+    writeFileSync(join(dir, path), content);
+  }
+  return dir;
+}
+const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff, 0xfe, 0x00]);
+
+test('catalog: frontmatter scalars, CRLF, a binary file and a BOM file keep their exact bytes', async () => {
+  const bom = Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), Buffer.from('bom file\n')]);
+  const dir = fixture({
+    'demo/SKILL.md': '---\r\nname: demo\r\ndescription: "Says: hello"\r\nlicense: Apache-2.0\r\nbeta: true\r\nrank: 3\r\n---\r\nBody\r\n',
+    'demo/assets/logo.png': PNG,
+    'demo/notes/bom.md': bom,
+  });
+  const cat = buildCatalog(dir, 'fx');
+  assert.deepEqual(cat.skills[0].frontmatter, { name: 'demo', description: 'Says: hello', license: 'Apache-2.0', beta: true, rank: 3 });
+  const h = createHandler(cat);
+  const r = (m, p) => h(new Request('https://x.test/mcp', { method: 'POST', headers: { 'content-type': 'application/json', 'mcp-protocol-version': V, 'mcp-method': m, ...(p.uri && m === 'resources/read' ? { 'mcp-name': p.uri } : {}) }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: m, params: { ...p, _meta: { 'io.modelcontextprotocol/protocolVersion': V, 'io.modelcontextprotocol/clientCapabilities': {} } } }) })).then((x) => x.json());
+  const list = (await r('skills/list', {})).result.skills[0];
+  assert.equal(list.resources.length, 3);
+  for (const [uri, bytes] of [['skill://demo/assets/logo.png', PNG], ['skill://demo/notes/bom.md', bom]]) {
+    const entry = list.resources.find((x) => x.uri === uri);
+    assert.equal(entry.size, bytes.length);
+    assert.equal(entry.digest, `sha256:${createHash('sha256').update(bytes).digest('hex')}`);
+    const c = (await r('resources/read', { uri })).result.contents[0];
+    const got = c.text !== undefined ? Buffer.from(c.text, 'utf8') : Buffer.from(c.blob, 'base64');
+    assert.equal(got.equals(bytes), true, uri);
+  }
+  assert.equal((await r('resources/read', { uri: 'skill://demo/assets/logo.png' })).result.contents[0].blob, PNG.toString('base64'));
+});
+
+test('catalog: a bad folder fails the build, never a half-served skill', () => {
+  const md = (name) => `---\nname: ${name}\ndescription: d\n---\nx\n`;
+  assert.throws(() => buildCatalog(fixture({ 'one/SKILL.md': md('two') })), /must equal the folder name/);
+  assert.throws(() => buildCatalog(fixture({ 'Bad_Name/SKILL.md': md('Bad_Name') })), /not a valid skill name/);
+  assert.throws(() => buildCatalog(fixture({ 'a/SKILL.md': md('a'), 'a/my file.md': 'x' })), /use only letters/);
+  assert.throws(() => buildCatalog(fixture({ 'a/SKILL.md': '---\nname: a\ndescription: >\n  folded\n---\n' })), /flat/);
+  assert.throws(() => buildCatalog(fixture({ 'a/SKILL.md': '---\nname: a\ndescription: "C:\\path"\n---\n' })), /bad double-quoted value/);
+  assert.throws(() => buildCatalog(fixture({})), /no skill folders/);
+  const many = Object.fromEntries(Array.from({ length: 512 }, (_, i) => [`a/f${i}.md`, 'x']));
+  assert.throws(() => buildCatalog(fixture({ 'a/SKILL.md': md('a'), ...many })), /over the 512 limit/);
+  assert.throws(() => buildCatalog(fixture({ 'a/SKILL.md': md('a'), 'a/big.bin': Buffer.alloc(16 * 1024 * 1024) })), /over the 16777216 limit/);
+  const linked = fixture({ 'a/SKILL.md': md('a'), 'shared.md': 'x' });
+  symlinkSync(join(linked, 'shared.md'), join(linked, 'a', 'link.md'));
+  assert.throws(() => buildCatalog(linked), /symbolic link/);
+  const linkedSkill = fixture({ 'a/SKILL.md': md('a'), 'shared.md': md('a') });
+  rmSync(join(linkedSkill, 'a', 'SKILL.md'));
+  symlinkSync(join(linkedSkill, 'shared.md'), join(linkedSkill, 'a', 'SKILL.md'));
+  assert.throws(() => buildCatalog(linkedSkill), /symbolic link/);
 });
 
 test('server/discover declares resources and the skills extension, with the version and cache fields', async () => {
@@ -57,7 +104,7 @@ test('server/discover declares resources and the skills extension, with the vers
 
 test('skills/list lists every skill with a complete manifest, and skills/get returns the same entry', async () => {
   const list = await ok(await call('skills/list'));
-  assert.equal(list.skills.length, 6);
+  assert.equal(list.skills.length, NAMES.length);
   const plan = list.skills.find((s) => s.frontmatter.name === 'plan');
   assert.equal(plan.uri, 'skill://plan/SKILL.md');
   assert.deepEqual(plan.resources.map((r) => r.uri), ['skill://plan/SKILL.md', 'skill://plan/scripts/watch_workers.py']);
@@ -72,7 +119,7 @@ test('resources/read returns the bytes the manifest describes', async () => {
     const r = await ok(await call('resources/read', { uri: res.uri }));
     const [c] = r.contents;
     assert.equal(c.uri, res.uri);
-    const bytes = Buffer.from(c.text ?? '', 'utf8');
+    const bytes = c.text !== undefined ? Buffer.from(c.text, 'utf8') : Buffer.from(c.blob, 'base64');
     assert.equal(bytes.length, res.size, res.uri);
     assert.equal(`sha256:${createHash('sha256').update(bytes).digest('hex')}`, res.digest, res.uri);
   }
@@ -119,7 +166,7 @@ test('a browser Origin that is not listed is 403, a listed one passes, and GET i
   assert.equal((await call('skills/list', {}, { headers: { origin: 'https://evil.example' } })).status, 403);
   assert.equal((await call('skills/list', {}, { headers: { origin: 'https://claude.ai' } })).status, 200);
   const custom = createHandler(catalog, { allowedOrigins: ['https://app.example'] });
-  const req = new Request('https://x.test/mcp', { method: 'POST', headers: { origin: 'https://app.example', 'content-type': 'application/json', 'mcp-protocol-version': V, 'mcp-method': 'ping' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping', params: { _meta: { 'io.modelcontextprotocol/protocolVersion': V } } }) });
+  const req = new Request('https://x.test/mcp', { method: 'POST', headers: { origin: 'https://app.example', 'content-type': 'application/json', 'mcp-protocol-version': V, 'mcp-method': 'skills/list' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'skills/list', params: { _meta: { 'io.modelcontextprotocol/protocolVersion': V, 'io.modelcontextprotocol/clientCapabilities': {} } } }) });
   assert.equal((await custom(req)).status, 200);
   assert.equal((await call('x', {}, { verb: 'GET' })).status, 405);
 });
@@ -139,7 +186,7 @@ test('an older client that calls initialize first gets the same skills, without 
   assert.ok(r.capabilities.extensions['io.modelcontextprotocol/skills']);
   const list = await handle(new Request('https://x.test/mcp', { method: 'POST', headers: { 'content-type': 'application/json', 'mcp-protocol-version': '2025-06-18' }, body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'skills/list' }) }));
   const lr = (await list.json()).result;
-  assert.equal(lr.skills.length, 6);
+  assert.equal(lr.skills.length, NAMES.length);
   assert.equal(lr.resultType, undefined);
   assert.equal(lr.ttlMs, undefined);
 });
@@ -150,10 +197,77 @@ test('the built module is one file that exports a fetch handler, with the catalo
   writeFileSync(file, renderWorker(catalog));
   // A separate node process loads the file as a Cloudflare Worker module would: only the file, nothing from this repo.
   const script = `import w from ${JSON.stringify(pathToFileURL(file).href)};
-    const body = JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'skills/list', params: { _meta: { 'io.modelcontextprotocol/protocolVersion': '${V}' } } });
+    const body = JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'skills/list', params: { _meta: { 'io.modelcontextprotocol/protocolVersion': '${V}', 'io.modelcontextprotocol/clientCapabilities': {} } } });
     const res = await w.fetch(new Request('https://x.test/mcp', { method: 'POST', headers: { 'content-type': 'application/json', 'mcp-protocol-version': '${V}', 'mcp-method': 'skills/list' }, body }), {});
     console.log((await res.json()).result.skills.length);`;
   const run = spawnSync(process.execPath, ['--input-type=module', '-e', script], { encoding: 'utf8' });
   assert.equal(run.status, 0, run.stderr);
-  assert.equal(run.stdout.trim(), '6');
+  assert.equal(run.stdout.trim(), String(NAMES.length));
+});
+
+test('a method name from Object.prototype is not found, and the response is never a 500', async () => {
+  for (const method of ['toString', 'constructor', '__proto__', 'hasOwnProperty', 'valueOf']) {
+    const res = await call(method, { a: 1 });
+    assert.equal(res.status, 404, method);
+    assert.equal((await res.json()).error.code, -32601, method);
+    const old = await handle(new Request('https://x.test/mcp', { method: 'POST', headers: { 'content-type': 'application/json', 'mcp-protocol-version': '2025-06-18' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params: { a: 1 } }) }));
+    assert.equal(old.status, 200, method);
+    assert.equal((await old.json()).error.code, -32601, method);
+  }
+});
+
+test('a Mcp-Name that is not valid base64 or UTF-8 is a header mismatch, not a 500', async () => {
+  for (const bad of ['=?base64?!!!?=', `=?base64?${Buffer.from([0xff, 0xfe]).toString('base64')}?=`]) {
+    const res = await call('resources/read', { uri: 'skill://equip/SKILL.md' }, { headers: { 'mcp-name': bad } });
+    assert.equal(res.status, 400);
+    assert.equal((await res.json()).error.code, -32020);
+  }
+});
+
+test('an id must be a string or a number, and a request with no version anywhere is the legacy form', async () => {
+  for (const id of [null, {}, [1], true]) {
+    const res = await handle(new Request('https://x.test/mcp', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id, method: 'ping' }) }));
+    assert.equal(res.status, 400, JSON.stringify(id));
+    assert.equal((await res.json()).error.code, -32600);
+  }
+  const zero = await handle(new Request('https://x.test/mcp', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 0, method: 'ping' }) }));
+  assert.deepEqual((await zero.json()).result, {});
+});
+
+test('ALLOWED_ORIGINS from the environment is honored', async () => {
+  const req = (origin) => new Request('https://x.test/mcp', { method: 'POST', headers: { origin, 'content-type': 'application/json', 'mcp-protocol-version': V, 'mcp-method': 'skills/list' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'skills/list', params: { _meta: { 'io.modelcontextprotocol/protocolVersion': V, 'io.modelcontextprotocol/clientCapabilities': {} } } }) });
+  assert.equal((await handle(req('https://app.example'))).status, 403);
+  assert.equal((await handle(req('https://app.example'), { ALLOWED_ORIGINS: 'https://other.example, https://app.example' })).status, 200);
+});
+
+test('a request missing a required _meta field is 400 -32602, and an error with no usable id has no id', async () => {
+  const send = (params, headers = {}) => handle(new Request('https://x.test/mcp', { method: 'POST', headers: { 'content-type': 'application/json', 'mcp-protocol-version': V, 'mcp-method': 'skills/list', ...headers }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'skills/list', params }) }));
+  for (const params of [{}, { _meta: { 'io.modelcontextprotocol/protocolVersion': V } }, { _meta: { 'io.modelcontextprotocol/clientCapabilities': {} } }, { _meta: { 'io.modelcontextprotocol/protocolVersion': V, 'io.modelcontextprotocol/clientCapabilities': [] } }]) {
+    const res = await send(params);
+    assert.equal(res.status, 400, JSON.stringify(params));
+    assert.equal((await res.json()).error.code, -32602);
+  }
+  const bad = await (await send({}, { origin: 'https://evil.example' })).json();
+  assert.equal('id' in bad, false);
+});
+
+test('ping is answered on the older-revision path only (it is removed in 2026-07-28)', async () => {
+  assert.equal((await call('ping')).status, 404);
+  const old = await handle(new Request('https://x.test/mcp', { method: 'POST', headers: { 'content-type': 'application/json', 'mcp-protocol-version': '2025-06-18' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping' }) }));
+  assert.deepEqual((await old.json()).result, {});
+});
+
+test('every result names the server, and resources/list names a SKILL.md by its frontmatter', async () => {
+  for (const m of ['server/discover', 'skills/list', 'resources/list']) assert.equal((await ok(await call(m)))._meta['io.modelcontextprotocol/serverInfo'].name, 'claudius-skills', m);
+  const list = await ok(await call('resources/list'));
+  const equip = list.resources.find((r) => r.uri === 'skill://equip/SKILL.md');
+  assert.equal(equip.name, 'equip');
+  assert.match(equip.description, /^Keeps every plugin/);
+});
+
+test('catalog: an unquoted value a YAML parser would read differently fails the build', () => {
+  for (const v of ['has a # comment', 'a: b', 'trailing ', 'True', '~', 'yes', '1e3', '1.10', '*star', '- item']) {
+    assert.throws(() => parseFrontmatter(`---\nname: a\ndescription: d\nx: ${v}\n---\n`, 'x'), /plain YAML scalar|flat/, JSON.stringify(v));
+  }
+  assert.deepEqual(parseFrontmatter('---\nname: a\ndescription: d\nx: 10\ny: 1.5\nz: "True"\n---\n', 'x'), { name: 'a', description: 'd', x: 10, y: 1.5, z: 'True' });
 });
