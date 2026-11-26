@@ -21,7 +21,7 @@
    "tools": [
     "Collector"
    ],
-   "rule": "A metrics read makes few GitHub API requests.",
+   "rule": "A metrics read stays within a few GitHub API requests.",
    "rule_ref": "https://code.claude.com/docs/en/artifacts",
    "metric": "cp_library.api_requests_per_read"
   },

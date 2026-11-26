@@ -31,7 +31,7 @@
    "tools": [
     "/goal"
    ],
-   "rule": "Set one checkable end state, so a long thread needs no further prompt.",
+   "rule": "Set one checkable end state, so a long thread needs no prompt each turn.",
    "rule_ref": "https://code.claude.com/docs/en/goal",
    "metric": "cp_newer_features.nudged_threads"
   },
@@ -49,10 +49,10 @@
    "id": "count",
    "name": "Count",
    "tools": [
-    "Agent view"
+    "Threads"
    ],
    "rule": "Count the permission prompts each thread shows.",
-   "rule_ref": "https://code.claude.com/docs/en/agent-view",
+   "rule_ref": "https://code.claude.com/docs/en/auto-mode-config",
    "metric": "cp_newer_features.prompts_per_thread"
   },
   {

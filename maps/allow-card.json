@@ -1,8 +1,8 @@
 {
  "id": "allow-card",
  "name": "Allow cards",
- "why": "How a thread gets a folder on your computer, and how fast you answer in its thread",
- "ideal": "One Allow once card per Mac thread, a worktree for a shared folder, and an answer inside the thread within minutes.",
+ "why": "How a thread gets a folder on your computer, and where you answer the card and each prompt",
+ "ideal": "One Allow once card per Mac thread, a worktree for a shared folder, and each answer given where it was asked within minutes.",
  "sources": [
   {
    "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
@@ -23,7 +23,7 @@
     "Allow card",
     "Worktree"
    ],
-   "rule": "Turn on Worktree on the card when another thread works in the same folder.",
+   "rule": "Answer the Allow card in the project conversation, with Worktree on when another thread uses the folder.",
    "rule_ref": "https://code.claude.com/docs/en/claude-projects",
    "metric": "cp_allow_card.shared_folder_threads"
   },
@@ -34,17 +34,18 @@
     "Allow once",
     "Thread"
    ],
-   "rule": "Answer a card or prompt in its own thread: a go-ahead in the project conversation does not reach it.",
+   "rule": "Answer a thread's approval prompt in that thread: a go-ahead in the project conversation does not reach it.",
    "rule_ref": "https://code.claude.com/docs/en/claude-projects",
    "metric": "cp_allow_card.card_wait_minutes"
   },
   {
    "id": "run",
-   "name": "Run",
+   "name": "Count",
    "tools": [
-    "Auto mode"
+    "Allow card",
+    "Thread"
    ],
-   "rule": "The thread runs in auto mode when that computer's Claude Code allows it, so it raises one Allow once card.",
+   "rule": "Count the Allow cards and approval prompts each Mac thread raises.",
    "rule_ref": "https://code.claude.com/docs/en/claude-projects",
    "metric": "cp_allow_card.prompts_per_thread"
   }
