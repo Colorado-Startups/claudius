@@ -388,7 +388,7 @@
     "tab": "cp-extensions",
     "kind": "quality",
     "label": "Unrecorded sets with unknown provenance",
-    "means": "Installed plugin sets, not Anthropic made or verified, that the repo's notes do not record. Each is named, none turned off.",
+    "means": "Installed plugin sets, not Anthropic made or verified, that the repo's notes do not record. Record each, turn none off.",
     "unit": "sets",
     "goal": 0,
     "near": 3,
