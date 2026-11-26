@@ -46,9 +46,9 @@
    "tools": [
     "Hooks"
    ],
-   "rule": "A hook fires when it should, runs nothing unsafe and adds under a second.",
+   "rule": "A hook adds under a second to the tool call it guards.",
    "rule_ref": "https://code.claude.com/docs/en/hooks",
-   "metric": "cp_hooks.hook_text_tokens"
+   "metric": "cp_hooks.hook_ms"
   },
   {
    "id": "subagents",

@@ -1,6 +1,6 @@
 # Process maps
 
-Twelve maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }`, `{ "use": "remember" }`, `{ "use": "setup" }`, `{ "use": "memory" }` and `{ "use": "schedule" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
+Twenty-two maps for an agent-driven repo (twelve process maps and the ten [page maps](#page-maps-one-per-page)), each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }`, `{ "use": "remember" }`, `{ "use": "setup" }`, `{ "use": "memory" }` and `{ "use": "schedule" }`, then the ten page maps `context`, `setup-check`, `scheduled-task`, `local-thread`, `pr-flow`, `connectors`, `plugins`, `skills`, `subagents` and `hooks` the same way, once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
 
 ## Guard: a tool call, through the guards, to run or blocked
 

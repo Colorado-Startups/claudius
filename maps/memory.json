@@ -2,7 +2,7 @@
  "id": "memory",
  "name": "Memory",
  "why": "What a thread reads and can call at start, each lane held to one metric",
- "ideal": "A thread starts with short context, current memory and only verified tools, all ready in seconds.",
+ "ideal": "A thread starts with short context, current memory and tools whose source is known, all ready in seconds.",
  "sources": [
   {
    "title": "Claude Code Docs: How Claude remembers your project",
@@ -36,9 +36,9 @@
    "tools": [
     "Context"
    ],
-   "rule": "The Context tab holds no uploaded copy that is older than its repo, and nothing private.",
+   "rule": "The Context tab holds no copy that is older than its repo.",
    "rule_ref": "https://code.claude.com/docs/en/claude-projects",
-   "metric": "cp_context.first_read_share"
+   "metric": "cp_context.stale_copies"
   },
   {
    "id": "memory",
@@ -66,9 +66,9 @@
    "tools": [
     "Connectors"
    ],
-   "rule": "Each connector is signed in and from a verified publisher.",
+   "rule": "Each installed connector is signed in.",
    "rule_ref": "https://code.claude.com/docs/en/mcp",
-   "metric": "cp_connectors.connect_seconds"
+   "metric": "cp_connectors.incomplete_sign_ins"
   },
   {
    "id": "plugins",
@@ -76,9 +76,9 @@
    "tools": [
     "Plugins"
    ],
-   "rule": "Every plugin set has a verified listing or an official equivalent.",
+   "rule": "Every plugin set has a verified listing or an official equivalent, or is named and recorded.",
    "rule_ref": "https://code.claude.com/docs/en/plugins/overview",
-   "metric": "cp_plugins.plugin_skill_tokens"
+   "metric": "cp_plugins.unverified_sets_on"
   }
  ]
 }

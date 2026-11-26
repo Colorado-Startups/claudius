@@ -76,9 +76,9 @@
    "tools": [
     "Work locally"
    ],
-   "rule": "A local thread ends clean and pushed, and logs each Remote Control and Chrome step.",
+   "rule": "A local thread ends with its work committed and pushed.",
    "rule_ref": "https://code.claude.com/docs/en/claude-projects",
-   "metric": "cp_work_locally.folder_context_tokens"
+   "metric": "cp_work_locally.unclean_ends"
   }
  ]
 }

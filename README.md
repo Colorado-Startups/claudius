@@ -26,7 +26,7 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 flowchart LR
   GC[1 Git Crafter templates:<br/>CI, open-repo files, AGENTS.md] --> T[2 templates/claude:<br/>settings, plugins, skills]
   T --> P[3 Pack pin in quality/config.json:<br/>28 tabs]
-  P --> M[4 Process maps:<br/>Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory, Schedule]
+  P --> M[4 Process maps:<br/>Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory, Schedule, ten page maps]
   P --> L[5 --local run:<br/>your private full page]
   P --> CP[6 Optional Code Project:<br/>add repo, pick environment, paste prompt]
 ```
@@ -36,7 +36,7 @@ flowchart LR
 | 1 | Adopt Git Crafter: CI, open-repo files, `AGENTS.md` and `CLAUDE.md` | Git Crafter `templates/ci/README.md`, `templates/agents/` |
 | 2 | Copy the Claude files and set the desktop app, every plugin, skill and connector kept on ([All on, app-wide](templates/claude/README.md#all-on-app-wide)) | [templates/claude/README.md](templates/claude/README.md) |
 | 3 | Add the pack (table below) | `quality/config.json` |
-| 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }`, `{ "use": "remember" }`, `{ "use": "setup" }`, `{ "use": "memory" }` and `{ "use": "schedule" }` to your Process config's `maps` | [maps/README.md](maps/README.md) |
+| 4 | Add `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }`, `{ "use": "remember" }`, `{ "use": "setup" }`, `{ "use": "memory" }` and `{ "use": "schedule" }`, plus the ten page maps if you run a Code Project, to your Process config's `maps` | [maps/README.md](maps/README.md#page-maps-one-per-page) |
 | 5 | Run the one local command for the numbers CI never sees | below |
 | 6 | Optional, to run it as a Claude Code Project: add the repo to a project, pick the environment, paste the [setup prompt](docs/projects-quickstart.md#setup-prompt). Then memory seeds, subagents, scheduled tasks and guard placement | [quick start](docs/projects-quickstart.md), [templates/claude/code-project/README.md](templates/claude/code-project/README.md) |
 
@@ -71,9 +71,9 @@ flowchart LR
 | --- | --- |
 | `templates/claude/` | the Claude templates; `AGENTS.md`, `CLAUDE.md` and `.claude/` at the root are this repo's own |
 | `pack.json` | the 28 tabs |
-| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps |
+| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps, and the ten page maps |
 | `collectors/<tab>/`, `fixtures/` | the collectors, their tests and test fixtures |
-| `quality/process/config.json` | the Process page: the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps, named by `use` |
+| `quality/process/config.json` | the Process page: the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps and the ten page maps, named by `use` |
 | `quality/public.mjs`, `quality/public-params.json` | write `quality/public/`, the configs CI builds the public pages from. Each metric that needs local files is dropped but the repo-file ones. Each map is written out in full without the steps those metrics score |
 | `tests/moved.json` | where each file came from in Git Crafter |
 | `tests/engine-tests.sh` | CI: each file matches its source or is listed as edited, then the tests run beside the pinned engine |

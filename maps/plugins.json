@@ -26,7 +26,7 @@
    "tools": [
     "Plugins"
    ],
-   "rule": "Every plugin on is official, verified or the repo's own.",
+   "rule": "A plugin that is not official, verified or the repo's own is named and recorded, never turned off.",
    "rule_ref": "https://code.claude.com/docs/en/plugins/security",
    "metric": "cp_plugins.unverified_sets_on"
   },
