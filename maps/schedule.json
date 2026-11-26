@@ -1,0 +1,84 @@
+{
+ "id": "schedule",
+ "name": "Schedule",
+ "why": "The work a project runs after the start, each lane held to one metric",
+ "ideal": "Threads, scheduled tasks, guards, helpers and fixes run on time, stay safe and stop when the work is done.",
+ "sources": [
+  {
+   "title": "Claude Code Docs: Automate work with scheduled tasks",
+   "url": "https://code.claude.com/docs/en/routines",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Claude Code Docs: Hooks reference",
+   "url": "https://code.claude.com/docs/en/hooks",
+   "date": "2026-11-26"
+  }
+ ],
+ "critical_path": [
+  "threads",
+  "skills"
+ ],
+ "steps": [
+  {
+   "id": "threads",
+   "name": "Threads",
+   "tools": [
+    "Threads"
+   ],
+   "rule": "A thread opens a draft pull request with attribution lines, and it is green on the first push.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_threads.attributed_share"
+  },
+  {
+   "id": "scheduled-tasks",
+   "name": "Tasks",
+   "tools": [
+    "Scheduled tasks"
+   ],
+   "rule": "A scheduled task ran on time, succeeded, and keeps its up-front connector load small.",
+   "rule_ref": "https://code.claude.com/docs/en/routines",
+   "metric": "cp_scheduled_tasks.on_time_share"
+  },
+  {
+   "id": "hooks",
+   "name": "Hooks",
+   "tools": [
+    "Hooks"
+   ],
+   "rule": "A hook adds under a second to the tool call it guards.",
+   "rule_ref": "https://code.claude.com/docs/en/hooks",
+   "metric": "cp_hooks.hook_ms"
+  },
+  {
+   "id": "subagents",
+   "name": "Subagents",
+   "tools": [
+    "Subagents"
+   ],
+   "rule": "The reviewer finds real defects, and the explorer answers a lookup in one pass on a small model.",
+   "rule_ref": "https://code.claude.com/docs/en/sub-agents",
+   "metric": "cp_subagents.reviewer_real_share"
+  },
+  {
+   "id": "pr-auto-fix",
+   "name": "Auto fix",
+   "tools": [
+    "Pull request auto fix"
+   ],
+   "rule": "Auto fix pushes a fix with a test, never skips one, and stops when the pull request merges.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_pr_auto_fix.red_to_green_minutes"
+  },
+  {
+   "id": "skills",
+   "name": "Skills",
+   "tools": [
+    "Skills"
+   ],
+   "rule": "A skill fires when its task comes up, and the thread finds it on the first try.",
+   "rule_ref": "https://code.claude.com/docs/en/skills",
+   "metric": "cp_skills.skill_listing_tokens"
+  }
+ ]
+}

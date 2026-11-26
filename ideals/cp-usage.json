@@ -1,0 +1,18 @@
+{
+  "ideal": "Every thread shows in the project's Usage settings, which are read weekly and stay under the plan limit with no overage.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-26"
+    },
+    {
+      "title": "Claude Code Docs: Manage costs effectively",
+      "url": "https://code.claude.com/docs/en/costs",
+      "date": "2026-11-26"
+    }
+  ],
+  "quality": "Every thread has a usage line.",
+  "speed": "The project's Usage settings are read every week.",
+  "consumption": "The weekly plan share stays under its limit, with no usage credit billed."
+}

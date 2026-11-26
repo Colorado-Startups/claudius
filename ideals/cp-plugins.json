@@ -1,0 +1,13 @@
+{
+  "ideal": "Every plugin set has a verified listing or an official equivalent, and loads fast with a short skill listing.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Plugins overview",
+      "url": "https://code.claude.com/docs/en/plugins/overview",
+      "date": "2026-11-26"
+    }
+  ],
+  "quality": "Every plugin set has a verified listing or an official equivalent.",
+  "speed": "Plugin sets load within seconds of a thread's start.",
+  "consumption": "The up-front plugin skill listing stays small."
+}

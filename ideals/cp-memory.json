@@ -1,0 +1,13 @@
+{
+  "ideal": "Project memory holds short, current notes that spare the owner a repeated question.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: How Claude remembers your project",
+      "url": "https://code.claude.com/docs/en/memory",
+      "date": "2026-11-26"
+    }
+  ],
+  "quality": "Instructions stay under 200 lines and no note is out of date.",
+  "speed": "The owner is never asked the same question twice.",
+  "consumption": "Memory loads few tokens at the start of a thread."
+}

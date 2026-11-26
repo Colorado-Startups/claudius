@@ -1,6 +1,6 @@
 # Process maps
 
-Nine maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }` and `{ "use": "remember" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
+Twenty-two maps for an agent-driven repo (twelve process maps and the ten [page maps](#page-maps-one-per-page)), each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }`, `{ "use": "remember" }`, `{ "use": "setup" }`, `{ "use": "memory" }` and `{ "use": "schedule" }`, then the ten page maps `context`, `setup-check`, `scheduled-task`, `local-thread`, `pr-flow`, `connectors`, `plugins`, `skills`, `subagents` and `hooks` the same way, once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
 
 ## Guard: a tool call, through the guards, to run or blocked
 
@@ -175,4 +175,41 @@ Each part is a group on the Code Project tab. The engine's tab parts table holds
 | PR auto-fix | Ship (Check) |
 | Shipping and merging | Ship |
 
-Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json), [`project.json`](project.json), [`ship.json`](ship.json), [`environment.json`](environment.json), [`remember.json`](remember.json).
+Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json), [`project.json`](project.json), [`ship.json`](ship.json), [`environment.json`](environment.json), [`remember.json`](remember.json), [`setup.json`](setup.json), [`memory.json`](memory.json), [`schedule.json`](schedule.json).
+
+## Code Project page maps: Setup, Memory and Schedule
+
+Each lane scores one tab or feature of a Claude Code Project. A map holds six steps at most, so 18 lanes fit in three maps. The Usage tab has no lane in these maps. Every lane reads local files, so the public page leaves all three maps out.
+
+| Map | Lanes |
+|---|---|
+| `setup` | General, Environment, Network access, Network secrets, Setup script, Work locally |
+| `memory` | Conversation, Context, Memory, Extensions, Connectors, Plugins |
+| `schedule` | Threads, Scheduled tasks, Hooks, Subagents, Pull request auto fix, Skills |
+
+## Page maps: one per page
+
+Each page of a Code Project has a map of its own, six steps at most, scoring Quality, Speed and Consumption. The index of all 13 pages, with their tabs and metrics, is [`pages.json`](../templates/claude/code-project/pages.json); the kit to add one is [`page/`](../templates/claude/code-project/page/README.md).
+
+```mermaid
+flowchart LR
+  tab["Tab or feature"] --> page["Page: 3 metrics"] --> map["Map: 3 to 6 steps"] --> score["Score 0 to 100"]
+```
+
+| Page | Map | New or reused |
+|---|---|---|
+| 🛰️ Overview and threads | `project` | Reused |
+| 📎 Context | `context` | New |
+| ⚙️ General and Advanced | `decide` | Reused |
+| 🧠 Memory | `guard` | Reused |
+| 🌩️ Environment | `setup-check` | New |
+| ⏰ Scheduled tasks | `scheduled-task` | New |
+| 💻 Threads on your computer | `local-thread` | New |
+| 🔀 Pull requests and auto-fix | `pr-flow` | New |
+| 🔌 Connectors | `connectors` | New |
+| 🧩 Plugins | `plugins` | New |
+| 📚 Skills | `skills` | New |
+| 🤖 Subagents | `subagents` | New |
+| 🪝 Hooks | `hooks` | New |
+
+Steps that read local files show only on a `--local` page. A step on `code_project.*` or `practices.*` reads repo files, so it also shows on the public page.
