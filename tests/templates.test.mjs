@@ -2,7 +2,7 @@
 // root byte for byte, so the repo runs what it ships.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 const COPIES = ['.claude/settings.json', '.claude/skills/bump-pins/SKILL.md'];
 
@@ -61,18 +61,11 @@ test('templates: the Code Project template carries no em dash and links Git Craf
   assert.match(readme, /SoulCraft-Org\/git-crafter\/(tree|blob)\/main\/templates\/projects/);
 });
 
-test('templates: the Code Project pages name 20 tabs, each with a Quality, Speed and Consumption metric and goal, and no reading', () => {
-  const spec = JSON.parse(readFileSync('templates/claude/code-project/pages.json', 'utf8'));
-  assert.equal(spec.pages.length, 20);
-  assert.equal(new Set(spec.pages.map((p) => p.id)).size, 20, 'ids are unique');
-  for (const p of spec.pages) {
-    for (const k of ['quality', 'speed', 'consumption']) {
-      assert.ok(p[k]?.metric && p[k]?.goal, `${p.id} ${k}`);
-      assert.deepEqual(Object.keys(p[k]).sort(), ['goal', 'metric'], `${p.id} ${k} holds no value`);
-    }
-  }
+test('templates: pages.html draws page-index.json, the one page list, and readings stay out of git', () => {
   const html = readFileSync('templates/claude/code-project/pages.html', 'utf8');
-  assert.match(html, /fetch\(f\)/);
-  assert.ok(!html.includes('—') && !readFileSync('templates/claude/code-project/pages.json', 'utf8').includes('—'), 'em dash');
+  assert.match(html, /load\('page-index\.json'\)/);
+  assert.match(html, /targets\/code-project-tabs\.json/);
+  assert.ok(!html.includes('\u2014'), 'em dash');
+  assert.ok(!existsSync('templates/claude/code-project/pages.json'), 'a second page list');
   assert.match(readFileSync('.gitignore', 'utf8'), /^readings\.json$/m);
 });

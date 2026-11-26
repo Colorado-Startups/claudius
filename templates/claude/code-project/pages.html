@@ -1,7 +1,8 @@
 <!doctype html>
-<!-- The Code Project page: one tile per tab or feature, each with a Quality, Speed and Consumption dial.
-     It draws pages.json beside it. A readings.json beside it, if present, fills the dials; it is never committed.
-     Serve the folder to view it: python3 -m http.server, then open /pages.html. -->
+<!-- The Code Project pages at a glance: one tile per page of page-index.json, each with a Quality, Speed and
+     Consumption dot. Labels and goals come from targets/code-project-*.json. A readings.json beside this file, keyed
+     by metric id, fills the dots; it is never committed. Serve the repo root: python3 -m http.server, then open
+     /templates/claude/code-project/pages.html. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -39,7 +40,7 @@ dialog::backdrop{background:#0008}
 <body>
 <main>
   <h1 id="title">Project Pages</h1>
-  <p class="mute" id="sub">Loading pages.json</p>
+  <p class="mute" id="sub">Loading page-index.json</p>
   <div class="legend mute"><span style="--k:var(--q)">Quality</span><span style="--k:var(--s)">Speed</span><span style="--k:var(--c)">Consumption</span><span style="--k:var(--off)">not read</span></div>
   <div class="bar" id="bar"></div>
   <div class="grid" id="grid"></div>
@@ -51,14 +52,17 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 const load = (f) => fetch(f).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 let filter = 'all';
 
-Promise.all([load('pages.json'), load('readings.json')]).then(([spec, readings]) => {
-  if (!spec) { document.getElementById('sub').textContent = 'Serve this folder to read pages.json: python3 -m http.server'; return; }
+const TARGETS = ['../../../targets/code-project-tabs.json', '../../../targets/code-project-features.json'];
+Promise.all([load('page-index.json'), load('readings.json'), ...TARGETS.map(load)]).then(([spec, readings, ...defs]) => {
+  if (!spec) { document.getElementById('sub').textContent = 'Serve the repo root to read page-index.json: python3 -m http.server'; return; }
   const read = readings ?? {};
-  const met = (p, k) => read[p.id]?.[k]?.met === true;
-  document.getElementById('sub').textContent = `${spec.pages.length} pages, names and goals read ${spec.read}. ${readings ? 'Readings loaded.' : 'No readings yet: every dial is grey.'}`;
+  const def = Object.fromEntries(defs.flat().filter(Boolean).map((d) => [d.id, d]));
+  const ids = (p, k) => p.metrics[k] ?? [];
+  const met = (p, k) => ids(p, k).length > 0 && ids(p, k).every((id) => read[id]?.met === true);
+  document.getElementById('sub').textContent = `${spec.pages.length} pages. ${readings ? 'Readings loaded.' : 'No readings yet: every dot is grey.'}`;
 
   const bar = document.getElementById('bar');
-  [['all', 'All'], ['miss', 'Misses'], ['map', 'With a process map']].forEach(([k, label]) => {
+  [['all', 'All'], ['miss', 'Misses']].forEach(([k, label]) => {
     const b = document.createElement('button');
     b.textContent = label;
     b.setAttribute('aria-pressed', k === filter);
@@ -67,7 +71,7 @@ Promise.all([load('pages.json'), load('readings.json')]).then(([spec, readings])
   });
 
   function draw() {
-    const keep = (p) => filter === 'all' || (filter === 'map' ? p.map : KINDS.some(([k]) => !met(p, k)));
+    const keep = (p) => filter === 'all' || KINDS.some(([k]) => !met(p, k));
     document.getElementById('grid').innerHTML = spec.pages.filter(keep).map((p) => `
       <button class="tile" data-id="${esc(p.id)}" aria-label="${esc(p.name)}">
         <span aria-hidden="true">${esc(p.icon)}</span><b>${esc(p.name)}</b>
@@ -78,10 +82,10 @@ Promise.all([load('pages.json'), load('readings.json')]).then(([spec, readings])
 
   function open(p) {
     document.getElementById('detail').innerHTML = `<h2>${esc(p.icon)} ${esc(p.name)}</h2>
-      <p class="mute">${p.map ? `Process map: <code>${esc(p.map)}</code>` : 'No GitHub side: Claude only'}</p>
+      <p class="mute">Process map: <code>${esc(p.map)}</code>. Tabs: ${p.tabs.map(esc).join(', ')}</p>
       <div class="cols">${KINDS.map(([k, c, n]) => `<div class="col" style="--k:var(--${c})"><h3>${n}</h3>
-        <div class="val">${esc(read[p.id]?.[k]?.value ?? '–')}</div>
-        <div>${esc(p[k].metric)}</div><div class="mute">Goal ${esc(p[k].goal)}</div></div>`).join('')}</div>`;
+        ${ids(p, k).map((id) => `<div class="val">${esc(read[id]?.value ?? '–')}</div>
+        <div>${esc(def[id]?.label ?? id)}</div><div class="mute">Goal ${esc(def[id] ? `${def[id].goal}${def[id].unit && def[id].unit !== '%' ? ' ' : ''}${def[id].unit ?? ''}` : 'in targets')}</div>`).join('')}</div>`).join('')}</div>`;
     document.getElementById('pane').showModal();
   }
   draw();
