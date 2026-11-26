@@ -51,7 +51,7 @@
    "tools": [
     "Agent view"
    ],
-   "rule": "A session that needs input shows as Needs input in agent view, so its prompts are counted.",
+   "rule": "Count the permission prompts each thread shows.",
    "rule_ref": "https://code.claude.com/docs/en/agent-view",
    "metric": "cp_newer_features.prompts_per_thread"
   },
