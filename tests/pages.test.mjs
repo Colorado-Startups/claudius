@@ -68,7 +68,7 @@ test('pages: the kit has three files that parse, carry placeholders and no em da
   }
   const readme = readFileSync('templates/claude/code-project/page/README.md', 'utf8');
   assert.ok(!readme.includes('—'));
-  assert.match(readme, /pages\.json/);
+  assert.match(readme, /page-index\.json/);
 });
 
 test('pages: each new map keeps its rules at twenty words and names no private path or account', () => {

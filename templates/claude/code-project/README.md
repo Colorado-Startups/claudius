@@ -21,13 +21,12 @@ flowchart LR
 
 ## Pages
 
-Each tab or feature of a Project gets a Quality, Speed and Consumption page. [`pages.json`](pages.json) names the 20 pages, one metric and goal for each of the three, with no data. [`pages.html`](pages.html) draws them as tiles: grey until a `readings.json` beside it fills a dial. Keep the readings in the project's private repo, never here.
+Each page scores one Project tab or feature on Quality, Speed and Consumption. [`page-index.json`](page-index.json) lists the pages, their tabs, metric ids and process map. Each metric's label and goal is in `targets/code-project-*.json`. The [page kit](page/README.md) adds a page.
 
-| Copy | To | Then |
-|---|---|---|
-| `pages.json`, `pages.html` | The project's private repo | Write `readings.json` as `{"<page id>": {"quality": {"value": "92%", "met": true}}}` and serve the folder |
-
-A page's `map` names its GitHub side in Git Crafter [`pages/maps`](https://github.com/SoulCraft-Org/git-crafter/tree/main/pages/maps), or `spend` in Compute Crafter. `null` means Claude only.
+| View | How |
+|---|---|
+| Scored | The pack builds the pages into the Quality site, as with any other tab |
+| At a glance, no engine | Serve the repo root and open [`pages.html`](pages.html). Dots stay grey until a `readings.json` beside it fills them: `{"<metric id>": {"value": "92%", "met": true}}`. Keep readings in the project's private repo, never here |
 
 ## Where a guard lives
 
