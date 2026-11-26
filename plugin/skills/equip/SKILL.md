@@ -28,12 +28,12 @@ Tiers are enforced by name: Claude Code accepts the official and community names
 
 | # | Step | Do |
 |---|---|---|
-| 1 | Inventory | `claude plugin list --json` for Claude Code installs; the desktop app's own plugins show in the session's skill listing and as `<name>@synced` |
+| 1 | Inventory | `claude plugin list --json` for Claude Code installs; the desktop app's own plugins show in the session's skill listing and as `<name>@synced`. A connector can also bring skills (Skills over MCP); check where your session lists them |
 | 2 | Use | Count calls by plugin over the account's recent sessions (Skill, Agent and `mcp__plugin_<name>_` tool calls in `~/.claude/projects`). `/plugin` Installed shows "Not used recently" after 14 days and 10 sessions |
 | 3 | Adopt | For each unused plugin, name the task and the project it fits, and keep it on. Say what it is for |
 | 4 | Show | One table: plugin, tier, use in the last 30 days, action (use, add, fix), tokens. Steps 5 to 7 act on a row only after the person says yes |
 | 5 | Add | A 🅳 plugin or custom piece with an official equivalent: `claude plugin install <name>@claude-plugins-official` and put it to work. The old copy stays on |
-| 6 | Fix | A plugin or connector that fails to load or waits for a sign-in: name the repair or the sign-in step for the owner. It stays on meanwhile |
+| 6 | Fix | A plugin or connector that fails to load or waits for a sign-in: name the repair or the sign-in step for the owner. A connector whose skills are missing on a Team plan waits for an admin to enable Skills over MCP: name that step. The plugin or connector stays on meanwhile |
 | 7 | Restore | An install left turned off is turned back on. A project install record whose folder is gone loads in no session; only that record is removed (`--scope project` runs inside that folder) |
 | 8 | Budget | If `/doctor` or `/skill-doctor` says skill descriptions are dropped, `skillListingBudgetFraction` raises the listing budget, at a token cost on every turn. Offer it; never set it unasked |
 | 9 | Measure | `claude plugin details <name>` for each plugin's always-on tokens; `/context` or `/usage`; in a Claudius repo, the Claude desktop app tab. Report the cost; save tokens elsewhere (batched reviews, fresh sessions), never by turning one off |
