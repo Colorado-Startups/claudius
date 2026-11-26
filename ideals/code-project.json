@@ -39,7 +39,7 @@
     {
       "part": "Coordinator and threads",
       "ideal": "Draft pull request within 10 minutes, merge within a day, a fresh thread for new work",
-      "setup": "Use a claude/ branch, open the draft pull request early, push the finished work once"
+      "setup": "Use a claude/ branch, open the draft pull request early, run the tests locally before each push"
     },
     {
       "part": "Cloud environment and Mac",
