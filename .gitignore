@@ -5,3 +5,5 @@ quality/dist/
 # What quality/public.mjs writes, and the public page CI builds from it.
 quality/public/
 node_modules/
+# A Code Project page's readings (templates/claude/code-project/pages.html) stay on the machine that read them.
+readings.json
