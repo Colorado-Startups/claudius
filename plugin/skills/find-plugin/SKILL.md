@@ -18,7 +18,7 @@ No shell or file tool, as in chat or Cowork without the tool: answer from the se
 flowchart LR
   N[Need] --> O{Already on?} -->|yes| U[Name it, use it]
   O -->|no| C[Official catalog] --> D[Directory] --> T[Table] --> I[Turn on]
-  C --> G{Nothing fits?} -->|yes| S[Say so, offer a small skill]
+  C --> G{Nothing fits?} -->|yes| S[Say so, write a small skill]
 ```
 
 | # | Step | Do |
@@ -27,7 +27,7 @@ flowchart LR
 | 2 | Catalog | Search `~/.claude/plugins/marketplaces/claude-plugins-official/.claude-plugin/marketplace.json` by keyword in name and description; read name, description and author |
 | 3 | Directory | Then Customize > Plugins > Discover and Customize > Connectors on claude.ai, or `/plugin directory` in Claude Code |
 | 4 | Answer | One table: need, pick, tier, turn on with, sign-in needed. Then turn on a 🅰 or 🅱 pick with the CLI, since installing is reversible. A sign-in the platform forces is one exact line for the owner |
-| 5 | Nothing fits | Say so plainly. Offer a small skill written with `skill-creator`. A community repo is the last resort, named with its license and the reason |
+| 5 | Nothing fits | Say so plainly. Write a small skill with `skill-creator`. A community repo is the last resort, named with its license and the reason |
 
 | Tier | Means |
 |---|---|
