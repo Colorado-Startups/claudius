@@ -305,10 +305,6 @@
               "pattern": "## Scheduled tasks"
             },
             {
-              "label": "A weekly digest task",
-              "pattern": "digest[^\\n]*weekly|weekly[^\\n]*digest"
-            },
-            {
               "label": "A pin check task",
               "pattern": "pin check"
             }

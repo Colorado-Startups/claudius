@@ -169,7 +169,7 @@
     "goal": 95,
     "near": 80,
     "direction": "higher",
-    "goal_source": "template goal, no public benchmark: a weekly digest is read on schedule or not at all; see Claude Code Docs: Automate work with scheduled tasks (code.claude.com/docs/en/routines), read 2026-11-26",
+    "goal_source": "template goal, no public benchmark: a weekly task is useful on schedule or not at all; see Claude Code Docs: Automate work with scheduled tasks (code.claude.com/docs/en/routines), read 2026-11-26",
     "source": "the scheduled task run list, read on the machine that ran the sessions; not measured until a collector reads it",
     "needs": "local-files",
     "chart": "gauge",
