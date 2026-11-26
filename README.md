@@ -80,7 +80,7 @@ flowchart LR
 | Plugin | `plugin/`: the `claudius` Claude Code plugin (skills `plan`, `merge`, `equip`, `find-plugin`, `plain-voice`, `visibility`). Install: `claude plugin marketplace add Colorado-Startups/claudius`, then `claude plugin install claudius@claudius` |
 | Pack | 28 tabs: Claude, Claude settings, Claude desktop app, Blockers, Tokens, Instructions, Best practices, Visibility, Code Project and 19 Code Project page tabs, one per part of a project. Maps: Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory, Schedule |
 | Engine | Git Crafter's `actions/pages` and CI standard, pinned by full commit SHA. No engine code lives here |
-| Public pages | Built in CI from `quality/public/`. The Quality page shows only metrics read from GitHub and the repo's files. Each metric that needs local files is dropped: not shown, counted or listed. The exceptions are the ones `quality/public-params.json` reads from committed files alone. A tab left with no metric, Tokens and Claude desktop app, is left off; it shows on a `--local` page (Git Crafter v7.0.1 or later). The Process page shows each map step such a metric does not score |
+| Public pages | Built in CI from `quality/public/`. The Quality page shows only metrics read from GitHub and the repo's files. Each metric that needs local files is dropped: not shown, counted or listed. The exceptions are the ones `quality/public-params.json` reads from committed files alone. A tab left with no metric (Tokens, Claude desktop app and 16 of the 19 `cp-` tabs) is left off; it shows on a `--local` page (Git Crafter v7.0.1 or later). The Process page shows each map step such a metric does not score |
 | Private numbers | Usage, cost, transcripts and connectors. Read on your own machine only, never uploaded |
 | Licence | Apache-2.0. Source of the moved files: [NOTICE](NOTICE) |
 
@@ -103,7 +103,7 @@ flowchart LR
 | --- | --- |
 | 1 | Adopt Git Crafter: its `templates/ci/README.md` |
 | 2 | In `quality/config.json`, add `"packs": ["Colorado-Startups/claudius@<40-hex sha>"]`, the commit of the latest [release](https://github.com/Colorado-Startups/claudius/releases) |
-| 3 | If `quality/config.json` lists `tabs`, add the pack's ids too (`claude`, `claude-settings`, `desktop-app`, `blockers`, `tokens`, `instructions`, `practices`): a pack's tabs join only the default list (Git Crafter `quality/CONFIG.md`) |
+| 3 | If `quality/config.json` lists `tabs`, add the pack's ids too (every id in [`pack.json`](pack.json)): a pack's tabs join only the default list (Git Crafter `quality/CONFIG.md`) |
 | 4 | Pass that same file as `actions/pages`' `quality-config`, and name it as the Process config's `quality_config`: only that file's packs are fetched, so a map from the pack is found there alone |
 | 5 | `actions/pages` checks the pack out at that SHA and runs its collectors |
 | 6 | For a `--local` run, clone the pack at that SHA into `$CODE_OS_PACKS/Colorado-Startups/claudius` (default `.code-os-packs/` in the repo), with no SHA folder (Git Crafter `quality/packs.mjs`) |
@@ -135,3 +135,22 @@ flowchart LR
 | Equip | none, so the public page leaves it out | all six steps read local-only metrics |
 | Publish | all six | every step reads the repo's committed files |
 | Visibility | all five | every step reads GitHub; two need a token with admin reads and read not measured without one |
+| Project | all six | every step reads repo files or merged pull requests |
+| Ship | `ready`, `check` | the other four steps read local-only metrics |
+| Environment | `say` | the other four steps read local-only metrics |
+| Remember | `say`, `schedule` | the other three steps read local-only metrics |
+| Setup | none, so the public page leaves it out | all six lanes read local-only metrics |
+| Memory | none, so the public page leaves it out | all six lanes read local-only metrics |
+| Schedule | `threads`, `pr-auto-fix` | the other four lanes read local-only metrics |
+| Context | `limits` | the other three steps read local-only metrics |
+| Setup check | `say`, `check` | the other four steps read local-only metrics |
+| Scheduled task | `define` | the other three steps read local-only metrics |
+| Local thread | none, so the public page leaves it out | all four steps read local-only metrics |
+| Pull request flow | all six | every step reads GitHub |
+| Connectors | none, so the public page leaves it out | all four steps read local-only metrics |
+| Plugins | `skip` | the other four steps read local-only metrics |
+| Skills | `write`, `test` | the other three steps read local-only metrics |
+| Subagents | `delegate`, `route` | the other three steps read local-only metrics |
+| Hooks | `say`, `safe` | the other two steps read local-only metrics |
+
+The table is the public Process page as `node quality/public.mjs` writes it on 2026-11-26: a map's steps are in [maps/README.md](maps/README.md), and each step's metric names whether it needs local files (`needs` in `targets/`).
