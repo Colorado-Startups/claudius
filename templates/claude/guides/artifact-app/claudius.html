@@ -1,119 +1,330 @@
 <title>Claudius</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700&family=Alegreya+SC:wght@500;700&display=swap">
 <style>
-/* Layout: a night-blue title band with the gnome, four views under it (Needs you, Builds, Quality, Repos),
-   one working surface on warm ground. Colors, type and radii come from the Claudius pages' own tokens. */
+/* The Reach: a fantasy command center. Every asset is drawn here in SVG and CSS, original to Claudius.
+   Repos are keeps, pull requests are quests, merges are loot, the Quality page is the character sheet.
+   Two skies from one set of tokens: dusk (dark) and daybreak (light). */
 :root{
-  --ground:#FFFBF3; --surface:#FDF1D8; --surface-2:#F8E3B8; --rule:#E6D3AE;
-  --text:#2B1D12; --dim:#5A4632; --accent:#F0A92B; --accent-deep:#D9921A; --on-accent:#2B1D12; --link:#A3400F;
-  --focus:#14223F; --night:#14223F; --on-night:#FFFBF3; --on-night-dim:#E9DCC0;
-  --good:#3E5A4A; --good-wash:#E3EEE6; --warn:#7A4B00; --warn-wash:#FBE9C2; --bad:#B42318; --bad-wash:#FBE1DC;
-  --run:#1A5CA8; --run-wash:#E4EEF9;
-  --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --r-card:10px; --r-chip:4px;
+  --font-body:"Alegreya Sans","Segoe UI",ui-sans-serif,system-ui,sans-serif;
+  --font-display:"Alegreya SC","Palatino Linotype",Palatino,Georgia,serif;
+  --ground:#F6E9CB; --panel:#FDF1D8; --panel-2:#F4DFB0; --rule:#CDAE6E; --edge:#8A5A12;
+  --text:#2B1D12; --dim:#5A4632; --gold:#E7A62A; --gold-deep:#C98A12; --gold-ink:#7A4B00; --on-gold:#2B1D12;
+  --link:#8A3A0C; --focus:#14223F;
+  --jade:#2F6B4F; --jade-wash:#DCEBDD; --ember:#B42318; --ember-wash:#FBE1DC;
+  --azure:#1A5CA8; --azure-wash:#E0EAF7; --violet:#5B3FA6; --violet-wash:#E9E2F7; --amber-ink:#7A4B00; --amber-wash:#FBE9C2;
+  --sky-top:#7FBFE8; --sky-low:#FFE6B0; --sun:#FFF3B8; --mtn-far:#9DB7D1; --mtn-near:#7D9E95; --hill:#86B574; --grass:#6AA35E; --path:#D9BB82;
+  --cloud:#FFFFFF; --stars:0; --glow:0;
+  --wall:#BBA98C; --roof:#B5482E; --timber:#8A5A33; --house:#EEDDB6; --stone:#9C9486; --door:#5A3A1F;
+  --hud:#14223F; --hud-text:#FFFBF3; --hud-dim:#E9DCC0; --hud-rule:#34476F; --hud-chip:#1F3260;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --ground:#101B33; --surface:#1B2A4B; --surface-2:#27396A; --rule:#34476F;
-  --text:#FFFBF3; --dim:#E9DCC0; --link:#FFB85C; --focus:#F0A92B; --night:#0A1226;
-  --good:#8FD0A9; --good-wash:#1B3A2C; --warn:#F5C25B; --warn-wash:#3A2F10; --bad:#FF8A7A; --bad-wash:#4A2220;
-  --run:#8DB8F0; --run-wash:#1D3558; color-scheme:dark}}
+  --ground:#0B1230; --panel:#18233F; --panel-2:#22315A; --rule:#3A4D7D; --edge:#B8892B;
+  --text:#FFF6E3; --dim:#D9CCAE; --gold:#F6BD4A; --gold-deep:#D9921A; --gold-ink:#F6BD4A; --link:#FFB85C; --focus:#F0A92B;
+  --jade:#7FD6A4; --jade-wash:#1B3A2C; --ember:#FF8A7A; --ember-wash:#4A2220;
+  --azure:#8DB8F0; --azure-wash:#1D3558; --violet:#B9A3FF; --violet-wash:#2C2459; --amber-ink:#F5C25B; --amber-wash:#3A2F10;
+  --sky-top:#0B1230; --sky-low:#6A3F64; --sun:#F4EBD0; --mtn-far:#222D5C; --mtn-near:#18224A; --hill:#1D4743; --grass:#173A3A; --path:#6A5B46;
+  --cloud:#39407A; --stars:1; --glow:1;
+  --wall:#5C6685; --roof:#8E3A33; --timber:#5A4030; --house:#8A7A66; --stone:#566079; --door:#2B1D12;
+  --hud:#0A1226; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --ground:#101B33; --surface:#1B2A4B; --surface-2:#27396A; --rule:#34476F;
-  --text:#FFFBF3; --dim:#E9DCC0; --link:#FFB85C; --focus:#F0A92B; --night:#0A1226;
-  --good:#8FD0A9; --good-wash:#1B3A2C; --warn:#F5C25B; --warn-wash:#3A2F10; --bad:#FF8A7A; --bad-wash:#4A2220;
-  --run:#8DB8F0; --run-wash:#1D3558; color-scheme:dark}
+  --ground:#0B1230; --panel:#18233F; --panel-2:#22315A; --rule:#3A4D7D; --edge:#B8892B;
+  --text:#FFF6E3; --dim:#D9CCAE; --gold:#F6BD4A; --gold-deep:#D9921A; --gold-ink:#F6BD4A; --link:#FFB85C; --focus:#F0A92B;
+  --jade:#7FD6A4; --jade-wash:#1B3A2C; --ember:#FF8A7A; --ember-wash:#4A2220;
+  --azure:#8DB8F0; --azure-wash:#1D3558; --violet:#B9A3FF; --violet-wash:#2C2459; --amber-ink:#F5C25B; --amber-wash:#3A2F10;
+  --sky-top:#0B1230; --sky-low:#6A3F64; --sun:#F4EBD0; --mtn-far:#222D5C; --mtn-near:#18224A; --hill:#1D4743; --grass:#173A3A; --path:#6A5B46;
+  --cloud:#39407A; --stars:1; --glow:1;
+  --wall:#5C6685; --roof:#8E3A33; --timber:#5A4030; --house:#8A7A66; --stone:#566079; --door:#2B1D12;
+  --hud:#0A1226; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--ground);color:var(--text);font:14px/1.5 var(--font);margin:0}
+body{background:var(--ground);color:var(--text);font:16px/1.45 var(--font-body);margin:0;min-height:100vh}
 a{color:var(--link)}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.band :focus-visible{outline-color:var(--accent)}
-nav button:focus-visible{outline-offset:-3px}   /* the nav scrolls sideways, which would clip an outside ring */
-button{font:inherit;cursor:pointer}
-.band{border-bottom:1px solid var(--rule);background:var(--night);color:var(--on-night);padding:14px max(16px,env(safe-area-inset-right,0px)) 0 max(68px,env(safe-area-inset-left,0px))}
-.id{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.gnome{width:44px;height:44px;border-radius:50%;border:2px solid var(--accent);display:block;background:var(--night)}
-.id h1{margin:0;font-size:1.375rem;font-weight:700;letter-spacing:.01em}
-.id .meta{color:var(--on-night-dim);font-size:.8125rem;flex:1;min-width:12ch}
-.ghost{background:transparent;color:var(--on-night);border:1px solid var(--on-night-dim);border-radius:var(--r-chip);padding:5px 12px}
-.ghost:hover{background:rgba(255,251,243,.12)}
-nav{display:flex;gap:4px;margin-top:10px;overflow-x:auto}
-nav button{background:transparent;color:var(--on-night-dim);border:0;border-bottom:3px solid transparent;padding:8px 14px;font-weight:600}
-nav button[aria-current="page"]{color:var(--on-night);border-bottom-color:var(--accent)}
-nav button:hover{color:var(--on-night)}
-main{padding:20px max(16px,env(safe-area-inset-right,0px)) 32px max(16px,env(safe-area-inset-left,0px));max-width:980px}
-h2{font-size:1rem;margin:0 0 10px;font-weight:700}
-h3{font-size:.8125rem;margin:0 0 6px;font-weight:700;color:var(--dim)}
-.cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:start}
-@media (max-width:640px){.cols{grid-template-columns:minmax(0,1fr)}}
-.stack{display:flex;flex-direction:column;gap:20px;min-width:0}
-.card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-card);padding:16px}
-.list{display:flex;flex-direction:column;min-width:0}
-.row{display:grid;grid-template-columns:8.5rem minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--rule);border-left:4px solid transparent}
-.row:last-child{border-bottom:0}
-.row.bad{border-left-color:var(--bad)} .row.warn{border-left-color:var(--accent-deep)} .row.ok{border-left-color:var(--good)} .row.run{border-left-color:var(--run)}
-.row .t{min-width:0;overflow-wrap:anywhere}
-.row .sub{grid-column:2/-1;color:var(--dim);font-size:.8125rem;overflow-wrap:anywhere}
-.num{color:var(--dim);font-variant-numeric:tabular-nums}
-.pill{display:inline-block;border-radius:var(--r-chip);padding:1px 8px;font-size:.75rem;font-weight:650;white-space:nowrap;background:var(--surface-2);color:var(--text)}
-.pill.bad{background:var(--bad-wash);color:var(--bad)} .pill.warn{background:var(--warn-wash);color:var(--warn)}
-.pill.ok{background:var(--good-wash);color:var(--good)} .pill.run{background:var(--run-wash);color:var(--run)}
-.empty{color:var(--dim);padding:14px 12px} p.empty{padding:0}
+.hud :focus-visible,.stage :focus-visible{outline-color:var(--gold)}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3{font-family:var(--font-display);letter-spacing:.02em;margin:0}
+h2{font-size:1.25rem;font-weight:700} h3{font-size:1rem;font-weight:700;color:var(--dim)}
 .sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.err{background:var(--bad-wash);color:var(--bad);border-radius:var(--r-chip);padding:8px 12px;margin-bottom:12px;overflow-wrap:anywhere}
-.meter{display:block;height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;min-width:60px}
-.meter i{display:block;height:100%;background:var(--good)}
-.meter.warn i{background:var(--accent-deep)} .meter.bad i{background:var(--bad)}
-.score{display:grid;grid-template-columns:7.5rem minmax(0,1fr) 3ch;gap:10px;align-items:center;margin:6px 0}
-.score b{font-variant-numeric:tabular-nums;text-align:right}
-.master b{font-size:1.5rem}
-.tbl{width:100%;border-collapse:collapse}
+
+/* ---- the HUD: portrait, level, XP, stats, view tabs ---- */
+.hud{background:linear-gradient(180deg,var(--hud),color-mix(in srgb,var(--hud) 82%,#000));color:var(--hud-text);border-bottom:3px solid var(--edge);
+  box-shadow:0 2px 0 #0004;padding:12px max(16px,env(safe-area-inset-right,0px)) 0 max(76px,env(safe-area-inset-left,0px));position:relative}
+.hud-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.portrait{position:relative;width:62px;height:62px;flex:none}
+.portrait img{width:100%;height:100%;border-radius:50%;display:block;background:var(--hud);border:3px solid var(--gold);box-shadow:0 0 0 2px var(--hud),0 0 0 4px var(--edge),0 0 14px #F0A92B66}
+.lvl{position:absolute;right:-8px;bottom:-6px;min-width:26px;height:26px;border-radius:13px;background:var(--gold);color:var(--on-gold);font:700 .9rem/26px var(--font-display);text-align:center;border:2px solid var(--hud);padding:0 5px}
+.who{min-width:0;flex:1 1 260px}
+.who h1{font-size:1.5rem;line-height:1.1}
+.who .title{color:var(--hud-dim);font-size:.9375rem}
+.xp{margin-top:5px;display:grid;grid-template-columns:minmax(80px,1fr) auto;gap:8px;align-items:center;max-width:380px}
+.xpbar{height:12px;border-radius:7px;background:#0007;border:1px solid var(--hud-rule);overflow:hidden;position:relative}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,#F0A92B,#FFD97A);border-radius:6px;position:relative;overflow:hidden}
+.xp small{color:var(--hud-dim);font-size:.8125rem;white-space:nowrap}
+.hud-stats{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.stat{background:var(--hud-chip);border:1px solid var(--hud-rule);border-radius:8px;padding:3px 10px;text-align:center;min-width:64px}
+.stat b{display:block;font:700 1.125rem/1.1 var(--font-display)} .stat span{font-size:.75rem;color:var(--hud-dim)}
+.alertbtn{display:flex;align-items:center;gap:8px;border:2px solid var(--gold);background:#2A1F0A;color:#FFE9B0;border-radius:10px;padding:4px 12px 4px 6px;font-weight:700}
+.alertbtn .bang{width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--on-gold);font:700 1.2rem/28px var(--font-display);text-align:center}
+.alertbtn.on{animation:glowpulse 1.8s ease-in-out infinite}
+.alertbtn.off{border-color:var(--hud-rule);background:var(--hud-chip);color:var(--hud-dim)} .alertbtn.off .bang{background:#3b4c7a;color:var(--hud-dim)}
+.rune{background:var(--hud-chip);border:1px solid var(--hud-rule);border-radius:8px;padding:6px 12px;color:var(--hud-text)}
+.rune:hover{border-color:var(--gold);transform:translateY(-1px)} .rune:active{transform:translateY(1px)}
+.rune[aria-pressed="true"]{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.meta{color:var(--hud-dim);font-size:.8125rem;margin-top:6px}
+.tools{display:flex;gap:6px;margin-left:auto}
+.rune{font-size:.9375rem;padding:5px 10px}
+nav{display:flex;gap:2px;margin-top:8px;overflow-x:auto;scrollbar-width:thin}
+nav button{background:transparent;border:0;border-bottom:4px solid transparent;color:var(--hud-dim);padding:8px 14px;font:700 1rem var(--font-display);letter-spacing:.03em;white-space:nowrap;display:flex;gap:7px;align-items:center;transition:color .15s,background .15s}
+nav button svg{width:18px;height:18px;flex:none}
+nav button:hover{color:var(--hud-text);background:#ffffff12}
+nav button[aria-current="page"]{color:var(--gold);border-bottom-color:var(--gold);background:#ffffff0d}
+nav button .count{background:var(--gold);color:var(--on-gold);border-radius:9px;padding:0 6px;font:700 .75rem/1.4 var(--font-body)}
+nav button:focus-visible{outline-offset:-3px}
+
+/* ---- panels ---- */
+main{padding:18px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));max-width:1040px;margin:0 auto}
+.view{display:flex;flex-direction:column;gap:20px;min-width:0}
+.panel{background:var(--panel);border:2px solid var(--edge);border-radius:12px;padding:14px 16px;position:relative;
+  box-shadow:inset 0 0 0 3px var(--panel),inset 0 0 0 4px var(--rule),0 3px 0 #0003}
+.panel>h2,.panel>.ph{margin-bottom:10px}
+.ph{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.note{color:var(--dim);font-size:.875rem} p.note{margin:6px 0 0}
+.err{background:var(--ember-wash);color:var(--ember);border:1px solid var(--ember);border-radius:8px;padding:8px 12px;margin-bottom:10px;overflow-wrap:anywhere;font-weight:500}
+.empty{color:var(--dim);padding:10px 2px;margin:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px}
+.chip{display:inline-block;border-radius:6px;padding:0 8px;font-size:.8125rem;font-weight:700;white-space:nowrap;background:var(--panel-2);color:var(--text);line-height:1.5}
+.chip.bad{background:var(--ember-wash);color:var(--ember)} .chip.warn{background:var(--amber-wash);color:var(--amber-ink)}
+.chip.ok{background:var(--jade-wash);color:var(--jade)} .chip.run{background:var(--azure-wash);color:var(--azure)} .chip.mut{background:var(--violet-wash);color:var(--violet)}
+.num{font-variant-numeric:tabular-nums}
+.bar{display:block;height:10px;border-radius:5px;background:var(--panel-2);border:1px solid var(--rule);overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;border-radius:4px;background:var(--jade)}
+.bar.warn i{background:var(--gold-deep)} .bar.bad i{background:var(--ember)} .bar.run i{background:var(--azure)} .bar.mut i{background:var(--violet)}
+.bar.bad i{background-image:repeating-linear-gradient(135deg,transparent 0 5px,#0004 5px 8px)}
+.bar.run i{background-image:linear-gradient(110deg,transparent 30%,#ffffff55 50%,transparent 70%);background-size:200% 100%}
+
+/* ---- the Realm: sky, keeps, road, guide ---- */
+.stage{position:relative;border-radius:14px;overflow:hidden;border:2px solid var(--edge);background:var(--sky-top);box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--rule),0 6px 0 #0003;isolation:isolate}
+.sky{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.sky .grad-top{stop-color:var(--sky-top)} .sky .grad-low{stop-color:var(--sky-low)}
+.sky .mf{fill:var(--mtn-far)} .sky .mn{fill:var(--mtn-near)} .sky .hl{fill:var(--hill)}
+.sky .sun{fill:var(--sun)} .sky .cloud{fill:var(--cloud);opacity:.7} .sky .star{fill:#fff;opacity:calc(var(--stars)*.9)}
+.sky .halo{fill:var(--sun);opacity:.22}
+.keeps{display:flex;flex-wrap:wrap;gap:0 4px;justify-content:center;padding:34px 14px 0}
+.kcol{flex:1 1 300px;max-width:430px;min-width:0;display:flex;flex-direction:column;align-items:stretch}
+.keep{position:relative;display:block;width:100%;background:none;border:0;padding:0;border-radius:12px;transition:transform .2s ease,filter .2s}
+.keep:hover,.keep:focus-visible{transform:translateY(-5px);filter:brightness(1.08) drop-shadow(0 0 10px #F0A92B88)}
+.keep svg.scene{display:block;width:100%;height:auto;overflow:visible}
+.keep .party{position:absolute;width:9%;transform:translateX(-50%);pointer-events:none}
+.keep .party svg{display:block;width:100%}
+.keep .mk{position:absolute;top:-6px;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px}
+.mk .bang,.mk .flame,.mk .star{width:34px;height:34px;display:block}
+.mk .bang{background:var(--gold);color:var(--on-gold);border-radius:50%;font:700 1.5rem/34px var(--font-display);text-align:center;border:3px solid #fff8;box-shadow:0 0 18px 4px #F0A92Baa;animation:hop 1.3s ease-in-out infinite}
+.mk .flame{animation:flicker .9s ease-in-out infinite;filter:drop-shadow(0 0 8px #ff5a3caa)}
+.mk .star{animation:hop 1.7s ease-in-out infinite;filter:drop-shadow(0 0 8px #7fd6a4cc)}
+.plate{margin:2px 10px 0;background:var(--panel);border:2px solid var(--edge);border-radius:10px;padding:6px 10px 8px;position:relative;z-index:1;box-shadow:inset 0 0 0 2px var(--panel),inset 0 0 0 3px var(--rule),0 3px 0 #0003}
+.plate .nm{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.plate .nm b{font:700 1.125rem var(--font-display);overflow-wrap:anywhere}
+.plate .nm span{color:var(--dim);font-size:.8125rem}
+.plate .row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;align-items:center}
+.plate .more{display:grid;grid-template-rows:0fr;transition:grid-template-rows .25s}
+.plate .more>div{overflow:hidden;min-height:0;color:var(--dim);font-size:.8125rem}
+.kcol:hover .more,.kcol:focus-within .more{grid-template-rows:1fr}
+.plate .go{background:none;border:0;padding:4px 2px;min-height:28px;color:var(--link);font-weight:700;text-decoration:underline;margin-left:auto}
+.road{position:relative;height:128px;margin-top:-8px;background:linear-gradient(180deg,var(--grass),color-mix(in srgb,var(--grass) 70%,#000))}
+.road::before{content:"";position:absolute;left:0;right:0;top:34px;height:28px;background:var(--path);opacity:.85;border-radius:50%/100%;transform:scaleX(1.06)}
+.guide{position:absolute;bottom:6px;left:12px;width:76px;transition:left 1s cubic-bezier(.45,.05,.3,1)}
+.gnome-btn{display:block;background:none;border:0;padding:0;width:100%;border-radius:12px}
+.gnome-btn:hover{filter:brightness(1.12)}
+.bubble{position:absolute;bottom:26px;left:80px;width:max-content;max-width:min(300px,60vw);background:var(--panel);color:var(--text);border:2px solid var(--edge);border-radius:12px;padding:8px 12px;font-size:.9375rem;line-height:1.3;
+  box-shadow:0 3px 0 #0004;animation:pop .25s ease-out;z-index:3}
+.bubble::after{content:"";position:absolute;left:-9px;bottom:12px;width:14px;height:14px;background:var(--panel);border-left:2px solid var(--edge);border-bottom:2px solid var(--edge);transform:rotate(45deg)}
+.guide.flip .bubble{left:auto;right:80px} .guide.flip .bubble::after{left:auto;right:-9px;transform:rotate(225deg)}
+.guidebar{display:flex;gap:10px;align-items:flex-end;margin-bottom:-6px}
+.guidebar .gwrap{width:58px;flex:none}
+.guidebar .bubble{position:relative;left:0;bottom:auto;margin-bottom:12px;max-width:560px}
+.gnome-svg{display:block;width:100%;height:auto;overflow:visible}
+.gnome-svg *{transform-box:fill-box}
+.gnome-svg .tunic{fill:#2f7a74} .gnome-svg .boot{fill:#4a2f1b} .gnome-svg .skin{fill:#f0c9a0} .gnome-svg .nose{fill:#e39c7e}
+.gnome-svg .beard{fill:#f6f0e2;stroke:#d9cfb8;stroke-width:1} .gnome-svg .hat{fill:#8a5a33} .gnome-svg .hatband{fill:#5a3a1f}
+.gnome-svg .brass{fill:none;stroke:#c8932b;stroke-width:2.2} .gnome-svg .lens{fill:#ffd27a} .gnome-svg .eye{fill:#2b1d12}
+.gnome-svg .belt{fill:#5a3a1f} .gnome-svg .buckle{fill:#e7a62a} .gnome-svg .shadow{fill:#000;opacity:.25}
+.gnome-svg .metal{fill:#9aa3b5} .gnome-svg .handle{fill:#6b4423}
+.gnome-svg .bangtxt{font:700 22px var(--font-display);fill:var(--gold);opacity:0;stroke:#2b1d12;stroke-width:1}
+.gnome-svg .sweat{fill:#7fc4ff;opacity:0}
+.g-body{transform-origin:50% 100%;animation:breathe 3.4s ease-in-out infinite}
+.g-eyes{transform-origin:50% 50%;animation:blink 5s infinite}
+.g-hat{transform-origin:50% 100%;animation:sway 4.2s ease-in-out infinite}
+.g-armr{transform-origin:20% 15%} .g-arml{transform-origin:80% 15%}
+.gnome-svg.working .g-armr{animation:hammer .7s ease-in-out infinite}
+.gnome-svg.happy .g-armr{transform:rotate(150deg);animation:cheer .6s ease-in-out infinite alternate} .gnome-svg.happy .g-arml{transform:rotate(-150deg);animation:cheer2 .6s ease-in-out infinite alternate}
+.gnome-svg.happy .g-body{animation:jump .6s ease-in-out infinite}
+.gnome-svg.alert .bangtxt{opacity:1;animation:hop 1s ease-in-out infinite} .gnome-svg.alert .g-body{animation:jump 1.1s ease-in-out infinite}
+.gnome-svg.alert .lens{animation:lensglow 1.1s ease-in-out infinite}
+.gnome-svg.worried .sweat{opacity:.95;animation:drip 1.4s ease-in infinite}
+.guide.walking .gnome-svg .g-body{animation:walk .38s ease-in-out infinite}
+.dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:20px}
+.pips{display:flex;gap:6px;flex-wrap:wrap}
+.legend{display:flex;flex-direction:column;gap:6px;margin:8px 0 0;padding:0;list-style:none}
+.legend li{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.loot{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none}
+.loot li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 2px;border-bottom:1px dashed var(--rule)}
+.loot li:last-child{border-bottom:0}
+.coin{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#E7A62A 55%,#A8690B);box-shadow:0 0 0 1px #6b430a}
+.loot a{overflow-wrap:anywhere}
+
+/* ---- quests, needs, stats, keeps ---- */
+.quest{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:10px 4px;border-bottom:1px dashed var(--rule);transition:background .15s,transform .15s}
+.quest:last-child{border-bottom:0}
+.quest:hover{background:color-mix(in srgb,var(--gold) 12%,transparent);transform:translateX(3px)}
+.quest .ico{grid-row:1/4;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;background:var(--panel-2);border:2px solid var(--rule)}
+.quest .ico svg{width:34px;height:36px;overflow:visible}
+.quest.bad .ico{border-color:var(--ember);background:var(--ember-wash)} .quest.ok .ico{border-color:var(--jade);background:var(--jade-wash)}
+.quest.run .ico{border-color:var(--azure);background:var(--azure-wash)} .quest.mut .ico{border-color:var(--violet);background:var(--violet-wash)} .quest.gold .ico{border-color:var(--gold-deep);background:var(--amber-wash)}
+.quest .t{min-width:0;overflow-wrap:anywhere;font-weight:500;font-size:1.0625rem}
+.quest .sub{grid-column:2/-1;color:var(--dim);font-size:.875rem;overflow-wrap:anywhere;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.quest .prog{grid-column:2/-1;display:grid;grid-template-columns:minmax(80px,1fr) auto;gap:8px;align-items:center}
+.quest .prog small{color:var(--dim);font-size:.8125rem;white-space:nowrap}
+.sheet{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;align-items:center}
+@media (max-width:640px){.sheet{grid-template-columns:minmax(0,1fr)}}
+.stat-row{display:grid;grid-template-columns:7.5rem minmax(0,1fr) 3ch;gap:10px;align-items:center;margin:8px 0}
+.stat-row b{font:700 1.25rem var(--font-display);text-align:right} .stat-row .nm span{display:block;color:var(--dim);font-size:.8125rem}
+.radar{width:100%;max-width:260px;margin:0 auto;display:block}
+.radar .ring{fill:none;stroke:var(--rule);stroke-width:1} .radar .shape{fill:color-mix(in srgb,var(--gold) 35%,transparent);stroke:var(--gold-deep);stroke-width:2.5;stroke-linejoin:round}
+.radar text{fill:var(--dim);font:600 12px var(--font-body)} .radar .goal{fill:none;stroke:var(--jade);stroke-width:1.5;stroke-dasharray:4 3}
+.trophies{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:10px;margin:0;padding:0;list-style:none}
+.trophy{display:grid;grid-template-columns:40px minmax(0,1fr);gap:4px 10px;align-items:center;padding:8px;border:2px solid var(--rule);border-radius:10px;background:var(--panel-2)}
+.trophy .medal{grid-row:1/3;width:40px;height:40px}
+.trophy b{font-family:var(--font-display);font-size:1rem;line-height:1.15} .trophy span{color:var(--dim);font-size:.8125rem;line-height:1.25}
+.trophy.have{border-color:var(--gold-deep)} .trophy.lock{opacity:.78} .trophy.lock .medal{filter:grayscale(1) opacity(.6)}
 .tblwrap{overflow-x:auto}
-.tbl th,.tbl td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:middle}
-.tbl th{font-size:.8125rem;color:var(--dim);font-weight:650}
-.tbl td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
-.tbl td .mini{display:inline-block;width:44px;vertical-align:middle;margin-left:8px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.chip{border-radius:var(--r-chip);padding:2px 8px;font-size:.8125rem;font-weight:600}
-.chip.ok{background:var(--good-wash);color:var(--good)} .chip.bad{background:var(--bad-wash);color:var(--bad)} .chip.mut{background:var(--surface-2);color:var(--dim)}
-.repohead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
-.repohead h2{margin:0}
-.note{color:var(--dim);font-size:.8125rem}
-details{margin-top:24px}
-summary{cursor:pointer;font-weight:650}
-textarea{display:block;width:100%;max-width:520px;min-height:4.5em;margin:8px 0;font:inherit;background:var(--ground);color:var(--text);border:1px solid var(--rule);border-radius:var(--r-chip);padding:8px}
-.primary,.save{background:var(--accent);color:var(--on-accent);border:0;border-radius:var(--r-chip);padding:7px 14px;font-weight:700}
-.primary:hover,.save:hover{background:var(--accent-deep)}
-.plain .band{padding-left:max(16px,env(safe-area-inset-left,0px))}
-.install{max-width:560px;margin-block:24px}
-.foot{margin-top:28px;color:var(--dim);font-size:.8125rem}
-@media (prefers-reduced-motion:no-preference){.meter i{transition:width .3s}}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th,.tbl td{text-align:left;padding:7px 10px;border-bottom:1px dashed var(--rule);vertical-align:middle}
+.tbl th{font-size:.875rem;color:var(--dim);font-weight:700} .tbl td.n{white-space:nowrap;font-variant-numeric:tabular-nums}
+.tbl .mini{display:inline-block;width:48px;vertical-align:middle;margin-left:8px}
+.kview{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:700px){.kview{grid-template-columns:minmax(0,1fr)}}
+.kview .scenebox{position:relative;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,var(--sky-top),var(--sky-low));border:2px solid var(--rule)}
+.kview .scenebox svg.scene{display:block;width:100%;height:auto}
+.kview .scenebox .party{position:absolute;width:9%;transform:translateX(-50%)}
+.blds{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.blds li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:8px;align-items:center}
+.blds svg{width:24px;height:24px}
+.blds .built b{color:var(--text)} .blds .plot{color:var(--dim)}
+details{margin-top:6px} summary{cursor:pointer;font:700 1.0625rem var(--font-display);padding:4px 0}
+textarea{display:block;width:100%;max-width:520px;min-height:4.5em;margin:8px 0;font:inherit;background:var(--ground);color:var(--text);border:2px solid var(--rule);border-radius:8px;padding:8px}
+.primary{background:var(--gold);color:var(--on-gold);border:2px solid var(--gold-deep);border-radius:8px;padding:7px 16px;font:700 1rem var(--font-display);letter-spacing:.03em;box-shadow:0 3px 0 var(--gold-deep);transition:transform .1s,box-shadow .1s}
+.primary:hover{filter:brightness(1.07);transform:translateY(-1px)} .primary:active{transform:translateY(2px);box-shadow:0 1px 0 var(--gold-deep)}
+.install{max-width:600px;margin:20px auto}
+.glossary{width:100%;border-collapse:collapse;margin-top:8px} .glossary td,.glossary th{padding:5px 8px;border-bottom:1px dashed var(--rule);text-align:left;vertical-align:top}
+.foot{margin-top:22px;color:var(--dim);font-size:.875rem}
+
+/* ---- effects ---- */
+canvas.fx{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:60}
+#toasts{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:70;max-width:min(340px,calc(100vw - 28px));pointer-events:none}
+.toast{background:var(--panel);color:var(--text);border:2px solid var(--gold-deep);border-radius:10px;padding:8px 12px;box-shadow:0 4px 0 #0004,0 0 16px #F0A92B55;animation:slidein .3s ease-out;display:flex;gap:10px;align-items:center}
+.toast .coin{flex:none} .toast b{font-family:var(--font-display)}
+.floater{position:fixed;z-index:65;pointer-events:none;font:700 1.5rem var(--font-display);color:#FFE9A8;text-shadow:0 2px 0 #6b430a,0 0 12px #F0A92B;animation:rise 1.6s ease-out forwards}
+.levelup{position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:#0008;cursor:pointer;animation:fadein .3s}
+.levelup .card{position:relative;text-align:center;background:var(--panel);border:3px solid var(--gold);border-radius:16px;padding:22px 44px;box-shadow:0 0 0 4px var(--panel),0 0 0 6px var(--edge),0 0 60px #F0A92Baa;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.levelup .card::before{content:"";position:absolute;inset:-60px;background:repeating-conic-gradient(from 0deg,#F0A92B33 0 6deg,transparent 6deg 18deg);border-radius:50%;z-index:-1;animation:spin 14s linear infinite;mask:radial-gradient(circle,#000 30%,transparent 70%);-webkit-mask:radial-gradient(circle,#000 30%,transparent 70%)}
+.levelup b{display:block;font:700 3.2rem/1 var(--font-display);color:var(--gold-ink)} .levelup span{font-size:1.125rem}
+.keep.cheer{animation:cheerpulse .9s ease-out}
+.xpbar i.shine::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,#fff9 50%,transparent 70%);animation:shine 2.8s ease-in-out infinite}
+
+/* scene art classes: shapes take their colors from the sky's tokens */
+.f-roof{fill:var(--roof)} .f-wall{fill:var(--wall)} .f-house{fill:var(--house)} .f-timber{fill:var(--timber)} .f-door{fill:var(--door)} .f-stone{fill:var(--stone)}
+.f-gold{fill:var(--gold)} .f-grass{fill:var(--grass)} .f-hill{fill:var(--hill)} .f-path{fill:var(--path)} .f-jade{fill:var(--jade)} .f-ember{fill:var(--ember)} .f-grey{fill:#8a8f9c}
+.f-win{fill:#FFD27A;opacity:calc(.35 + var(--glow)*.65)} .f-leaf{fill:#4f9a55} .f-leaf2{fill:#3f7f48} .f-cloth{fill:#d9d2bf}
+.s-dash{fill:none;stroke:var(--text);stroke-opacity:.5;stroke-width:1.4;stroke-dasharray:4 3}
+.s-line{fill:none;stroke:var(--door);stroke-width:1.4}
+.blades{transform-box:view-box;animation:spin 6s linear infinite}
+.smoke{fill:#fff;opacity:0;transform-box:fill-box;transform-origin:center;animation:smoke 3.4s ease-out infinite}
+.fire{transform-box:fill-box;transform-origin:50% 100%;animation:flicker .8s ease-in-out infinite}
+.beacon{transform-box:fill-box;transform-origin:50% 50%;animation:beacon 1.8s ease-in-out infinite}
+.beacon.fail{animation-duration:.7s}
+.pennant{transform-box:fill-box;transform-origin:50% 0;animation:flutter 2.6s ease-in-out infinite}
+.pf-arm{transform-box:fill-box;transform-origin:20% 20%}
+.pf.run .pf-arm{animation:hammer .6s ease-in-out infinite}
+.pf.pass .pf-body{animation:hop 1.2s ease-in-out infinite} .pf.fail .pf-body{animation:slump 1.6s ease-in-out infinite} .pf.mut .pf-body{animation:breathe 3s ease-in-out infinite}
+.pf .cloak{fill:var(--pfc)} .pf .skin{fill:#f0c9a0} .pf .eye{fill:#2b1d12} .pf .tool{fill:#9aa3b5} .pf .stick{fill:#6b4423}
+.pf.run{--pfc:#3b78c4} .pf.pass{--pfc:#3f9a6b} .pf.fail{--pfc:#c4503f} .pf.mut{--pfc:#8a6cd0}
+
+@keyframes breathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.025)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes sway{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(2deg)}}
+@keyframes hammer{0%,100%{transform:rotate(0)}50%{transform:rotate(-50deg)}}
+@keyframes cheer{from{transform:rotate(150deg)}to{transform:rotate(125deg)}} @keyframes cheer2{from{transform:rotate(-150deg)}to{transform:rotate(-125deg)}}
+@keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes walk{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-4px) rotate(2deg)}}
+@keyframes drip{0%{transform:translateY(0);opacity:.95}100%{transform:translateY(12px);opacity:0}}
+@keyframes lensglow{0%,100%{fill:#ffd27a}50%{fill:#fff6c0}}
+@keyframes glowpulse{0%,100%{box-shadow:0 0 0 0 #F0A92B00}50%{box-shadow:0 0 18px 4px #F0A92Baa}}
+@keyframes flicker{0%,100%{transform:scale(1,1)}30%{transform:scale(.92,1.08)}60%{transform:scale(1.06,.94)}}
+@keyframes beacon{0%,100%{opacity:.55;transform:scale(.9)}50%{opacity:1;transform:scale(1.25)}}
+@keyframes flutter{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(6deg)}}
+@keyframes slump{0%,100%{transform:translateY(0)}50%{transform:translateY(2px) rotate(-3deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes smoke{0%{opacity:0;transform:translate(0,0) scale(.6)}20%{opacity:.55}100%{opacity:0;transform:translate(6px,-22px) scale(1.5)}}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes slidein{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes rise{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-70px);opacity:0}}
+@keyframes cheerpulse{0%{transform:scale(1)}30%{transform:scale(1.05);filter:brightness(1.3)}100%{transform:scale(1)}}
+@keyframes shine{0%{transform:translateX(-100%)}60%,100%{transform:translateX(100%)}}
+@keyframes drift{from{transform:translateX(-12%)}to{transform:translateX(12%)}}
+@keyframes twinkle{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.sky .cloud{animation:drift 60s ease-in-out infinite alternate}
+.sky .star{animation:twinkle 3.2s ease-in-out infinite}
+.sky .star:nth-child(3n){animation-delay:-1s} .sky .star:nth-child(3n+1){animation-delay:-2.1s}
+.view{animation:enter .3s ease-out}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .sky .star{opacity:calc(var(--stars)*.8)}
+}
+@media (max-width:560px){
+  nav button{padding:8px 10px}
+  nav button:not([aria-current]) span:not(.count){position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .hud{padding-left:max(16px,env(safe-area-inset-left,0px))}
+  body.app .hud{padding-left:max(76px,env(safe-area-inset-left,0px))}
+  .keeps{padding-top:28px}
+  .road{height:176px} .guide{width:64px} .guide.stack .bubble{bottom:92px;max-width:calc(100vw - 64px);right:auto} .guide.stack .bubble::after{left:50%;bottom:-9px;margin-left:-7px;transform:rotate(-45deg)}
+}
 </style>
 <script type="application/json" id="claudius-config">{"repos":["Colorado-Startups/claudius"],"quality":["https://colorado-startups.github.io/claudius/"]}</script>
 <script type="application/json" id="claude-artifacts-manifest">{"permissions":["full-access","notifications","menu-bar"]}</script>
 
-<header class="band">
-  <div class="id">
-    <img class="gnome" id="gnome" alt="Claudius, an AI agent character" width="44" height="44">
-    <h1>Claudius</h1>
-    <span class="meta" id="meta">Starting</span>
-    <button class="ghost" id="refresh" hidden>Refresh now</button>
+<header class="hud" id="hud">
+  <div class="hud-row">
+    <div class="portrait"><img id="gnome" alt="Claudius, an AI agent character" width="62" height="62"><span class="lvl" id="lvl" title="Level">1</span></div>
+    <div class="who">
+      <h1>Claudius</h1>
+      <div class="title" id="title">Tinker of the Reach</div>
+      <div class="xp"><span class="xpbar" id="xpbar" role="progressbar" aria-label="Progress to the next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i style="width:0%"></i></span><small id="xptext">Reading merges</small></div>
+    </div>
+    <div class="hud-stats" id="stats"></div>
+    <button class="alertbtn off" id="alertbtn" type="button"><span class="bang" aria-hidden="true">!</span><span id="alerttext">Needs you: 0</span></button>
+    <div class="tools"><button class="rune" id="sound" type="button" aria-pressed="false">Sound off</button><button class="rune" id="refresh" type="button" hidden>Refresh now</button></div>
   </div>
+  <div class="meta" id="meta">Starting</div>
   <nav id="nav" aria-label="Views"></nav>
 </header>
 <main id="app"></main>
+<div id="toasts" aria-hidden="true"></div>
 <div class="sr" id="live" role="status"></div>
-
 <script type="module">
 const CONFIG = JSON.parse(document.getElementById("claudius-config").textContent);   // the repos and Quality pages to start with
 const DEFAULT_REPOS = CONFIG.repos, DEFAULT_QUALITY = CONFIG.quality;
 const POLL_MS = 120000;       // two minutes: kind to the shared GitHub rate limit
-const SLOW_EVERY = 5;         // repo readiness and quality scores change slowly: every fifth check
+const SLOW_EVERY = 5;         // repo readiness, merge totals and quality scores change slowly: every fifth check
 const IDLE_MIN = 15;          // an open PR with no update this long is flagged
 const GOAL = 90, LOW = 70;    // a score at the goal is good, under LOW needs work
 const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const URL_RE = /^https:\/\/[A-Za-z0-9.-]+(\/[A-Za-z0-9._~\/-]*)?$/;
 const SHA_RE = /^[0-9a-f]{40}$/;
 const ASK_LABEL = "needs-owner";   // an issue or pull request carrying this label is something only the owner can do
-const VIEWS = [["needs", "Needs you"], ["builds", "Builds"], ["quality", "Quality"], ["repos", "Repos"]];
+const VIEWS = [["realm", "Realm"], ["needs", "Needs you"], ["quests", "Quests"], ["stats", "Stats"], ["keeps", "Keeps"]];
+const ALIAS = { builds: "quests", quality: "stats", repos: "keeps", today: "needs" };   // addresses from the earlier layout
 const blob = (id) => {   // an embedded image: base64 text only, anything else is dropped
   const t = document.getElementById(id)?.textContent.trim() ?? "";
   return /^[A-Za-z0-9+\/]+={0,2}$/.test(t) ? t : "";
@@ -123,13 +334,17 @@ const meta = document.getElementById("meta");
 const refreshBtn = document.getElementById("refresh");
 const nav = document.getElementById("nav");
 const live = document.getElementById("live");
+const toasts = document.getElementById("toasts");
 document.getElementById("gnome").src = "data:image/png;base64," + blob("img-avatar");
+const sayLive = Object.assign(document.createElement("div"), { className: "sr", role: "status" });
+document.body.append(sayLive);
+const RM = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
-function h(tag, props, ...kids) {
+function h(tag, props, ...kids) {   // text only goes through textContent; markup comes from this file's own art, never from GitHub
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(props || {})) {
     if (k === "class") el.className = v; else if (k === "text") el.textContent = v; else el.setAttribute(k, v);
@@ -137,38 +352,46 @@ function h(tag, props, ...kids) {
   for (const kid of kids) if (kid) el.append(kid);
   return el;
 }
+const art = (markup) => { const t = document.createElement("template"); t.innerHTML = markup.trim(); return t.content.firstElementChild; };
 
 // ---- pure logic -----------------------------------------------------------
+const BAD = new Set(["failure", "timed_out", "cancelled", "action_required", "startup_failure"]);
 function rollup(runs) {
   if (!runs.length) return "none";
-  const bad = new Set(["failure", "timed_out", "cancelled", "action_required", "startup_failure"]);
-  if (runs.some((r) => r.status === "completed" && bad.has(r.conclusion))) return "fail";
+  if (runs.some((r) => r.status === "completed" && BAD.has(r.conclusion))) return "fail";
   if (runs.some((r) => r.status !== "completed")) return "running";
   return "pass";
 }
 function label(pr) {           // one state per PR, worst news first
-  if (pr.checks === "fail") return { text: "Failing", kind: "bad" };
-  if (pr.checks === "running") return { text: "Running", kind: "run" };
-  if (pr.draft) return { text: pr.checks === "pass" ? "Draft, green" : "Draft", kind: "mut" };
-  if (pr.checks === "pass") return { text: "Ready", kind: "ok" };
-  return { text: "No checks", kind: "mut" };
+  if (pr.checks === "fail") return { text: "Checks failing", kind: "bad", key: "fail" };
+  if (pr.checks === "running") return { text: "Checks running", kind: "run", key: "run" };
+  if (pr.draft) return { text: pr.checks === "pass" ? "Draft, checks green" : "Draft", kind: "mut", key: "draft" };
+  if (pr.checks === "pass") return { text: "Ready to merge", kind: "ok", key: "pass" };
+  return { text: "No checks", kind: "mut", key: "draft" };
 }
 function idleMinutes(updatedAt, now = Date.now()) { return Math.max(0, Math.round((now - Date.parse(updatedAt)) / 60000)); }
-function isIdle(p) { return ["Running", "No checks", "Draft"].includes(label(p).text) && idleMinutes(p.updated) >= IDLE_MIN; }
-function ago(m) { return m < 60 ? m + "m" : m < 1440 ? Math.round(m / 60) + "h" : Math.round(m / 1440) + "d"; }
+function isIdle(p) { return ["run", "draft"].includes(label(p).key) && idleMinutes(p.updated) >= IDLE_MIN; }
+function ago(m) { return m < 1 ? "now" : m < 60 ? m + "m" : m < 1440 ? Math.round(m / 60) + "h" : Math.round(m / 1440) + "d"; }
 function band(v) { return v >= GOAL ? "ok" : v >= LOW ? "warn" : "bad"; }
-const CHECKS = [   // what a repo needs before agents can build in it, each read from GitHub
-  ["AGENTS.md", (r) => r.files.includes("AGENTS.md")],
-  ["CLAUDE.md", (r) => r.files.includes("CLAUDE.md")],
-  ["README", (r) => r.files.some((f) => /^README/i.test(f))],
-  ["SECURITY.md", (r) => r.files.includes("SECURITY.md") || r.dotgithub.includes("SECURITY.md")],
-  ["CI workflow", (r) => r.workflows.length > 0],
-  ["Rules on default branch", (r) => r.rules === null ? null : r.rules > 0],
-  ["Squash only", (r) => r.squash && !r.merge && !r.rebase],
-  ["Deletes merged branches", (r) => r.delbr],
+// Level and keep size come only from merged pull requests (GitHub's own count). Level n starts at 2(n-1)^2 merges.
+const levelOf = (n) => Math.floor(Math.sqrt(n / 2)) + 1;
+const levelStart = (L) => 2 * (L - 1) * (L - 1);
+const TITLES = [[3, "Tinker"], [6, "Artificer"], [10, "Master artificer"], [15, "Warden of the Reach"], [Infinity, "Steward of the Reach"]];
+const titleOf = (L) => TITLES.find(([max]) => L < max)[1];
+const TIERS = [[5, "camp", "Camp"], [25, "outpost", "Outpost"], [80, "hamlet", "Hamlet"], [200, "keep", "Keep"], [Infinity, "citadel", "Citadel"]];
+function tierOf(n) { if (!Number.isInteger(n)) return { id: "camp", name: "Camp", known: false }; const [, id, name] = TIERS.find(([max]) => n < max); return { id, name, known: true }; }
+const CHECKS = [   // what a repo needs before agents can build in it, each read from GitHub; each one is a building in the keep
+  ["AGENTS.md", (r) => r.files.includes("AGENTS.md"), "library", "Library"],
+  ["CLAUDE.md", (r) => r.files.includes("CLAUDE.md"), "lantern", "Lantern post"],
+  ["README", (r) => r.files.some((f) => /^README/i.test(f)), "signpost", "Signpost"],
+  ["SECURITY.md", (r) => r.files.includes("SECURITY.md") || r.dotgithub.includes("SECURITY.md"), "gatehouse", "Gatehouse"],
+  ["CI workflow", (r) => r.workflows.length > 0, "watchtower", "Watchtower"],
+  ["Rules on default branch", (r) => r.rules === null ? null : r.rules > 0, "wall", "Wall"],
+  ["Squash only", (r) => r.squash && !r.merge && !r.rebase, "windmill", "Windmill"],
+  ["Deletes merged branches", (r) => r.delbr, "garden", "Garden"],
 ];
 function readiness(r) {
-  const rows = CHECKS.map(([name, f]) => ({ name, ok: f(r) }));
+  const rows = CHECKS.map(([name, f, build, bname]) => ({ name, build, bname, ok: f(r) }));
   const read = rows.filter((x) => x.ok !== null);
   return { rows, pass: read.filter((x) => x.ok).length, of: read.length };
 }
@@ -217,20 +440,30 @@ async function gh(desktop, args, jq) {
   }
   try { return JSON.parse(out); } catch { throw new Error("gh did not return JSON"); }
 }
-async function readPRs(desktop, repo) {   // the first 50 open pull requests: Builds shows no more
+async function readPRs(desktop, repo) {   // the first 50 open pull requests: Quests shows no more
   const prs = await gh(desktop, `api -X GET repos/${repo}/pulls -f state=open -f per_page=100`,
     "[.[]|{number,title,html_url,draft,updated_at,ref:.head.ref,sha:.head.sha}]");
   const out = [];
   for (const p of prs.slice(0, 50)) {            // one command at a time, and at most 50 pull requests so a huge repo stays cheap: the app may hold 32 processes at most
-    let checks = "none";
+    let checks = "none", done = 0, total = 0, bad = 0;
     if (SHA_RE.test(p.sha)) {
       const runs = await gh(desktop, `api -X GET repos/${repo}/commits/${p.sha}/check-runs -f per_page=100`, "[.check_runs[]|{status,conclusion}]");
-      checks = rollup(runs);
+      checks = rollup(runs); total = runs.length; done = runs.filter((r) => r.status === "completed").length; bad = runs.filter((r) => r.status === "completed" && BAD.has(r.conclusion)).length;
     }
     out.push({ key: `${repo}#${p.number}`, repo, number: p.number, title: p.title, url: p.html_url,
-      branch: p.ref, draft: !!p.draft, updated: p.updated_at, checks });
+      branch: p.ref, draft: !!p.draft, updated: p.updated_at, checks, done, total, bad });
   }
   return out;
+}
+async function readMerged(desktop, repo) {   // the last pull requests that merged: the loot feed and the trigger for a celebration
+  const rows = await gh(desktop, `api -X GET repos/${repo}/pulls -f state=closed -f sort=updated -f direction=desc -f per_page=20`,
+    "[.[]|select(.merged_at!=null)|{number,title,html_url,merged_at}]");
+  return rows.map((x) => ({ key: `${repo}#${x.number}`, repo, number: x.number, title: x.title, url: x.html_url, merged: x.merged_at }));
+}
+async function readMergedTotal(desktop, repo) {   // every pull request ever merged here: XP and the size of the keep
+  const n = await gh(desktop, `api -X GET search/issues -f ${q("q=repo:" + repo + " is:pr is:merged")} -f per_page=1`, ".total_count");
+  if (!Number.isInteger(n)) throw new Error("GitHub gave no merge count");
+  return n;
 }
 async function readAsks(desktop, repo) {   // open issues and pull requests that wait on the owner
   const rows = await gh(desktop, `api -X GET repos/${repo}/issues -f labels=${ASK_LABEL} -f state=open -f per_page=50`, "[.[]|{number,title,html_url,updated_at}]");
@@ -261,22 +494,270 @@ async function readQuality(desktop, url) {
   return { url, ...parsed };
 }
 
-// ---- views ----------------------------------------------------------------
-const S = { data: [], asks: [], errors: [], slowErrs: [], failed: new Set(), askFailed: new Set(), ready: {}, quals: [], at: null, repos: DEFAULT_REPOS, view: "needs" };
+// ---- state and what it means ----------------------------------------------
+const S = { data: [], asks: [], errors: [], slowErrs: [], failed: new Set(), askFailed: new Set(), ready: {}, quals: [], at: null, repos: DEFAULT_REPOS,
+  view: "realm", mTotal: {}, recent: {}, sound: store.get("sound", false) === true, gnomeAt: -1, sel: null, lastLevel: null };
+const qualityFor = (repo) => S.quals.find((x) => {   // a Quality page belongs to a repo when it is that repo's own GitHub Pages address
+  try { const u = new URL(x.url), [owner, name] = repo.toLowerCase().split("/"); return u.hostname === owner + ".github.io" && u.pathname.split("/")[1]?.toLowerCase() === name; } catch { return false; } }) || null;
+function keepModel(repo, i) {
+  const prs = (S.data[i] || []), r = S.ready[repo], rd = r ? readiness(r) : null;
+  const total = S.mTotal[repo], quality = qualityFor(repo);
+  const c = { fail: 0, run: 0, pass: 0, draft: 0, idle: 0 };
+  for (const p of prs) { c[label(p).key]++; if (isIdle(p)) c.idle++; }
+  return { repo, i, owner: repo.split("/")[0], short: repo.split("/")[1], prs, rd, have: new Set(rd ? rd.rows.filter((x) => x.ok).map((x) => x.build) : []),
+    total: Number.isInteger(total) ? total : null, tier: tierOf(total), quality, band: quality ? band(quality.totals.master) : null,
+    asks: S.asks.filter((a) => a.repo === repo), c, unread: !!S.failed.has(repo) };
+}
+const keeps = () => S.repos.map(keepModel);
+function realm() {   // everything the HUD and the guide say, from the data
+  const ks = keeps(), known = ks.filter((k) => k.total !== null), total = known.reduce((n, k) => n + k.total, 0);
+  const L = levelOf(total), lo = levelStart(L), hi = levelStart(L + 1);
+  const all = ks.flatMap((k) => k.prs);
+  const count = (key) => all.filter((p) => label(p).key === key).length;
+  return { ks, total, partial: known.length < ks.length, L, lo, hi, title: titleOf(L), open: all.length, failing: count("fail"), running: count("run"), pass: count("pass"), draft: count("draft"),
+    asks: S.asks.length, master: S.quals[0]?.totals.master ?? null, known: known.length > 0 };
+}
+const TROPHIES = [   // each trophy is a plain fact in the data; none is a made-up score
+  ["first", "First loot", "Merge one pull request.", (s) => s.total >= 1],
+  ["ten", "Ten quests done", "Merge 10 pull requests.", (s) => s.total >= 10],
+  ["hundred", "A hundred merges", "Merge 100 pull requests.", (s) => s.total >= 100],
+  ["wall", "Wall raised", "Put rules on a default branch.", (s) => s.ks.some((k) => k.have.has("wall"))],
+  ["lamps", "Every building standing", "Pass all eight setup checks in one repo.", (s) => s.ks.some((k) => k.rd && k.rd.pass === CHECKS.length)],
+  ["banner", "Golden banner", `Reach a master score of ${GOAL} on a Quality page.`, (s) => s.master !== null && s.master >= GOAL],
+  ["calm", "Quiet realm", "Nothing needs you and no quest is failing.", (s) => !!S.at && !S.errors.length && s.asks === 0 && s.failing === 0],
+  ["forge", "Busy forge", "Have three quests running checks at once.", (s) => s.running >= 3],
+];
 
-function scoreRow(name, v, cls = "") {
-  const meter = h("span", { class: "meter " + band(v), role: "meter", "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": String(v), "aria-label": name }, h("i", { style: `width:${v}%` }));
-  return h("div", { class: "score " + cls }, h("span", { text: name }), meter, h("b", { text: String(v) }));
+// ---- original art ---------------------------------------------------------
+const R_ = (x, y, w, hh, c, x2 = "") => `<rect x="${x}" y="${y}" width="${w}" height="${hh}" class="${c}" ${x2}/>`;
+const P_ = (d, c, x2 = "") => `<path d="${d}" class="${c}" ${x2}/>`;
+const C_ = (x, y, r, c, x2 = "") => `<circle cx="${x}" cy="${y}" r="${r}" class="${c}" ${x2}/>`;
+const fdn = (x, y, w, hh) => `<rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="2" class="s-dash"/>`;
+const merlons = (x, y, w, c = "f-wall") => { let s = ""; for (let i = 0; i + 4 <= w; i += 8) s += R_(x + i, y - 4, 4, 4, c); return s; };
+const house = (x, y, d = 0) => R_(x - 11, y - 16, 22, 16, "f-house") + P_(`M${x - 14} ${y - 16} L${x} ${y - 28} L${x + 14} ${y - 16}Z`, "f-roof") + R_(x - 2, y - 8, 5, 8, "f-door") + R_(x + 5, y - 13, 4, 4, "f-win") + R_(x + 6, y - 31, 4, 8, "f-stone")
+  + C_(x + 8, y - 34, 3, "smoke", `style="animation-delay:${d}s"`) + C_(x + 8, y - 34, 2.4, "smoke", `style="animation-delay:${d + 1.6}s"`);
+const tent = (x, y) => P_(`M${x - 18} ${y} L${x} ${y - 25} L${x + 18} ${y}Z`, "f-cloth") + P_(`M${x - 5} ${y} L${x} ${y - 13} L${x + 5} ${y}Z`, "f-door") + R_(x - 1, y - 33, 2, 10, "f-timber") + P_(`M${x + 1} ${y - 33} L${x + 11} ${y - 30} L${x + 1} ${y - 27}Z`, "f-gold");
+const fire = (x, y) => R_(x - 7, y - 2, 14, 3, "f-timber") + `<g class="fire">${P_(`M${x} ${y - 16} Q${x + 7} ${y - 7} ${x + 4} ${y - 2} L${x - 4} ${y - 2} Q${x - 7} ${y - 7} ${x} ${y - 16}Z`, "f-gold")}${P_(`M${x} ${y - 10} Q${x + 3} ${y - 6} ${x + 2} ${y - 2} L${x - 2} ${y - 2} Q${x - 3} ${y - 6} ${x} ${y - 10}Z`, "f-ember")}</g>`;
+const keepTower = (x, y, big) => { const t = big ? 56 : 46; return R_(x - 16, y - t, 32, t, "f-wall") + merlons(x - 16, y - t, 32) + R_(x - 4, y - 16, 9, 16, "f-door") + P_(`M${x - 4} ${y - 16} Q${x} ${y - 22} ${x + 5} ${y - 16}Z`, "f-door")
+  + R_(x - 11, y - t + 12, 4, 6, "f-win") + R_(x + 7, y - t + 12, 4, 6, "f-win") + R_(x - 1, y - t - 20, 2, 18, "f-timber") + P_(`M${x + 1} ${y - t - 20} L${x + 17} ${y - t - 15} L${x + 1} ${y - t - 10}Z`, "f-gold pennant"); };
+const sideTower = (x, y) => R_(x - 7, y - 40, 14, 40, "f-wall") + P_(`M${x - 9} ${y - 40} L${x} ${y - 54} L${x + 9} ${y - 40}Z`, "f-roof") + R_(x - 2, y - 30, 4, 7, "f-win");
+const stall = (x, y) => R_(x - 11, y - 12, 22, 12, "f-timber") + P_(`M${x - 13} ${y - 12} L${x - 9} ${y - 20} L${x + 9} ${y - 20} L${x + 13} ${y - 12}Z`, "f-gold") + R_(x - 8, y - 8, 16, 4, "f-house");
+const TOWNS = {
+  camp: (y) => tent(150, y) + fire(188, y + 6),
+  outpost: (y) => tent(122, y) + house(160, y, 0) + house(198, y, .8) + fire(228, y + 6),
+  hamlet: (y) => house(118, y, 0) + house(146, y, .6) + house(176, y, 1.2) + house(206, y, 1.8) + stall(234, y),
+  keep: (y) => keepTower(160, y, false) + house(114, y, .4) + house(204, y, 1) + house(230, y, 1.7),
+  citadel: (y) => sideTower(130, y) + sideTower(190, y) + keepTower(160, y, true) + house(106, y, .3) + house(216, y, .9) + house(240, y, 1.6),
+};
+function structure(name, built, known, fail, run) {   // the eight buildings: standing when the check passes, a dashed plot when it does not, absent when unread
+  if (!known) return "";
+  const B = built;
+  switch (name) {
+    case "windmill": { const x = 34, y = 126; return !B ? fdn(x - 12, y - 32, 24, 32) : P_(`M${x - 11} ${y} L${x - 7} ${y - 32} L${x + 7} ${y - 32} L${x + 11} ${y}Z`, "f-house") + P_(`M${x - 9} ${y - 32} L${x} ${y - 43} L${x + 9} ${y - 32}Z`, "f-roof") + R_(x - 3, y - 12, 6, 12, "f-door")
+      + `<g class="blades" style="transform-origin:${x}px ${y - 32}px">${R_(x - 1.5, y - 52, 3, 40, "f-timber")}${R_(x - 21, y - 33.5, 40, 3, "f-timber")}${R_(x + 2, y - 52, 8, 14, "f-cloth")}${R_(x - 10, y - 26, 8, 14, "f-cloth")}</g>`; }
+    case "gatehouse": { const x = 84, y = 126; return !B ? fdn(x - 20, y - 34, 40, 34) : R_(x - 20, y - 34, 12, 34, "f-wall") + R_(x + 8, y - 34, 12, 34, "f-wall") + merlons(x - 20, y - 34, 12) + merlons(x + 8, y - 34, 12)
+      + R_(x - 9, y - 24, 18, 24, "f-door") + P_(`M${x - 9} ${y - 24} Q${x} ${y - 34} ${x + 9} ${y - 24}Z`, "f-wall") + `<path class="s-line" d="M${x - 5} ${y - 22}V${y} M${x} ${y - 24}V${y} M${x + 5} ${y - 22}V${y}"/>` + R_(x - 16, y - 24, 3, 5, "f-win"); }
+    case "library": { const x = 240, y = 126; return !B ? fdn(x - 12, y - 34, 24, 34) : R_(x - 11, y - 32, 22, 32, "f-house") + P_(`M${x - 14} ${y - 32} Q${x} ${y - 56} ${x + 14} ${y - 32}Z`, "f-roof") + R_(x - 3, y - 12, 6, 12, "f-door")
+      + R_(x - 8, y - 26, 6, 7, "f-win") + R_(x + 2, y - 26, 6, 7, "f-win") + R_(x - 4, y - 44, 8, 2, "f-gold"); }
+    case "watchtower": { const x = 292, y = 126, cls = fail ? "f-ember beacon fail" : run ? "f-gold beacon" : "f-gold"; return !B ? fdn(x - 8, y - 56, 16, 56) : R_(x - 6, y - 52, 12, 52, "f-stone") + R_(x - 11, y - 58, 22, 6, "f-timber") + P_(`M${x - 10} ${y - 58} L${x} ${y - 70} L${x + 10} ${y - 58}Z`, "f-roof") + C_(x, y - 62, 4, cls) + R_(x - 2, y - 40, 4, 8, "f-win"); }
+    case "wall": return !B ? `<path class="s-dash" d="M104 126H236"/>` + [108, 124, 140, 156, 172, 188, 204, 220].map((x) => R_(x, y_(120), 2, 6, "f-timber", 'opacity=".6"')).join("")
+      : R_(104, 112, 132, 14, "f-wall") + merlons(104, 112, 132) + `<path class="s-line" d="M104 119H236"/>`;
+    case "signpost": { const x = 34, y = 182; return !B ? fdn(x - 11, y - 30, 22, 30) : R_(x - 1.5, y - 28, 3, 28, "f-timber") + R_(x - 12, y - 30, 22, 8, "f-timber") + P_(`M${x + 10} ${y - 30} L${x + 16} ${y - 26} L${x + 10} ${y - 22}Z`, "f-timber") + R_(x - 9, y - 27.5, 14, 1.6, "f-cloth"); }
+    case "lantern": { const x = 62, y = 184; return !B ? fdn(x - 5, y - 30, 10, 30) : R_(x - 1.5, y - 28, 3, 28, "f-timber") + C_(x, y - 30, 9, "f-gold", `opacity="${(0.12 + 0.2 * 1).toFixed(2)}"`) + R_(x - 4, y - 36, 8, 10, "f-win") + P_(`M${x - 6} ${y - 36} L${x} ${y - 42} L${x + 6} ${y - 36}Z`, "f-roof"); }
+    case "garden": { const y = 186; return !B ? fdn(256, y - 14, 48, 14) : C_(262, y - 6, 8, "f-leaf") + C_(276, y - 8, 10, "f-leaf2") + C_(292, y - 6, 8, "f-leaf") + C_(272, y - 14, 2, "f-ember") + C_(282, y - 16, 2, "f-gold") + C_(296, y - 12, 2, "f-ember") + C_(264, y - 10, 2, "f-gold"); }
+  }
+  return "";
 }
-function prRow(p) {
-  const l = label(p), m = idleMinutes(p.updated);
-  const kind = l.kind === "mut" ? "" : l.kind;
-  return h("div", { class: "row " + (isIdle(p) ? "warn" : kind) },
-    h("span", { class: "pill " + kind, text: l.text }),
-    h("span", { class: "t" }, h("span", { class: "num", text: "#" + p.number + " " }), h("a", { href: p.url, target: "_blank", rel: "noopener", text: p.title })),
-    h("span", { class: "pill " + (isIdle(p) ? "warn" : ""), text: ago(m) }),
-    h("span", { class: "sub", text: p.branch }));
+const y_ = (n) => n;
+function bunting(n, bandKey) {   // the banners: more of them, and brighter, as the Quality score rises
+  if (!n) return "";
+  const cols = bandKey === "ok" ? ["f-gold", "f-jade"] : bandKey === "warn" ? ["f-gold", "f-cloth"] : ["f-ember", "f-grey"];
+  let s = R_(12, 36, 3, 114, "f-timber") + R_(305, 36, 3, 114, "f-timber") + `<path d="M14 40 Q160 ${bandKey === "bad" ? 70 : 80} 306 40" fill="none" stroke="#6b4423" stroke-width="1.2"/>`;
+  for (let i = 0; i < n; i++) {
+    const t = (i + 1) / (n + 1), x = (1 - t) * (1 - t) * 14 + 2 * (1 - t) * t * 160 + t * t * 306, yy = (1 - t) * (1 - t) * 40 + 2 * (1 - t) * t * (bandKey === "bad" ? 70 : 80) + t * t * 40;
+    s += `<path class="${cols[i % cols.length]} pennant" d="M${(x - 6).toFixed(1)} ${yy.toFixed(1)} L${(x + 6).toFixed(1)} ${yy.toFixed(1)} L${x.toFixed(1)} ${(yy + (bandKey === "bad" && i % 2 ? 11 : 16)).toFixed(1)}Z" style="animation-delay:${(i * -.4).toFixed(1)}s"/>`;
+  }
+  return s;
 }
+function sceneSVG(m) {
+  const known = !!m.rd, st = (n) => structure(n, m.have.has(n), known && m.rd.rows.find((r) => r.build === n)?.ok !== null, m.c.fail > 0, m.c.run > 0);
+  const n = m.band === "ok" ? 8 : m.band === "warn" ? 5 : m.band === "bad" ? 3 : 0;
+  return `<svg class="scene" viewBox="0 0 320 200" aria-hidden="true" focusable="false">`
+    + P_("M0 150 Q30 124 100 119 Q200 108 285 119 Q314 126 320 150 L320 200 L0 200Z", "f-hill") + P_("M-12 150 Q80 138 160 144 Q250 138 332 150 L332 200 L-12 200Z", "f-grass")
+    + P_("M136 200 Q152 170 156 142 L166 142 Q172 170 190 200Z", "f-path")
+    + bunting(n, m.band)
+    + st("windmill") + st("gatehouse") + st("library") + st("watchtower") + st("wall")
+    + (TOWNS[m.tier.id])(150)
+    + st("signpost") + st("lantern") + st("garden") + `</svg>`;
+}
+const PARTY_X = [100, 126, 200, 226, 250, 74];
+function partySVG(key) {   // one agent working a quest: hammering, cheering, kneeling or reading, by the state of its checks
+  const tool = key === "run" ? `<rect class="stick" x="21" y="12" width="2" height="12"/><rect class="tool" x="18" y="10" width="8" height="4" rx="1"/>`
+    : key === "pass" ? `<rect class="stick" x="21" y="6" width="2" height="18"/><path d="M23 6 L31 9 L23 12Z" fill="#7fd6a4"/>`
+    : key === "fail" ? `<circle cx="22" cy="24" r="3.2" fill="#ff6a4a"/><rect class="stick" x="21" y="17" width="2" height="5"/>`
+    : `<rect x="19" y="16" width="8" height="9" rx="1" fill="#f3ead2"/><rect x="21" y="19" width="5" height="1" fill="#8a7a5a"/>`;
+  return `<svg class="pf ${key}" viewBox="0 0 34 36" aria-hidden="true" focusable="false"><ellipse cx="14" cy="34" rx="9" ry="2.2" fill="#000" opacity=".25"/><g class="pf-body"><path class="cloak" d="M4 32 Q4 15 14 13 Q24 15 24 32Z"/><circle class="skin" cx="14" cy="14" r="6"/><path class="cloak" d="M7 15 Q6 5 14 5 Q22 5 21 15 Q14 11 7 15Z"/><circle class="eye" cx="12" cy="14.5" r=".9"/><circle class="eye" cx="16.5" cy="14.5" r=".9"/><g class="pf-arm"><rect class="cloak" x="19" y="18" width="3" height="9" rx="1.5"/>${tool}</g></g></svg>`;
+}
+const GNOME = `<svg class="gnome-svg" viewBox="0 0 80 104" aria-hidden="true" focusable="false">
+<ellipse class="shadow" cx="40" cy="100" rx="22" ry="3.5"/>
+<g class="g-body">
+ <rect class="boot" x="26" y="88" width="11" height="10" rx="3"/><rect class="boot" x="43" y="88" width="11" height="10" rx="3"/>
+ <path class="tunic" d="M23 90 Q22 60 40 58 Q58 60 57 90Z"/><rect class="belt" x="23" y="74" width="34" height="5"/><rect class="buckle" x="36" y="73" width="8" height="7" rx="1"/>
+ <g class="g-arml"><path d="M26 64 Q15 72 19 83" stroke="#2f7a74" stroke-width="8" fill="none" stroke-linecap="round"/><circle class="skin" cx="19" cy="84" r="4.5"/></g>
+ <g class="g-armr"><path d="M54 64 Q65 72 61 83" stroke="#2f7a74" stroke-width="8" fill="none" stroke-linecap="round"/><circle class="skin" cx="61" cy="84" r="4.5"/><rect class="handle" x="60" y="72" width="3" height="14" rx="1"/><rect class="metal" x="56" y="68" width="11" height="6" rx="1.5"/></g>
+ <path class="beard" d="M24 44 Q21 74 40 82 Q59 74 56 44Z"/>
+ <circle class="skin" cx="40" cy="42" r="13"/><circle class="nose" cx="40" cy="47" r="4.6"/>
+ <g class="g-eyes"><circle class="eye" cx="34" cy="41" r="1.9"/><circle class="eye" cx="46" cy="41" r="1.9"/></g>
+ <path d="M30 51 Q40 59 50 51 Q40 55 30 51Z" fill="#f6f0e2" stroke="#d9cfb8" stroke-width="1"/>
+ <g class="g-hat"><path class="hat" d="M23 36 Q40 29 57 36 Q52 18 46 10 Q52 3 66 8 Q50 1 41 9 Q30 17 23 36Z"/><rect class="hatband" x="23" y="31" width="34" height="5" rx="2"/>
+  <circle class="brass" cx="33" cy="30" r="5"/><circle class="brass" cx="47" cy="30" r="5"/><circle class="lens" cx="33" cy="30" r="3.6"/><circle class="lens" cx="47" cy="30" r="3.6"/><circle cx="32" cy="29" r="1.1" fill="#fff"/><circle cx="46" cy="29" r="1.1" fill="#fff"/></g>
+ <path class="sweat" d="M59 34 Q62 40 59 43 Q56 40 59 34Z"/>
+</g>
+<text class="bangtxt" x="62" y="22" text-anchor="middle">!</text></svg>`;
+const ICON = {
+  run: `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 22 L15 11" stroke="#8a5a33" stroke-width="3.5" stroke-linecap="round"/><rect x="13" y="4" width="11" height="7" rx="2" transform="rotate(35 18 8)" fill="#9aa3b5" stroke="#555e70"/></svg>`,
+  pass: `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 3 L24 7 V14 Q24 22 14 26 Q4 22 4 14 V7Z" fill="#7fd6a4" stroke="#2f6b4f" stroke-width="1.6"/><path d="M9 14 L13 18 L20 10" fill="none" stroke="#14402c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  fail: `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 2 Q22 10 20 18 Q19 25 14 26 Q8 25 7 18 Q6 12 11 8 Q11 12 14 13 Q15 8 14 2Z" fill="#ff7a4a" stroke="#b42318" stroke-width="1.4"/><path d="M14 14 Q18 18 16 22 Q14 24 12 22 Q10 18 14 14Z" fill="#ffd27a"/></svg>`,
+  draft: `<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M7 4 H21 Q24 4 24 7 V22 Q24 25 21 25 H9 Q6 25 6 22 V9 Q6 6 9 6" fill="#f3ead2" stroke="#8a7a5a" stroke-width="1.6"/><path d="M10 11H20M10 15H20M10 19H16" stroke="#8a7a5a" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+  ask: `<svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="#F0A92B" stroke="#a8690b" stroke-width="2"/><text x="14" y="21" text-anchor="middle" font-family="serif" font-weight="700" font-size="20" fill="#2b1d12">!</text></svg>`,
+  star: `<svg class="star" viewBox="0 0 34 34" aria-hidden="true"><path d="M17 2 L21 12 L32 13 L24 20 L26 31 L17 25 L8 31 L10 20 L2 13 L13 12Z" fill="#7fd6a4" stroke="#2f6b4f" stroke-width="2"/></svg>`,
+  flame: `<svg class="flame" viewBox="0 0 34 34" aria-hidden="true"><path d="M17 2 Q27 12 24 22 Q22 31 17 32 Q10 31 9 22 Q8 14 14 9 Q14 14 17 15 Q18 9 17 2Z" fill="#ff7a4a" stroke="#b42318" stroke-width="1.6"/><path d="M17 17 Q22 22 19 27 Q17 29 15 27 Q12 22 17 17Z" fill="#ffd27a"/></svg>`,
+};
+const NAVICON = {
+  realm: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9h3V6h3v3h2V4h2v5h2V6h3v3h3v12Z" fill="currentColor"/></svg>`,
+  needs: `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor"/><text x="12" y="18" text-anchor="middle" font-family="serif" font-weight="700" font-size="16" fill="#14223F">!</text></svg>`,
+  quests: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12q2 0 2 2v14q0 2-2 2H8q-2 0-2-2V6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 9h8M9 13h8M9 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+  stats: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l9 4v6q0 7-9 10-9-3-9-10V6Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 13l3 3 5-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+  keeps: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V8h3v3h2V8h2v3h2V8h2v3h2V8h3v13Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 21v-5h4v5" stroke="currentColor" stroke-width="2" fill="none"/></svg>`,
+};
+const medal = (on) => `<svg class="medal" viewBox="0 0 40 40" aria-hidden="true"><path d="M12 2 L20 16 L28 2 L32 4 L22 22 L18 22 L8 4Z" fill="${on ? "#c4503f" : "#6b7080"}"/><circle cx="20" cy="26" r="12" fill="${on ? "#F0A92B" : "#9aa0ae"}" stroke="${on ? "#a8690b" : "#6b7080"}" stroke-width="2"/><path d="M20 19 L22.5 24 L28 24.8 L24 28.6 L25 34 L20 31.4 L15 34 L16 28.6 L12 24.8 L17.5 24Z" fill="${on ? "#FFF2C0" : "#c9ceda"}"/></svg>`;
+function skySVG() {
+  let stars = ""; for (let i = 0; i < 46; i++) stars += `<circle class="star" cx="${(i * 197 + 41) % 1000}" cy="${(i * 83 + 17) % 170}" r="${i % 4 === 0 ? 1.8 : 1.1}"/>`;
+  return `<svg class="sky" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><defs><linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1"><stop class="grad-top" offset="0"/><stop class="grad-low" offset="1"/></linearGradient></defs>
+<rect width="1000" height="560" fill="url(#skyg)"/>${stars}
+<circle class="halo" cx="790" cy="110" r="70"/><circle class="halo" cx="790" cy="110" r="48"/><circle class="sun" cx="790" cy="110" r="30"/>
+<g class="cloud"><ellipse cx="170" cy="120" rx="80" ry="16"/><ellipse cx="220" cy="106" rx="50" ry="16"/><ellipse cx="560" cy="80" rx="70" ry="13"/><ellipse cx="600" cy="68" rx="40" ry="12"/></g>
+<path class="mf" d="M0 330 L90 250 L170 310 L270 220 L380 320 L470 260 L580 330 L690 240 L790 320 L890 255 L1000 320 V560 H0Z"/>
+<path class="mn" d="M0 400 L120 330 L230 395 L340 340 L470 410 L600 335 L720 400 L850 340 L1000 400 V560 H0Z"/>
+<path class="hl" d="M0 460 Q250 400 500 450 T1000 440 V560 H0Z"/></svg>`;
+}
+
+// ---- effects: particles, sound, toasts ------------------------------------
+const fx = { cv: null, ctx: null, ps: [], on: false };
+function fxSize() { if (!fx.cv) return; const d = devicePixelRatio || 1; fx.cv.width = innerWidth * d; fx.cv.height = innerHeight * d; fx.ctx.setTransform(d, 0, 0, d, 0, 0); }
+function burst(x, y, n = 34, big = false) {
+  if (RM()) return;
+  if (!fx.cv) { fx.cv = h("canvas", { class: "fx", "aria-hidden": "true" }); document.body.append(fx.cv); fx.ctx = fx.cv.getContext("2d"); fxSize(); addEventListener("resize", fxSize); }
+  const pal = ["#FFD97A", "#F0A92B", "#FFF2C0", "#7FD6A4", "#FF8A6B"];
+  for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, v = (big ? 7 : 4.5) * (0.4 + Math.random()); fx.ps.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 3, life: 1, r: 2 + Math.random() * 3, c: pal[i % pal.length], ph: Math.random() * 6, coin: i % 3 === 0 }); }
+  if (!fx.on) { fx.on = true; requestAnimationFrame(fxStep); }
+}
+function fxStep() {
+  const { ctx, cv } = fx; ctx.clearRect(0, 0, cv.width, cv.height);
+  fx.ps = fx.ps.filter((p) => p.life > 0);
+  for (const p of fx.ps) {
+    p.vy += 0.22; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.life -= 0.014; p.ph += 0.3;
+    ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.c; ctx.beginPath();
+    ctx.ellipse(p.x, p.y, p.coin ? p.r * Math.abs(Math.cos(p.ph)) + 0.6 : p.r, p.r, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  if (fx.ps.length) requestAnimationFrame(fxStep); else { fx.on = false; ctx.clearRect(0, 0, cv.width, cv.height); }
+}
+let actx = null;
+function sfx(kind) {   // a few synthesized notes, only when the viewer turned sound on, and only after a click or key press
+  if (!S.sound) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume();
+    const notes = { merge: [523, 659, 784], level: [392, 523, 659, 784, 1047], click: [440], alert: [660, 880] }[kind] || [];
+    notes.forEach((f, i) => { const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + i * 0.09;
+      o.type = "triangle"; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.1, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+      o.connect(g).connect(actx.destination); o.start(t); o.stop(t + 0.32); });
+  } catch {}
+}
+function toast(title, text) {
+  const t = h("div", { class: "toast" }, h("span", { class: "coin" }), h("span", {}, h("b", { text: title }), h("br"), h("span", { text })));
+  toasts.append(t); while (toasts.children.length > 4) toasts.firstChild.remove();
+  setTimeout(() => t.remove(), 6000);
+}
+function floater(x, y, text) { const f = h("span", { class: "floater", text }); f.style.left = x + "px"; f.style.top = y + "px"; document.body.append(f); setTimeout(() => f.remove(), 1700); }
+function keepEl(repo) { return [...document.querySelectorAll(".keep")].find((e) => e.dataset.repo === repo) || null; }
+function celebrate(ev) {   // a merge: coins, +1 XP, a cheer from the keep and from the guide
+  const el = keepEl(ev.repo), r = (el || document.getElementById("gnome")).getBoundingClientRect();
+  const x = r.left + r.width / 2, y = r.top + r.height * 0.45;
+  burst(x, y, 40); floater(x - 20, y - 10, "+1 XP"); sfx("merge");
+  if (el) { el.classList.remove("cheer"); void el.offsetWidth; el.classList.add("cheer"); }
+  toast("Quest complete", `#${ev.number} ${ev.title}`.slice(0, 120));
+  say(`Merged: #${ev.number}. Loot for the realm.`, "happy", true, 6000);
+}
+function levelUp(L) {
+  const card = h("div", { class: "card", role: "dialog", "aria-label": "Level up" }, h("b", { text: "Level " + L }), h("span", { text: titleOf(L) }));
+  const o = h("div", { class: "levelup", "aria-hidden": "true" }, card); card.removeAttribute("role"); card.removeAttribute("aria-label");   // the live region already says the level
+  const esc = (e) => { if (e.key === "Escape") done(); }, done = () => { o.remove(); removeEventListener("keydown", esc); };
+  o.onclick = done; addEventListener("keydown", esc); document.body.append(o); setTimeout(done, 4200);
+  burst(innerWidth / 2, innerHeight / 2, 120, true); sfx("level");
+  say(`Level ${L}. ${titleOf(L)}. The party cheers.`, "happy", true, 7000);
+}
+
+// ---- the guide -------------------------------------------------------------
+function guideLines() {   // what the guide can say, best news last, urgent first: each line comes from the data
+  const r = realm(), L = [], add = (text, mood = "idle") => L.push({ text, mood });
+  const firstFail = r.ks.flatMap((k) => k.prs).find((p) => label(p).key === "fail"), firstReady = r.ks.flatMap((k) => k.prs).find((p) => label(p).key === "pass");
+  if (!S.at) { add("Lighting the lanterns. I am reading GitHub now.", "working"); return L; }
+  if (S.errors.length) add(S.errors[0].length > 150 ? "Some reads failed. The details are on screen." : S.errors[0], "worried");
+  if (r.asks) add(`${r.asks === 1 ? "One thing needs" : r.asks + " things need"} you. Open Needs you.`, "alert");
+  if (r.failing) add(`${r.failing === 1 ? "A quest has" : r.failing + " quests have"} failing checks${firstFail ? ": #" + firstFail.number + " " + firstFail.title : ""}.`, "worried");
+  if (r.pass) add(`${r.pass === 1 ? "One quest is" : r.pass + " quests are"} ready to merge${firstReady ? ": #" + firstReady.number + " " + firstReady.title : ""}.`, "happy");
+  if (r.running) add(`The party is working: ${r.running} ${r.running === 1 ? "quest has" : "quests have"} checks running.`, "working");
+  if (!r.open && !r.asks && !S.errors.length) add("All quiet. The party is resting.", "idle");
+  const recent = Object.values(S.recent).flat().sort((a, b) => b.merged.localeCompare(a.merged))[0];
+  if (recent) add(`Last loot: #${recent.number} ${recent.title}, ${ago(idleMinutes(recent.merged))} ago.`, "happy");
+  if (r.known) add(`Level ${r.L}: ${r.hi - r.total} more ${r.hi - r.total === 1 ? "merge" : "merges"} to level ${r.L + 1}.`, "idle");
+  const q0 = S.quals[0]; if (q0 && q0.totals.master < GOAL) add(`Renown is ${q0.totals.master}. ${GOAL - q0.totals.master} more points earns the golden banner.`, "idle");
+  const weak = r.ks.find((k) => k.rd && k.rd.rows.some((x) => x.ok === false));
+  if (weak) { const x = weak.rd.rows.find((y) => y.ok === false); add(`${weak.short} has an empty plot for its ${x.bname.toLowerCase()}. It needs ${x.name}.`, "idle"); }
+  return L;
+}
+let tipIx = 0;
+let calmTimer = 0;
+function say(text, mood = "idle", announce = false, hold = 0) {   // hold: milliseconds a celebration lasts before the guide goes back to the news
+  S.say = { text, mood }; S.sayAuto = false; S.holding = !!hold; clearTimeout(calmTimer);
+  if (hold) calmTimer = setTimeout(() => { S.holding = false; S.sayAuto = true; const g = guideNow(); S.say = g; for (const b of document.querySelectorAll(".bubble")) b.textContent = g.text; for (const e of document.querySelectorAll(".gnome-svg")) e.setAttribute("class", "gnome-svg " + g.mood); }, hold);
+  for (const b of document.querySelectorAll(".bubble")) { b.textContent = text; b.style.animation = "none"; void b.offsetWidth; b.style.animation = ""; }   // the pop-in replays for each new line
+  for (const g of document.querySelectorAll(".gnome-svg")) g.setAttribute("class", "gnome-svg " + mood);
+  if (announce) sayLive.textContent = text;
+}
+function guideNow() { const L = guideLines(); return L[0]; }
+function nextTip() { const L = guideLines(); tipIx = (tipIx + 1) % L.length; return L[tipIx]; }
+function keepLine(k) {
+  const bits = [`${k.short}: ${k.tier.known ? k.tier.name + ", " + k.total + " merged" : "merges not read"}`];
+  bits.push(k.prs.length ? `${k.prs.length} open ${k.prs.length === 1 ? "quest" : "quests"}` : "no open quests");
+  if (k.rd) bits.push(`${k.rd.pass} of ${k.rd.of} buildings standing`);
+  if (k.asks.length) bits.push(`${k.asks.length} waiting on you`);
+  return bits.join(". ") + ".";
+}
+function guideBuild(kind) {   // kind "walk": on the road in the Realm; "bar": a strip at the top of other views
+  const g = art(GNOME), b = h("div", { class: "bubble" });
+  const btn = h("button", { class: "gnome-btn", type: "button", "aria-label": "Claudius the gnome. Choose to hear another tip." }); btn.append(g);
+  btn.onclick = () => { const t = nextTip(); say(t.text, t.mood, true, 9000); sfx("click"); };
+  const now = S.say || guideNow(); g.setAttribute("class", "gnome-svg " + now.mood); b.textContent = now.text;
+  if (kind === "bar") return h("div", { class: "guidebar" }, h("div", { class: "gwrap" }, btn), b);
+  return h("div", { class: "guide" }, btn, b);
+}
+function placeGuide(animate) {
+  const road = document.querySelector(".road"), gd = document.querySelector(".guide"); if (!road || !gd) return;
+  const cols = [...document.querySelectorAll(".kcol")], rr = road.getBoundingClientRect();
+  const target = cols[S.gnomeAt] || cols[0]; if (!target) return;
+  const tr = target.getBoundingClientRect(), x = Math.max(8, Math.min(rr.width - gd.offsetWidth - 8, tr.left - rr.left + tr.width / 2 - gd.offsetWidth / 2));
+  const from = parseFloat(gd.style.left || "0"); gd.style.left = x + "px";
+  const bub = gd.querySelector(".bubble"), bw = bub.offsetWidth, narrow = rr.width < 560;
+  gd.classList.toggle("flip", !narrow && x + gd.offsetWidth + bw + 12 > rr.width);   // beside the guide, or left of it when it would run off the road
+  gd.classList.toggle("stack", narrow);   // on a phone it sits above the guide and is clamped inside the road
+  bub.style.left = narrow ? Math.max(8 - x, Math.min(rr.width - bw - 8 - x, gd.offsetWidth / 2 - bw / 2)) + "px" : "";
+  if (animate && !RM() && Math.abs(from - x) > 4) { gd.classList.add("walking"); setTimeout(() => gd.classList.remove("walking"), 1050); }
+}
+
+// ---- views ----------------------------------------------------------------
+function meter(v, cls, label_) { return h("span", { class: "bar " + cls, role: "meter", "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": String(v), "aria-label": label_ }, h("i", { style: `width:${v}%` })); }
 const alertBox = h("div", { role: "alert" });   // one container, so a screen reader hears an error once, not on every check
 let alertKey = "";
 function errors() {
@@ -284,98 +765,166 @@ function errors() {
   if (key !== alertKey) { alertKey = key; alertBox.replaceChildren(...S.errors.map((e) => h("div", { class: "err", text: /[.!?]$/.test(e) ? e : e + "." }))); }
   return alertBox;
 }
-function qualityCard(qs) {
-  if (!qs.length) return h("section", { class: "card" }, h("h2", { text: "Quality" }), h("p", { class: "empty", text: S.errors.some((e) => /^https:/.test(e)) ? "Could not read the Quality page. See the errors above." : "No Quality page yet. Add one under Settings." }));
-  return h("section", { class: "card" }, h("h2", { text: "Quality" }), ...qs.map((x) => h("div", {},
-    scoreRow("Master score", x.totals.master, "master"),
-    ...["quality", "speed", "consumption"].filter((k) => x.totals[k] !== undefined).map((k) => scoreRow(k[0].toUpperCase() + k.slice(1), x.totals[k])),
-    h("p", { class: "note" }, h("a", { href: x.url, target: "_blank", rel: "noopener", text: "Open the live page" })))));
+function keepAria(k) {
+  return `${k.short}. ${k.tier.known ? k.tier.name + ", " + k.total + " pull requests merged" : "merge count not read"}. ${k.prs.length} open ${k.prs.length === 1 ? "quest" : "quests"}, ${k.c.fail} failing, ${k.c.pass} ready to merge.${k.asks.length ? " " + k.asks.length + " waiting on you." : ""}${k.rd ? " " + k.rd.pass + " of " + k.rd.of + " buildings standing." : ""} Choose to send the guide there.`;
+}
+function partyLayer(k, max = 6) {
+  const out = []; const list = k.prs.slice().sort((a, b) => ({ fail: 0, run: 1, pass: 2, draft: 3 }[label(a).key] - { fail: 0, run: 1, pass: 2, draft: 3 }[label(b).key])).slice(0, max);
+  list.forEach((p, i) => { const s = h("span", { class: "party", title: `${label(p).text}: ${p.branch}` }); s.style.left = (PARTY_X[i] / 3.2) + "%"; s.style.bottom = "3%"; s.append(art(partySVG(label(p).key))); out.push(s); });
+  return out;
+}
+function keepColumn(k) {
+  const btn = h("button", { class: "keep", type: "button", "aria-label": keepAria(k) }); btn.dataset.repo = k.repo;
+  btn.append(art(sceneSVG(k)), ...partyLayer(k));
+  const mk = h("div", { class: "mk" }); mk.style.left = "50%"; mk.style.transform = "translateX(-50%)"; mk.style.top = "12%";
+  if (k.asks.length) mk.append(h("span", { class: "bang", text: "!" })); else if (k.c.fail) mk.append(art(ICON.flame)); else if (k.c.pass) mk.append(art(ICON.star));
+  if (mk.children.length) btn.append(mk);
+  btn.onclick = () => { S.gnomeAt = k.i; placeGuide(true); say(keepLine(k), k.asks.length ? "alert" : k.c.fail ? "worried" : "idle", true, 9000); sfx("click"); };
+  const go = h("button", { class: "go", type: "button", text: "Keep details", "aria-label": "Details for " + k.short }); go.onclick = () => { S.sel = k.repo; location.hash = "keeps"; };
+  const missing = k.rd ? k.rd.rows.filter((x) => x.ok === false).map((x) => x.bname) : [];
+  const plate = h("div", { class: "plate" },
+    h("div", { class: "nm" }, h("b", { text: k.short }), h("span", { text: k.owner }), go),
+    h("div", { class: "row" }, h("span", { class: "chip", text: k.tier.known ? `${k.tier.name} · ${k.total} merged` : "Merges not read" }),
+      h("span", { class: "chip " + (k.c.fail ? "bad" : k.prs.length ? "run" : "mut"), text: `${k.prs.length} ${k.prs.length === 1 ? "quest" : "quests"}` }),
+      h("span", { class: "chip " + (k.rd ? band(Math.round(100 * k.rd.pass / k.rd.of)) : "mut"), text: k.rd ? `${k.rd.pass}/${k.rd.of} built` : "Surveying" }),
+      h("span", { class: "chip " + (k.band || "mut"), text: k.quality ? "Renown " + k.quality.totals.master : "Unrated" })),
+    h("div", { class: "more" }, h("div", {}, k.unread ? "Could not read this keep. See the errors above." : missing.length ? "Empty plots: " + missing.join(", ") + "." : k.rd ? "Every building stands." : "Surveying the land.")));
+  return h("div", { class: "kcol" }, btn, plate);
+}
+function viewRealm() {
+  const r = realm(), cols = keeps().map(keepColumn);
+  const stage = h("section", { class: "stage", "aria-label": "The Reach: one keep for each repository" }, art(skySVG()), h("div", { class: "keeps" }, ...cols), h("div", { class: "road" }, guideBuild("walk")));
+  const quests = h("section", { class: "panel" }, h("h2", { text: "Quest log" }),
+    h("div", { class: "pips" }, h("span", { class: "chip run", text: r.running + " running" }), h("span", { class: "chip ok", text: r.pass + " ready to merge" }), h("span", { class: "chip " + (r.failing ? "bad" : "mut"), text: r.failing + " failing" }), h("span", { class: "chip mut", text: r.draft + " draft" })),
+    h("p", { class: "note", text: r.open ? `${r.open} open ${r.open === 1 ? "pull request is a quest" : "pull requests are quests"}. Each hooded figure on a keep is the agent working one.` : "No open quests. The party is resting." }),
+    h("p", {}, h("button", { class: "primary", type: "button", text: "Open the quest log"})));
+  quests.querySelector("button").onclick = () => { location.hash = "quests"; };
+  const loot = Object.values(S.recent).flat().sort((a, b) => b.merged.localeCompare(a.merged)).slice(0, 6);
+  const lootPanel = h("section", { class: "panel" }, h("h2", { text: "Recent loot" }),
+    loot.length ? h("ul", { class: "loot" }, ...loot.map((x) => h("li", {}, h("span", { class: "coin" }), h("a", { href: x.url, target: "_blank", rel: "noopener", text: `#${x.number} ${x.title}` }), h("span", { class: "note", text: ago(idleMinutes(x.merged)) + " ago" })))) : h("p", { class: "empty", text: S.at ? "No merged pull requests read yet." : "Reading merges." }));
+  const facts = facts_(), have = TROPHIES.filter((t) => trophyHeld(t, facts)).length;
+  const tro = h("section", { class: "panel" }, h("h2", { text: "Trophies" }), h("p", { class: "note", text: `${have} of ${TROPHIES.length} earned.` }),
+    h("p", {}, h("button", { class: "primary", type: "button", text: "See the character sheet" })));
+  tro.querySelector("button").onclick = () => { location.hash = "stats"; };
+  return h("div", { class: "view" }, errors(), stage, h("div", { class: "dash" }, quests, lootPanel, tro), glossary());
+}
+function glossary() {
+  const rows = [["Keep", "A repository. It grows from a camp to a citadel as pull requests merge."], ["Quest", "An open pull request. Its progress bar is its finished checks."], ["Party", "The agent working a quest, one hooded figure each."], ["Loot and XP", "A merged pull request. Level comes from the total merged."], ["Buildings", "The eight repo setup checks. A dashed plot is a check that is missing."], ["Renown and banners", "The master score on the Quality page. A higher score hangs more banners."], ["Quest-giver (!)", "Something only you can do, marked with the needs-owner label."]];
+  return h("details", {}, h("summary", { text: "How to read the Realm" }), h("table", { class: "glossary" }, h("tbody", {}, ...rows.map(([a, b]) => h("tr", {}, h("th", { scope: "row", text: a }), h("td", { text: b }))))));
+}
+function questCard(p) {
+  const l = label(p), m = idleMinutes(p.updated), pct = p.total ? Math.round(100 * p.done / p.total) : l.key === "pass" ? 100 : 0;
+  const idle = isIdle(p), kind = idle ? "warn" : l.kind;
+  const el = h("div", { class: "quest " + (l.kind === "mut" ? "mut" : l.kind) },
+    h("span", { class: "ico", title: "The agent on this quest" }, art(partySVG(l.key))),
+    h("span", { class: "t" }, h("span", { class: "num", text: "#" + p.number + " " }), h("a", { href: p.url, target: "_blank", rel: "noopener", text: p.title })),
+    h("span", { class: "chip " + l.kind, text: l.text }),
+    h("span", { class: "prog" }, meter(pct, l.kind === "mut" ? "mut" : l.kind === "ok" ? "" : l.kind, "Checks finished for pull request " + p.number), h("small", { class: "num", text: !p.total ? "No checks yet" : l.key === "fail" ? `${p.bad} failed of ${p.total} checks` : `${p.done} of ${p.total} checks` })),
+    h("span", { class: "sub" }, h("span", { text: "Party: " + p.branch }), h("span", { class: "chip " + (idle ? "warn" : ""), text: (idle ? "Stalled " : "Updated ") + ago(m) })));
+  return el;
+}
+function viewQuests() {
+  const parts = keeps().map((k) => {
+    const rows = k.prs.slice().sort((a, b) => b.updated.localeCompare(a.updated));
+    return h("section", { class: "panel" }, h("div", { class: "ph" }, h("h2", { text: k.short }), h("span", { class: "note", text: `${k.owner} · ${rows.length} open` })),
+      ...(rows.length ? rows.map(questCard) : [h("p", { class: "empty", text: k.unread ? "Could not read this keep. See the errors above." : "No open quests. The party is resting." })]));
+  });
+  return h("div", { class: "view" }, guideBuild("bar"), errors(), ...parts);
 }
 function viewNeeds() {
-  const rows = S.asks.map((x) => h("div", { class: "row warn" },
-    h("span", { class: "pill warn", text: "Waiting " + ago(idleMinutes(x.updated)) }),
-    h("span", { class: "t" }, h("a", { href: x.url, target: "_blank", rel: "noopener", text: x.title })), h("span"), h("span", { class: "sub", text: x.repo })));
-  if (!rows.length) rows.push(h("div", { class: "empty", text: !S.at ? "Checking GitHub." : S.errors.length ? "Could not read everything. See the errors above." : "Nothing needs you. Claudius will say when that changes." }));
-  return h("div", { class: "stack" },
-    h("section", {}, h("h2", { text: "Needs you" }), h("div", { class: "card list", style: "padding:4px 0" }, ...rows),
-      h("p", { class: "note", text: `A thread adds the ${ASK_LABEL} label to an issue or pull request when only you can do the step: an install, a passkey, typed words or billing. Pull requests, Quality and repo setup stay under Builds, Quality and Repos.` })));
+  const rows = S.asks.map((x) => h("div", { class: "quest gold" }, h("span", { class: "ico" }, art(ICON.ask)),
+    h("span", { class: "t" }, h("a", { href: x.url, target: "_blank", rel: "noopener", text: x.title })), h("span", { class: "chip warn", text: "Waiting " + ago(idleMinutes(x.updated)) }),
+    h("span", { class: "sub", text: x.repo })));
+  const body = rows.length ? rows : [h("p", { class: "empty", text: !S.at ? "Checking GitHub." : S.errors.length ? "Could not read everything. See the errors above." : "Nothing needs you. Claudius will say when that changes." })];
+  return h("div", { class: "view" }, guideBuild("bar"), errors(), h("section", { class: "panel" }, h("h2", { text: "Needs you" }), ...body,
+    h("p", { class: "note", text: `A thread adds the ${ASK_LABEL} label to an issue or pull request when only you can do the step: an install, a passkey, typed words or billing. Pull requests, Quality and repo setup stay under Quests, Stats and Keeps.` })));
 }
-function viewBuilds() {
-  const parts = [];
-  S.repos.forEach((repo, i) => {
-    const rows = (S.data[i] || []).slice().sort((a, b) => b.updated.localeCompare(a.updated));
-    parts.push(h("section", {}, h("div", { class: "repohead" }, h("h2", { text: repo }), h("span", { class: "note", text: rows.length + " open" })),
-      h("div", { class: "card list", style: "padding:4px 0" }, ...(rows.length ? rows.map(prRow) : [h("div", { class: "empty", text: S.failed.has(repo) ? "Could not read this repo. See the errors above." : "No open pull requests." })]))));
-  });
-  return h("div", { class: "stack" }, ...parts);
+function radarSVG(vals) {   // quality, speed and consumption on three spokes; the dashed ring is the goal
+  const cx = 130, cy = 120, R = 86, ang = [-90, 30, 150], pt = (i, v) => [cx + Math.cos(ang[i] * Math.PI / 180) * R * v / 100, cy + Math.sin(ang[i] * Math.PI / 180) * R * v / 100];
+  const poly = (v) => vals.map((x, i) => pt(i, v ?? x).join(",")).join(" "), names = ["Craft", "Swiftness", "Thrift"];
+  const svg = art(`<svg class="radar" viewBox="0 0 260 240" role="img" aria-label="Radar of the three scores">
+    ${[25, 50, 75, 100].map((v) => `<polygon class="ring" points="${poly(v)}"/>`).join("")}<polygon class="goal" points="${poly(GOAL)}"/>
+    <polygon class="shape" points="${vals.map((x, i) => pt(i, x ?? 0).join(",")).join(" ")}"/>
+    ${names.map((n, i) => { const [x, y] = pt(i, 118); return `<text x="${x}" y="${y + 4}" text-anchor="middle">${n}</text>`; }).join("")}</svg>`);
+  return svg;
 }
-function viewQuality() {
-  if (!S.quals.length) return qualityCard([]);
-  return h("div", { class: "stack" }, ...S.quals.map((x) => {
+function facts_() { const r = realm(); return { ...r, ks: r.ks }; }
+function trophyHeld(t, facts) {
+  const held = store.get("trophies", null) || [];
+  return held.includes(t[0]) || t[3](facts);
+}
+function viewStats() {
+  const x = S.quals[0], facts = facts_();
+  const sheet = !x ? h("section", { class: "panel" }, h("h2", { text: "Character sheet" }), h("p", { class: "empty", text: S.errors.some((e) => /^https:/.test(e)) ? "Could not read the Quality page. See the errors above." : "No Quality page yet. Add one under Settings." })) : (() => {
+    const T = x.totals, rows = [["Renown", "Master score", T.master, "master"], ["Craft", "Quality", T.quality], ["Swiftness", "Speed", T.speed], ["Thrift", "Consumption", T.consumption]].filter((r) => r[2] !== undefined);
+    return h("section", { class: "panel" }, h("h2", { text: "Character sheet" }), h("div", { class: "sheet" },
+      h("div", {}, ...rows.map(([n, sub, v]) => h("div", { class: "stat-row" }, h("span", { class: "nm" }, n, h("span", { text: sub })), meter(v, band(v), n + ", " + sub), h("b", { text: String(v) }))),
+        h("p", { class: "note" }, `The dashed ring is the goal of ${GOAL}. `, h("a", { href: x.url, target: "_blank", rel: "noopener", text: "Open the live page" }))),
+      radarSVG([T.quality, T.speed, T.consumption])));
+  })();
+  const tro = h("section", { class: "panel" }, h("h2", { text: "Trophies" }), h("ul", { class: "trophies" }, ...TROPHIES.map((t) => { const on = trophyHeld(t, facts);
+    return h("li", { class: "trophy " + (on ? "have" : "lock") }, art(medal(on)), h("b", { text: t[1] }), h("span", { text: t[2] }), h("span", { class: "sr", text: on ? "Earned" : "Not yet earned" })); })));
+  const skills = !x ? null : (() => {
     const tabs = x.tabs.slice().sort((a, b) => Math.min(...Object.values(a.scores)) - Math.min(...Object.values(b.scores)));
-    const cell = (v) => v === undefined ? h("td", { class: "n", text: "not measured" }) :
-      h("td", { class: "n" }, h("b", { text: String(v) }), h("span", { class: "meter mini " + band(v) }, h("i", { style: `width:${v}%` })));
-    const table = h("table", { class: "tbl" }, h("thead", {}, h("tr", {}, ...["Tab", "Quality", "Speed", "Consumption"].map((c) => h("th", { scope: "col", text: c })))),
-      h("tbody", {}, ...tabs.map((t) => h("tr", {}, h("th", { scope: "row", text: t.name }), cell(t.scores.quality), cell(t.scores.speed), cell(t.scores.consumption)))));
-    return h("div", { class: "stack" }, qualityCard([x]), h("section", {}, h("h2", { text: "Tabs, lowest first" }), h("div", { class: "card tblwrap" }, table)));
-  }));
+    const cell = (v) => v === undefined ? h("td", { class: "n", text: "not measured" }) : h("td", { class: "n" }, h("b", { text: String(v) }), h("span", { class: "mini" }, meter(v, band(v), "score " + v)));
+    return h("section", { class: "panel" }, h("h2", { text: "Skills, weakest first" }), h("div", { class: "tblwrap" }, h("table", { class: "tbl" }, h("thead", {}, h("tr", {}, ...["Tab", "Craft", "Swiftness", "Thrift"].map((c) => h("th", { scope: "col", text: c })))),
+      h("tbody", {}, ...tabs.map((t) => h("tr", {}, h("th", { scope: "row", text: t.name }), cell(t.scores.quality), cell(t.scores.speed), cell(t.scores.consumption)))))));
+  })();
+  return h("div", { class: "view" }, guideBuild("bar"), errors(), sheet, tro, skills);
 }
-function viewRepos() {
-  return h("div", { class: "stack" }, ...S.repos.map((repo) => {
-    const r = S.ready[repo];
-    if (!r) return h("section", { class: "card" }, h("h2", { text: repo }), h("p", { class: "empty", text: "Not read yet." }));
-    const s = readiness(r);
-    return h("section", { class: "card" }, h("div", { class: "repohead" }, h("h2", { text: repo }), h("span", { class: "pill " + band(Math.round(100 * s.pass / s.of)), text: `${s.pass} of ${s.of} ready` })),
-      h("div", { class: "chips" }, ...s.rows.map((x) => h("span", { class: "chip " + (x.ok === null ? "mut" : x.ok ? "ok" : "bad"), text: (x.ok === null ? "Not read: " : x.ok ? "Has " : "Missing ") + x.name }))));
-  }));
+function viewKeeps() {
+  const parts = keeps().map((k) => {
+    const scene = h("div", { class: "scenebox" }, art(sceneSVG(k)), ...partyLayer(k));
+    const list = k.rd ? h("ul", { class: "blds" }, ...k.rd.rows.map((x) => h("li", { class: x.ok ? "built" : "plot" }, art(`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="${x.ok === null ? "none" : x.ok ? "#3f9a6b" : "none"}" stroke="${x.ok ? "#2f6b4f" : "#8a7a5a"}" stroke-width="2" ${x.ok ? "" : 'stroke-dasharray="4 3"'}/>${x.ok ? '<path d="M7 12.5l3.5 3.5L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>' : ""}</svg>`),
+      h("span", {}, h("b", { text: x.bname }), h("span", { text: ` (${x.name}): ${x.ok === null ? "not read with this login" : x.ok ? "standing" : "empty plot"}` }))))) : h("p", { class: "empty", text: k.unread ? "Could not read this keep. See the errors above." : "Not read yet." });
+    const sec = h("section", { class: "panel", id: "keep-" + k.i }, h("div", { class: "ph" }, h("h2", { tabindex: "-1", text: k.short }), h("span", { class: "note", text: k.owner }),
+      h("a", { href: "https://github.com/" + k.repo, target: "_blank", rel: "noopener", text: "Open on GitHub" })),
+      h("div", { class: "pips" }, h("span", { class: "chip", text: k.tier.known ? `${k.tier.name} · ${k.total} merged` : "Merges not read" }), k.rd ? h("span", { class: "chip " + band(Math.round(100 * k.rd.pass / k.rd.of)), text: `${k.rd.pass} of ${k.rd.of} buildings standing` }) : null,
+        h("span", { class: "chip " + (k.band || "mut"), text: k.quality ? "Renown " + k.quality.totals.master + " (banners)" : "No Quality page: no banners" })),
+      h("div", { class: "kview", style: "margin-top:12px" }, scene, h("div", {}, h("h3", { text: "Buildings" }), list)));
+    if (S.sel === k.repo) sec.dataset.sel = "1";
+    return sec;
+  });
+  return h("div", { class: "view" }, guideBuild("bar"), errors(), ...parts, settings());
 }
 function settings() {
+  if (S.settings) return S.settings;   // built once, so typed text and the open state survive a refresh
   const ta = h("textarea", { id: "repos", "aria-label": "Repositories to watch" }); ta.value = store.get("repos", DEFAULT_REPOS).join("\n");
   const tq = h("textarea", { id: "quality-urls", "aria-label": "Quality pages to read" }); tq.value = store.get("quality", DEFAULT_QUALITY).join("\n");
-  const save = h("button", { class: "save", id: "save", text: "Save and refresh" });
+  const save = h("button", { class: "primary", id: "save", type: "button", text: "Save and refresh" });
   save.onclick = () => {
     const nextR = ta.value.split(/\s+/).filter((r) => REPO_RE.test(r)), nextQ = tq.value.split(/\s+/).filter((u) => URL_RE.test(u));
     store.set("repos", nextR.length ? nextR : DEFAULT_REPOS); store.set("quality", nextQ); window.__reset(); window.__refresh(true);
   };
-  return h("details", {}, h("summary", { text: "Settings" }),
-    h("h3", { text: "Repositories" }), ta, h("h3", { text: "Quality pages (https)" }), tq,
-    h("div", {}, save, h("span", { class: "note", text: "  One per line." })));
+  S.settings = h("details", { class: "panel" }, h("summary", { text: "Settings" }),
+    h("h3", { text: "Repositories" }), ta, h("h3", { text: "Quality pages (https)" }), tq, h("div", {}, save, h("span", { class: "note", text: "  One per line." })));
+  return S.settings;
 }
 function foot() {
-  return h("p", { class: "foot", text: "Claudius is an AI agent. This view reads GitHub through your gh login and the public Quality pages. Project threads, plan limits and credit use sit behind the Claude app, so Claudius cannot read them." });
+  return h("p", { class: "foot", text: "Claudius is an AI agent. This view reads GitHub through your gh login and the public Quality pages. Project threads, plan limits and credit use sit behind the Claude app, so Claudius cannot read them. Level and keep size count merged pull requests, and every number on screen comes from GitHub or a Quality page." });
 }
-function render() {
-  if (S.waiting) return;   // the permission card is showing
-  let view;
-  switch (S.view) {   // a fixed list of views, so the address bar never picks a function
-    case "builds": view = viewBuilds(); break;
-    case "quality": view = viewQuality(); break;
-    case "repos": view = viewRepos(); break;
-    default: view = viewNeeds();
-  }
-  nav.replaceChildren(...VIEWS.map(([id, name]) => {
-    const b = h("button", { text: name, type: "button" });
-    if (id === S.view) b.setAttribute("aria-current", "page");
-    b.onclick = () => { location.hash = id; };
-    return b;
-  }));
-  S.settings = S.settings || settings();   // built once, so typed text and the open state survive a refresh
-  app.replaceChildren(errors(), view, S.settings, foot());
+function hud() {
+  const r = realm();
+  const lv = document.getElementById("lvl"); lv.textContent = r.known ? String(r.L) : "?"; lv.setAttribute("aria-label", r.known ? "Level " + r.L : "Level not read yet");
+  document.getElementById("title").textContent = r.known ? r.title + (r.partial ? " (some keeps unread)" : "") : "Reading merges";
+  const pct = r.known ? Math.round(100 * (r.total - r.lo) / (r.hi - r.lo)) : 0, bar = document.getElementById("xpbar");
+  bar.setAttribute("aria-valuenow", String(pct)); bar.firstChild.style.width = pct + "%"; bar.firstChild.classList.toggle("shine", r.known && !RM());
+  document.getElementById("xptext").textContent = r.known ? `${r.total} merged · ${r.hi - r.total} to level ${r.L + 1}` : "Reading merges";
+  const chip = (v, l) => h("div", { class: "stat" }, h("b", { text: String(v) }), h("span", { text: l }));
+  document.getElementById("stats").replaceChildren(r.master === null ? chip("?", "Renown not read") : chip(r.master, "Renown"));
+  const ab = document.getElementById("alertbtn"); ab.className = "alertbtn " + (r.asks ? "on" : "off");
+  document.getElementById("alerttext").textContent = "Needs you: " + r.asks;
+  return r;
 }
-function route() {
-  const id = location.hash.slice(1);
-  S.view = VIEWS.some(([v]) => v === id) ? id : "needs";
-  render();
-}
-window.addEventListener("hashchange", route);
-
 function installView(state) {
-  document.body.classList.add("plain");
-  nav.hidden = true;
-  const card = h("section", { class: "card install" }, h("h2", { text: "Claudius runs as a Mac app" }),
-    h("p", { text: "It shows only what needs you, such as an install, a passkey, typed words or billing, and keeps pull requests, Quality scores and repo readiness one click away. It reads GitHub with your own login (gh) and tells you when something new needs you. It needs its own window, so install it from the Claude desktop app." }));
+  document.body.classList.add("plain"); S.waiting = true;   // the install card stays put, whatever key or address comes next
+  S.say = { text: "Install me as an app and I will keep watch over your keeps.", mood: "idle" };
+  document.querySelector(".xp").hidden = true; document.getElementById("title").textContent = "Not installed yet";
+  nav.hidden = true; document.getElementById("alertbtn").hidden = true; document.getElementById("sound").hidden = true; document.getElementById("stats").hidden = true;
+  const card = h("section", { class: "panel install" }, h("h2", { text: "Claudius runs as a Mac app" }), guideBuild("bar"),
+    h("p", { text: "It turns your repositories into keeps, your pull requests into quests and your merges into loot, and marks anything only you can do with a glowing !. It reads GitHub with your own login (gh) and tells you when something new needs you. It needs its own window, so install it from the Claude desktop app." }));
   if (state === "available") {
-    const b = h("button", { class: "primary", text: "Install as app" });
+    const b = h("button", { class: "primary", type: "button", text: "Install as app" });
     b.onclick = () => window.__desktop.install.request().catch(() => {});
     card.append(h("p", {}, b), h("p", { class: "note", text: "On install, Claude asks for full access, notifications and a menu bar item. All three are used. Claudius only reads: issues, pull requests, checks, repo settings and public pages." }));
   } else {
@@ -383,18 +932,57 @@ function installView(state) {
   }
   app.replaceChildren(card, foot());
 }
+function render() {
+  if (S.waiting) return;   // the permission card is showing
+  const r = hud();
+  let view;
+  switch (S.view) {   // a fixed list of views, so the address bar never picks a function
+    case "needs": view = viewNeeds(); break;
+    case "quests": view = viewQuests(); break;
+    case "stats": view = viewStats(); break;
+    case "keeps": view = viewKeeps(); break;
+    default: view = viewRealm();
+  }
+  nav.replaceChildren(...VIEWS.map(([id, name]) => {
+    const b = h("button", { type: "button" }, art(NAVICON[id]), h("span", { text: name }));
+    if (id === "needs" && r.asks) b.append(h("span", { class: "count", text: String(r.asks) }));
+    if (id === S.view) b.setAttribute("aria-current", "page");
+    b.onclick = () => { location.hash = id; }; return b;
+  }));
+  app.replaceChildren(view, foot());
+  if (!S.say || S.sayAuto) { const g = guideNow(); S.say = g; S.sayAuto = true; for (const el of document.querySelectorAll(".bubble")) el.textContent = g.text; for (const e of document.querySelectorAll(".gnome-svg")) e.setAttribute("class", "gnome-svg " + g.mood); }
+  requestAnimationFrame(() => { placeGuide(false); if (S.view === "keeps" && S.sel) { const t = document.querySelector('[data-sel="1"]'); if (t) { t.scrollIntoView({ block: "start" }); t.querySelector("h2")?.focus({ preventScroll: true }); } S.sel = null; } });
+}
+function route() {
+  const id = location.hash.slice(1), v = ALIAS[id] || id;
+  S.view = VIEWS.some(([x]) => x === v) ? v : "realm";
+  render();
+}
+window.addEventListener("hashchange", route);
+addEventListener("resize", () => placeGuide(false));
+document.getElementById("alertbtn").onclick = () => { location.hash = "needs"; sfx("click"); };
+const soundBtn = document.getElementById("sound");
+const syncSound = () => { soundBtn.setAttribute("aria-pressed", String(S.sound)); soundBtn.textContent = S.sound ? "Sound on" : "Sound off"; };
+soundBtn.onclick = () => { S.sound = !S.sound; store.set("sound", S.sound); syncSound(); sfx("click"); };
+syncSound();
+addEventListener("keydown", (e) => {   // 1 to 5 switch views, unless the viewer is typing
+  if (e.metaKey || e.ctrlKey || e.altKey || /^(TEXTAREA|INPUT)$/.test(e.target.tagName)) return;
+  const i = "12345".indexOf(e.key); if (i >= 0 && VIEWS[i]) location.hash = VIEWS[i][0];
+});
 
 // ---- boot -----------------------------------------------------------------
 const desktop = await window.claude?.use?.("desktop").catch(() => null);
 window.__desktop = desktop;
+document.body.classList.toggle("app", !!desktop?.childProcess);
 if (!desktop?.childProcess) {
   installView(await desktop?.install?.state().catch(() => "unavailable"));
   meta.textContent = "Not running as an app";
 } else {
   desktop.app.dock.setIcon("data:image/png;base64," + blob("img-dock")).catch(() => {});
-  desktop.window.setOptions({ titleBarStyle: "hiddenInset", dragHeight: 36, width: 860, height: 680 }).catch(() => {});
+  desktop.window.setOptions({ titleBarStyle: "hiddenInset", dragHeight: 36, width: 960, height: 760 }).catch(() => {});
   refreshBtn.hidden = false;
   let askPrev = new Map(), askSeen = new Set();   // in memory only: the asks seen last time, and the repos read in full at least once, so a repo's first read never notifies
+  let mergedSeen = new Map();                     // repo -> numbers of merged pull requests already seen; a repo's first read seeds it quietly
   let timer = null, busy = false, again = false, againSlow = false, gen = 0, tick = 0;
 
   async function setBar(asks, unread) {
@@ -405,6 +993,13 @@ if (!desktop?.childProcess) {
       ...items, ...(items.length ? [{ type: "separator" }] : []),
       { label: "Open Claudius", click: () => desktop.window.show().catch(() => {}) },
       { label: "Refresh now", click: () => window.__refresh(true) }] }).catch(() => {});
+  }
+  function trophies() {   // newly earned trophies are announced once, ever; the first complete read records what is already held without a fanfare
+    const rr = realm(); if (!rr.known || rr.partial || S.errors.length || !S.repos.every((x) => S.ready[x])) return;   // never judge a half-read realm
+    const f = facts_(), held = store.get("trophies", null), nowHeld = TROPHIES.filter((t) => t[3](f)).map((t) => t[0]);
+    if (held === null) { store.set("trophies", nowHeld); return; }
+    const fresh = TROPHIES.filter((t) => t[3](f) && !held.includes(t[0]));
+    if (fresh.length) { store.set("trophies", [...new Set([...held, ...nowHeld])]); for (const t of fresh) { toast("Trophy earned", t[1]); sayLive.textContent = "Trophy earned: " + t[1]; } burst(innerWidth - 120, innerHeight - 90, 24); sfx("level"); }
   }
 
   window.__refresh = async function (slow) {
@@ -419,7 +1014,7 @@ if (!desktop?.childProcess) {
       meta.textContent = "Checking";
       const errs = [], data = [], slowErrs = doSlow ? [] : S.slowErrs;   // slow reads keep their errors until the next slow read
       let setup = false;   // gh missing or signed out: say it once and skip the rest
-      const failed = new Set(), askFailed = new Set(), asks = [];
+      const failed = new Set(), askFailed = new Set(), asks = [], recent = {}, newMerges = [];
       for (const repo of repos) {   // what waits on the owner comes first
         try { asks.push(...await readAsks(desktop, repo)); }
         catch (e) { askFailed.add(repo); if (e instanceof SetupError) { setup = true; if (!errs.includes(e.message)) errs.push(e.message); break; } else errs.push(`${repo} issues: ${e.message}`); }
@@ -430,27 +1025,48 @@ if (!desktop?.childProcess) {
         try { data.push(await readPRs(desktop, repo)); }
         catch (e) { failed.add(repo); if (e instanceof SetupError) { setup = true; errs.push(e.message); } else errs.push(`${repo}: ${e.message}`); data.push([]); }
       }
-      let ready = S.ready, quals = S.quals;
+      for (const repo of repos) {   // the last merged pull requests: new ones since the last check are celebrated, the first read of a repo is not
+        if (setup || failed.has(repo)) { recent[repo] = S.recent[repo] || []; continue; }
+        try {
+          const rows = await readMerged(desktop, repo); recent[repo] = rows;
+          const seen = mergedSeen.get(repo);
+          if (seen) for (const x of rows) if (!seen.has(x.number) && Date.now() - Date.parse(x.merged) < 30 * 60000) newMerges.push(x);   // a long-merged pull request that was only touched again is not new loot
+          mergedSeen.set(repo, new Set([...(seen || []), ...rows.map((x) => x.number)]));
+        } catch (e) { recent[repo] = S.recent[repo] || []; errs.push(`${repo} merges: ${e.message}`); }
+      }
+      let ready = S.ready, quals = S.quals; const mTotal = { ...S.mTotal };
       if (doSlow) {
         ready = {}; quals = [];
-        if (!setup) for (const repo of repos.filter((r) => !failed.has(r))) { try { ready[repo] = await readRepo(desktop, repo); } catch (e) { slowErrs.push(`${repo} settings: ${e.message}`); } }
+        if (!setup) for (const repo of repos.filter((r) => !failed.has(r))) {
+          try { ready[repo] = await readRepo(desktop, repo); } catch (e) { slowErrs.push(`${repo} settings: ${e.message}`); }
+          try { mTotal[repo] = Math.max(await readMergedTotal(desktop, repo), mTotal[repo] || 0); }   // GitHub search can lag a fresh merge: the count never goes down
+           catch (e) { slowErrs.push(`${repo} merge count: ${e.message}`); }
+        }
         for (const u of urls) { try { quals.push(await readQuality(desktop, u)); } catch (e) { slowErrs.push(`${u}: ${e.message}`); } }
-      }
+      } else for (const x of newMerges) if (Number.isInteger(mTotal[x.repo])) mTotal[x.repo]++;   // between full reads, a new merge adds one until GitHub's own count replaces it
       const kept = S.asks.filter((a) => askFailed.has(a.repo));   // a repo that could not be read keeps its last asks, so it raises no false change
       const allAsks = [...asks, ...kept].sort((a, b) => a.updated.localeCompare(b.updated));   // longest waiting first
-      Object.assign(S, { data, asks: allAsks, errors: [...errs, ...slowErrs], slowErrs, failed, askFailed, ready, quals, repos, at: new Date() });
+      const prevLevel = S.lastLevel;
+      Object.assign(S, { data, asks: allAsks, errors: [...errs, ...slowErrs], slowErrs, failed, askFailed, ready, quals, repos, recent, mTotal, at: new Date() });
+      if (S.gnomeAt >= repos.length) S.gnomeAt = -1;
+      if (!S.holding) S.sayAuto = true;   // a line the viewer just asked for is not cut short by a poll
       render();
+      const r = realm();
       if (myGen === gen) {
+        if (r.known && !r.partial) S.lastLevel = r.L;   // a keep that could not be read, or a stale check, would fake a jump later
         const fresh = allAsks.filter((x) => askSeen.has(x.repo) && !askPrev.has(x.key));
-        if (fresh.length) desktop.notification.show({ body: fresh.map((x) => x.title).join(". ").slice(0, 280) }).catch(() => {});
+        if (fresh.length) { desktop.notification.show({ body: fresh.map((x) => x.title).join(". ").slice(0, 280) }).catch(() => {}); sfx("alert"); }
         askPrev = new Map(allAsks.map((x) => [x.key, x]));
         for (const repo of repos) if (!askFailed.has(repo)) askSeen.add(repo);
+        newMerges.slice(0, 3).forEach((ev, i) => setTimeout(() => celebrate(ev), i * 450));
+        if (prevLevel !== null && r.known && !r.partial && r.L > prevLevel) setTimeout(() => levelUp(r.L), newMerges.length ? 900 : 0);
+        trophies();
       }
       const n = allAsks.length;
       const summary = S.errors.length ? "Could not read everything" : n === 0 ? "Nothing needs you" : n === 1 ? "1 item needs you" : `${n} items need you`;
       if (live.textContent !== summary) live.textContent = summary;   // announced only when it changes
       await setBar(allAsks, askFailed.size > 0);
-      meta.textContent = `Watching ${repos.length} ${repos.length === 1 ? "repo" : "repos"}, checked ` + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + (S.errors.length ? ", with errors" : "");
+      meta.textContent = `Watching ${repos.length} ${repos.length === 1 ? "keep" : "keeps"}, checked ` + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + (S.errors.length ? ", with errors" : "");
     } catch (e) {
       meta.textContent = "Check failed: " + e.message;
     } finally {
@@ -459,7 +1075,7 @@ if (!desktop?.childProcess) {
       timer = setTimeout(() => window.__refresh(rerunSlow), rerun ? 0 : POLL_MS);
     }
   };
-  window.__reset = () => { askPrev = new Map(); askSeen = new Set(); gen++; };
+  window.__reset = () => { askPrev = new Map(); askSeen = new Set(); mergedSeen = new Map(); gen++; S.lastLevel = null; };
   refreshBtn.onclick = () => window.__refresh(true);
   route();
   // A call that needs a permission waits for a click while the window is hidden (during install),
@@ -468,7 +1084,7 @@ if (!desktop?.childProcess) {
   async function offerManage() {
     const states = await desktop.permissions.state().catch(() => ({}));
     if (NEED.some((n) => states[n] === "denied") && !document.getElementById("manage")) {
-      const manage = h("button", { class: "ghost", id: "manage", text: "Manage permissions" });
+      const manage = h("button", { class: "rune", id: "manage", type: "button", text: "Manage permissions" });
       manage.onclick = () => desktop.permissions.manage().catch(() => {});
       refreshBtn.after(manage);
     }
@@ -479,13 +1095,13 @@ if (!desktop?.childProcess) {
   else {
     refreshBtn.hidden = true; nav.hidden = true; S.waiting = true;
     meta.textContent = "Waiting for permission";
-    const go = h("button", { class: "primary", text: "Allow and start" });
+    const go = h("button", { class: "primary", type: "button", text: "Allow and start" });
     go.onclick = async () => {
       await desktop.permissions.request().catch(() => {});
       S.waiting = false; nav.hidden = false; refreshBtn.hidden = false; route();
       await offerManage(); window.__refresh(true);
     };
-    app.replaceChildren(h("section", { class: "card install" }, h("h2", { text: "Claudius needs three permissions" }),
+    app.replaceChildren(h("section", { class: "panel install" }, h("h2", { text: "Claudius needs three permissions" }),
       h("p", { text: "Full access runs gh and curl on this Mac to read GitHub and the public Quality pages. Notifications tell you when something new needs you. The menu bar item shows how many things need you. Claudius reads only and changes nothing." }),
       h("p", {}, go)));
   }
