@@ -14,7 +14,7 @@ flowchart LR
 | --- | --- |
 | [Claude API](claude-api.md) | Plan credits, workload identity federation, the keyless workflow in [ci/](ci/claude-keyless.yml) |
 | [Claude Code Projects](claude-projects.md) | Cloud threads on a Claude plan. Setup is in the [Code Project template](../code-project/README.md) |
-| [Claude artifact apps](claude-artifact-apps.md) | An installable artifact instead of a native app, with a [starter page](artifact-app/starter.html) |
+| [Claude artifact apps](claude-artifact-apps.md) | An installable artifact instead of a native app, with a [starter page](artifact-app/starter.html) and a finished [Claudius app](artifact-app/claudius.html) |
 | [Claude Desktop MCP](claude-desktop-mcp.md) | A custom connector or a desktop extension, with the [loopback bridge](loopback-bridge/manifest.json) and a [skills server](skills-server/README.md) |
 
 Every vendor claim cites the vendor's page and the date it was read. No key value appears anywhere: CLI logins and OAuth first, variable names only. The pages change, so read the cited page again before you rely on a figure.
