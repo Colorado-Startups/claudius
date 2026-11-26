@@ -212,13 +212,17 @@ test('off_switches: no settings file at all is not measured, never 0', async () 
   assert.match((await collect({ ...base, home: bare, root: path.join(tmp, 'none') }))['desktop_app.off_switches'].could_not_check, /no user, project or local settings file/);
 });
 
-test('off_switches: a settings file that does not parse is not measured, with a fixed reason and none of its text', async () => {
+test('off_switches: a settings file that cannot be read or parsed is not measured, with a fixed reason and none of its text', async () => {
   const broken = path.join(tmp, 'broken-repo');
   write(path.join(broken, '.claude', 'settings.json'), '{ "syncClaudeAiSkills": false, secret-looking-text');
   write(path.join(broken, '.claude', 'settings.local.json'), JSON.stringify({ disableClaudeAiConnectors: true }));
-  assert.throws(() => offSwitches({ home: path.join(tmp, 'none'), root: broken, params: PARAMS }), /^Error: a settings file does not parse$/);
+  assert.throws(() => offSwitches({ home: path.join(tmp, 'none'), root: broken, params: PARAMS }), /^Error: a settings file cannot be read or parsed$/);
   const bare = path.join(tmp, 'broken-settings-home');
   write(path.join(bare, '.claude', 'projects', '-Users-someone-Developer-acme-site', 'c1.jsonl'), jsonl([call('c1', 0, 'Read')]));
   const got = (await collect({ ...base, home: bare, root: broken }))['desktop_app.off_switches'];
-  assert.equal(got.could_not_check, 'could not read (a settings file does not parse)');
+  assert.equal(got.could_not_check, 'could not read (a settings file cannot be read or parsed)');
+  // A skillOverrides that is a list, not a map, adds no rows.
+  const listy = path.join(tmp, 'listy-repo');
+  write(path.join(listy, '.claude', 'settings.json'), JSON.stringify({ skillOverrides: ['off'] }));
+  assert.deepEqual(offSwitches({ home: path.join(tmp, 'none'), root: listy, params: PARAMS }), []);
 });

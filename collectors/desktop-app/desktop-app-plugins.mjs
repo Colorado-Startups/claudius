@@ -76,13 +76,13 @@ function settingsFiles({ home, root, params }) {
 export function offSwitches({ home, root, params }) {
   const files = settingsFiles({ home, root, params });
   // A file that is there but does not parse would be skipped, and the count would read too low: not measured instead.
-  if (files.some((f) => fs.existsSync(f) && !isObject(readJson(f)))) throw new Error('a settings file does not parse');
+  if (files.some((f) => fs.existsSync(f) && !isObject(readJson(f)))) throw new Error('a settings file cannot be read or parsed');
   const docs = files.map(readJson).filter(isObject);
   if (!docs.length) return null;
   const merged = Object.assign({}, ...docs);
   const rows = [];
   for (const [key, off] of Object.entries(params.off_booleans ?? {})) if (merged[key] === off) rows.push(key);
-  const overrides = Object.assign({}, ...docs.map((d) => d.skillOverrides ?? {}));
+  const overrides = Object.assign({}, ...docs.map((d) => (isObject(d.skillOverrides) ? d.skillOverrides : {})));
   for (const [skill, value] of Object.entries(overrides)) if ((params.skill_override_off ?? []).includes(value)) rows.push(`skillOverrides: ${skill}`);
   for (const [id, on] of Object.entries(enabledMap(...settingsFiles({ home, root, params })))) if (on === false) rows.push(`enabledPlugins: ${id}`);
   return rows.sort();
