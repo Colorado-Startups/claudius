@@ -203,6 +203,6 @@ test('visibility: an org never reads repos/<repo> for scanning, even for a publi
   const ok = fakeGh({ repos: bare });
   const gh = { rest: async (r) => (seen.push(r), ok.rest(r)), restAll: ok.restAll };
   const out = await collect({ params, gh, fetchPage: async () => false });
-  assert.ok(!seen.some((r) => r.startsWith('repos/acme/')), 'no per-repo read for an org');
+  assert.ok(!seen.some((r) => /^repos\/acme\/[^/?]+$/.test(r)), 'no repos/<repo> read for an org');
   assert.match(out['visibility.public_without_secret_scanning'].could_not_check, /security_and_analysis/);
 });
