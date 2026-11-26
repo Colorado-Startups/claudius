@@ -1,6 +1,6 @@
 # Claudius
 
-The Claude pack for [Git Crafter](https://github.com/SoulCraft-Org/git-crafter). It sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges, with no human in the loop. The Claude Code templates, Quality tabs and Process maps below are how that setup is built and measured.
+The Claude pack for [Git Crafter](https://github.com/SoulCraft-Org/git-crafter). Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing or a step the platform forces. The Claude Code templates, Quality tabs and Process maps below are how that setup is built and measured.
 
 ```mermaid
 flowchart LR
