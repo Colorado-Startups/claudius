@@ -213,6 +213,8 @@ flowchart LR
 
 Five of these readings (`environment_gaps`, `settings_gaps`, `task_failures`, `hours_since_last_run` and `largest_thread_token_share`) read small record files that the machine holding the setting saves under `quality/data/` ([`code-project-records.mjs`](../collectors/code-project/code-project-records.mjs), params on `cp_general.settings_gaps` in [`code-project-tabs.json`](../targets/code-project-tabs.json)). A missing, undated or old record is not measured, never 0, and the public page leaves these readings out.
 
+Eleven more readings (skill, plugin and hook text sizes, hook time, thread start time, first command time, effort and model share, needed servers that failed, Context and folder size) are read from this machine's session transcripts and folders by [`code-project-local.mjs`](../collectors/code-project/code-project-local.mjs), and the memory index size and stale notes by [`code-project-memory.mjs`](../collectors/code-project/code-project-memory.mjs). Each keeps lengths, counts, times and names only. A param left empty, a folder that is not there or no transcript in the window is not measured, never 0, and the public page leaves these readings out.
+
 ## Page maps: one per page
 
 Each page of a Code Project has a map of its own, six steps at most, scoring Quality, Speed and Consumption. The index of all 18 pages, with their tabs and metrics, is [`page-index.json`](../templates/claude/code-project/page-index.json); the kit to add one is [`page/`](../templates/claude/code-project/page/README.md).
