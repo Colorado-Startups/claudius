@@ -53,17 +53,18 @@ Lift is the mean score with Claudius minus without it, over each skill's three c
 | Component | Count |
 |---|---|
 | Skills (instructions only) | 6 |
-| Hooks, MCP servers, scripts, binaries | 0 |
+| Scripts | 1: `plan/scripts/watch_workers.py` |
+| Hooks, MCP servers, binaries | 0 |
 
 | Skill | Runs | Changes |
 |---|---|---|
-| `plan` | `gh` | GitHub issues in your repo; sessions you start |
+| `plan` | `gh`, `python3 watch_workers.py`, which reads GitHub by `gh api` | GitHub issues in your repo; sessions you start; a state file and its `.lock` in `$TMPDIR` |
 | `merge` | `gh`, `git` | A PR comment and a merge, at the reviewed commit only |
 | `equip` | `claude plugin` | Installs official plugins, turns back on ones left off and removes install records whose project folder is gone, only after you say yes to its change table. It turns nothing off ([All on, app-wide](https://github.com/Colorado-Startups/claudius/blob/main/templates/claude/README.md#all-on-app-wide)) |
 | `find-plugin` | `claude plugin install`, after a yes | Nothing until you say yes |
 | `plain-voice` | nothing | Nothing; it returns text |
 | `visibility` | `gh api`, `git clone`, `curl`, all reads | Nothing; it reports counts |
 
-The plugin itself collects nothing, makes no network calls and keeps no files. Its skills run `gh` commands that write to GitHub under your account, and `plan` saves its plan as an Artifact in your claude.ai account. It reads your local Claude Code plugin records and transcripts only when you ask the `equip` skill to measure use. Details: [PRIVACY.md](https://github.com/Colorado-Startups/claudius/blob/main/PRIVACY.md).
+The plugin itself collects nothing and sends nothing of its own. Its one script, `watch_workers.py`, reads the branches, pull requests and checks you list by REST through your signed-in `gh`, writes only a small state file of timestamps and shas in the temp directory, and sends nothing anywhere else. Its skills run `gh` commands that write to GitHub under your account, and `plan` saves its plan as an Artifact in your claude.ai account. It reads your local Claude Code plugin records and transcripts only when you ask the `equip` skill to measure use. Details: [PRIVACY.md](https://github.com/Colorado-Startups/claudius/blob/main/PRIVACY.md).
 
 Claudius is not an Anthropic product and is not affiliated with Anthropic. Source: [Colorado-Startups/claudius](https://github.com/Colorado-Startups/claudius). Credits: [NOTICE](NOTICE).

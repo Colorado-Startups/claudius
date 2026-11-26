@@ -5,7 +5,7 @@ opens a PR on GitHub) or a local git worktree. Each call checks every worker onc
 last check" into a nudge, and "still nothing after a nudge" into a restart. Meant for the Monitor tool (loop mode),
 or `/loop 1m` with one `--once` call per tick where Monitor is not available.
 
-    python3 -I watch_workers.py --workers workers.json [--every 60]  # loop; prints only changes; exits when all done
+    python3 -I watch_workers.py --workers workers.json [--every 60] [--max-minutes 120]  # loop; prints only changes
     python3 -I watch_workers.py --workers workers.json --once       # one JSON line per worker, exit 0
     python3 -I watch_workers.py --workers workers.json --reset NAME  # forget NAME's state (after a restart)
     python3 -I watch_workers.py --workers workers.json --once --busy api-fix   # api-fix shows busy right now
@@ -15,6 +15,9 @@ workers.json is a list; a worker has `name` and either `repo` + `branch` (+ opti
     [{"name": "api-fix", "repo": "owner/repo", "branch": "claude/api-fix", "pr": 12},
      {"name": "docs", "repo": "owner/repo", "branch": "claude/docs"},
      {"name": "local", "path": "~/src/repo/.claude/worktrees/x"}]
+
+Loop mode exits when every worker is done, or once --max-minutes (default 120) have passed, printing each unfinished worker's last
+row on the way out. A worker that is done is not read again in that loop: one `done` stays done.
 
 Output line: {"name","signal","idle_min","pr":{"number","state","ci"}|null,"verdict":"ok|nudge|restart|done"}.
 Progress for a cloud worker is the branch's newest sha plus the PR's head sha, state and check rollup (comments and
@@ -28,6 +31,7 @@ only.
 """
 
 import argparse
+import errno
 import hashlib
 import json
 import os
@@ -45,9 +49,11 @@ try:
 except ImportError:
     fcntl = None
 
+NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)  # 0 where the platform has none
 NUDGE_AFTER_MIN = 1          # quiet this long -> nudge
 RESTART_AFTER_NUDGE_MIN = 1  # still quiet this long after the nudge -> restart
 BUSY_GRACE_MIN = 10          # a session shown busy may go this long without a push (the contract's draft-PR limit)
+RATE_LIMIT = re.compile(r"rate limit|HTTP 429|abuse detection|secondary rate", re.I)
 FAILED = {"FAILURE", "TIMED_OUT", "CANCELLED", "ACTION_REQUIRED", "STARTUP_FAILURE", "ERROR"}
 PASSED = {"SUCCESS", "NEUTRAL", "SKIPPED"}
 
@@ -194,7 +200,9 @@ def judge(name, result, state, now, busy=False):
     if not error and result["fp"] != s["fp"]:
         s.update(fp=result["fp"], changed=now, nudged_at=None, done=False, done_seen=False)
     idle = int((now - s["changed"]) // 60)
-    if error and s.get("done"):
+    if error and RATE_LIMIT.search(result["error"]) and not s.get("done"):
+        v = "ok"  # GitHub throttled the read: no data, not no progress. Idle time still counts on the next read.
+    elif error and s.get("done"):
         v = "done"  # a finished worker stays finished through a failed read; new work clears it
     elif error and s.get("done_seen"):
         v = "ok"  # seen done once: a failed read on the confirming check waits for the next one
@@ -224,7 +232,11 @@ class locked_state:
 
     def __enter__(self):
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.lock = open(str(self.path) + ".lock", "a")
+        try:  # never follow a symlink, so a planted link cannot redirect the lock; 0600, as only this user reads it
+            fd = os.open(str(self.path) + ".lock", os.O_WRONLY | os.O_CREAT | os.O_APPEND | NOFOLLOW, 0o600)
+        except OSError as e:
+            sys.exit(f"watch_workers: cannot open {self.path}.lock ({errno.errorcode.get(e.errno, e.errno)}); refusing a symlink")
+        self.lock = os.fdopen(fd, "a")
         if fcntl:
             fcntl.flock(self.lock, fcntl.LOCK_EX)
         self.state = load_state(self.path)
@@ -240,7 +252,9 @@ class locked_state:
 
 def load_state(path):
     try:
-        state = json.loads(path.read_text())
+        fd = os.open(path, os.O_RDONLY | NOFOLLOW)
+        with os.fdopen(fd) as f:
+            state = json.loads(f.read())
     except FileNotFoundError:
         return {}
     except (OSError, ValueError) as e:
@@ -287,6 +301,8 @@ def main():
     ap.add_argument("--state", help="state file (default: one per workers file, in $TMPDIR)")
     ap.add_argument("--once", action="store_true", help="check once, print one JSON line per worker")
     ap.add_argument("--every", type=float, default=60, help="seconds between checks in loop mode")
+    ap.add_argument("--max-minutes", type=float, default=120, metavar="N",
+                    help="loop mode exits with the last results after N minutes (default 120)")
     ap.add_argument("--reset", action="append", metavar="NAME", help="clear this worker's state and exit")
     ap.add_argument("--now", type=float, help="fake clock (epoch seconds), for tests")
     ap.add_argument("--busy", action="append", default=[], metavar="NAME",
@@ -307,19 +323,33 @@ def main():
     workers = load_workers(args.workers)
 
     last = {}
+    rows_by_name = {}
+    started = time.monotonic()
     while True:
-        results = check_all(workers)
+        # A worker already done is not read again in a loop: one `done` stays done.
+        todo = [w for w in workers if args.once or rows_by_name.get(w["name"], {}).get("verdict") != "done"]
+        results = check_all(todo)
         now = args.now if args.now is not None else time.time()
         with locked_state(state_path) as state:
-            rows = [judge(w["name"], r, state, now, w["name"] in args.busy) for w, r in zip(workers, results)]
+            for w, r in zip(todo, results):
+                rows_by_name[w["name"]] = judge(w["name"], r, state, now, w["name"] in args.busy)
+        rows = [rows_by_name[w["name"]] for w in workers]
+        printed = set()
         for row in rows:
             key = (row["verdict"], row["signal"])
             if args.once or last.get(row["name"]) != key:
                 emit(row)
+                printed.add(row["name"])
             last[row["name"]] = key
         if args.once or all(r["verdict"] == "done" for r in rows):
             return
-        time.sleep(args.every)
+        left = args.max_minutes * 60 - (time.monotonic() - started)
+        if left <= 0:
+            for row in rows:  # out of time: leave with each worker's last row
+                if row["name"] not in printed and row["verdict"] != "done":  # a done row was printed already
+                    emit(row)
+            return
+        time.sleep(min(args.every, left))
 
 
 if __name__ == "__main__":
