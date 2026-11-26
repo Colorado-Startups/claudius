@@ -37,7 +37,7 @@ if (!desktop?.tray) {
   // Outside the installed app: offer the install button, or say where it runs.
   if ((await desktop?.install?.state().catch(() => "unavailable")) === "available") {
     button("Install as app", () => desktop.install.request().catch(() => {}));
-    out.textContent = "This page runs as an app.";
+    out.textContent = "Install this page to run it as an app.";
   } else {
     out.textContent = "Open this artifact in the Claude desktop app and choose Install as app.";
   }
@@ -56,7 +56,7 @@ if (!desktop?.tray) {
       out.textContent = "Menu bar item refused: " + e.message;
     }
   };
-  // A call that needs a permission waits for a click while the window is hidden (during install),
+  // A call that needs a permission is refused while the window is hidden (during install),
   // so start on load only when the permission is already granted.
   if ((await desktop.permissions.state("menu-bar")) === "granted") {
     show();
