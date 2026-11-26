@@ -21,7 +21,7 @@ flowchart LR
 | 2 | Fill `targets.json`: one Quality, one Speed and one Consumption metric. Say where the number is read, and keep `needs: local-files` until a collector reads it | `targets/code-project-tabs.json` or `code-project-features.json` |
 | 3 | Fill `ideal.json`: an ideal of 25 words at most, with dated sources you read | `ideals/cp-<name>.json` |
 | 4 | Fill `map.json`: each step names one metric, and the map scores all three kinds. Six steps at most, rules of 20 words at most | `maps/<map>.json` |
-| 5 | Add `["cp-<name>", "Name"]` to `pack.json` and `quality/config.json`, `{ "use": "<map>" }` to `quality/process/config.json`, and a row to [`pages.json`](../pages.json) | |
+| 5 | Add `["cp-<name>", "Name"]` to `pack.json` and `quality/config.json`, `{ "use": "<map>" }` to `quality/process/config.json`, and a row to [`page-index.json`](../page-index.json) | |
 | 6 | Run `node --test tests/pages.test.mjs`, then the engine tests in `AGENTS.md` | |
 
 ## What 100 means

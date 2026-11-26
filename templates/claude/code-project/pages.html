@@ -1,0 +1,91 @@
+<!doctype html>
+<!-- The Code Project page: one tile per tab or feature, each with a Quality, Speed and Consumption dial.
+     It draws pages.json beside it. A readings.json beside it, if present, fills the dials; it is never committed.
+     Serve the folder to view it: python3 -m http.server, then open /pages.html. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project Pages</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#17202c;--mute:#5d6878;--line:#dfe4ec;--q:#2563eb;--s:#0f9d58;--c:#c2410c;--off:#cfd5df}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f141c;--card:#18202b;--ink:#e8edf5;--mute:#9aa5b5;--line:#2a3441;--q:#60a5fa;--s:#4ade80;--c:#fb923c;--off:#364152}}
+:root[data-theme="dark"]{--bg:#0f141c;--card:#18202b;--ink:#e8edf5;--mute:#9aa5b5;--line:#2a3441;--q:#60a5fa;--s:#4ade80;--c:#fb923c;--off:#364152}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+h1{margin:0 0 4px;font-size:1.6rem}
+.mute{color:var(--mute);font-size:.85rem}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.bar button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font:600 .85rem system-ui;cursor:pointer}
+.bar button[aria-pressed="true"]{border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;text-align:left;color:inherit;font:inherit}
+.tile:focus-visible,.bar button:focus-visible{outline:2px solid var(--q);outline-offset:2px}
+.tile b{display:block;margin:4px 0 8px}
+.dots{display:flex;gap:6px}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--off)}
+.dot.q.on{background:var(--q)}.dot.s.on{background:var(--s)}.dot.c.on{background:var(--c)}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);max-width:min(720px,calc(100vw - 32px));width:100%;padding:18px}
+dialog::backdrop{background:#0008}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}
+.col{border-top:4px solid var(--k);border-radius:8px;background:var(--bg);padding:10px}
+.col h3{margin:0 0 6px;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--k)}
+.val{font-size:1.6rem;font-weight:700;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:14px;flex-wrap:wrap}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;background:var(--k)}
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">Project Pages</h1>
+  <p class="mute" id="sub">Loading pages.json</p>
+  <div class="legend mute"><span style="--k:var(--q)">Quality</span><span style="--k:var(--s)">Speed</span><span style="--k:var(--c)">Consumption</span><span style="--k:var(--off)">not read</span></div>
+  <div class="bar" id="bar"></div>
+  <div class="grid" id="grid"></div>
+</main>
+<dialog id="pane"><div id="detail"></div><form method="dialog"><button class="tile" style="margin-top:12px">Close</button></form></dialog>
+<script>
+const KINDS = [['quality', 'q', 'Quality'], ['speed', 's', 'Speed'], ['consumption', 'c', 'Consumption']];
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const load = (f) => fetch(f).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+let filter = 'all';
+
+Promise.all([load('pages.json'), load('readings.json')]).then(([spec, readings]) => {
+  if (!spec) { document.getElementById('sub').textContent = 'Serve this folder to read pages.json: python3 -m http.server'; return; }
+  const read = readings ?? {};
+  const met = (p, k) => read[p.id]?.[k]?.met === true;
+  document.getElementById('sub').textContent = `${spec.pages.length} pages, names and goals read ${spec.read}. ${readings ? 'Readings loaded.' : 'No readings yet: every dial is grey.'}`;
+
+  const bar = document.getElementById('bar');
+  [['all', 'All'], ['miss', 'Misses'], ['map', 'With a process map']].forEach(([k, label]) => {
+    const b = document.createElement('button');
+    b.textContent = label;
+    b.setAttribute('aria-pressed', k === filter);
+    b.onclick = () => { filter = k; bar.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b)); draw(); };
+    bar.appendChild(b);
+  });
+
+  function draw() {
+    const keep = (p) => filter === 'all' || (filter === 'map' ? p.map : KINDS.some(([k]) => !met(p, k)));
+    document.getElementById('grid').innerHTML = spec.pages.filter(keep).map((p) => `
+      <button class="tile" data-id="${esc(p.id)}" aria-label="${esc(p.name)}">
+        <span aria-hidden="true">${esc(p.icon)}</span><b>${esc(p.name)}</b>
+        <span class="dots">${KINDS.map(([k, c, n]) => `<span class="dot ${c}${met(p, k) ? ' on' : ''}" title="${n}"></span>`).join('')}</span>
+      </button>`).join('');
+    document.querySelectorAll('.tile[data-id]').forEach((t) => { t.onclick = () => open(spec.pages.find((p) => p.id === t.dataset.id)); });
+  }
+
+  function open(p) {
+    document.getElementById('detail').innerHTML = `<h2>${esc(p.icon)} ${esc(p.name)}</h2>
+      <p class="mute">${p.map ? `Process map: <code>${esc(p.map)}</code>` : 'No GitHub side: Claude only'}</p>
+      <div class="cols">${KINDS.map(([k, c, n]) => `<div class="col" style="--k:var(--${c})"><h3>${n}</h3>
+        <div class="val">${esc(read[p.id]?.[k]?.value ?? '–')}</div>
+        <div>${esc(p[k].metric)}</div><div class="mute">Goal ${esc(p[k].goal)}</div></div>`).join('')}</div>`;
+    document.getElementById('pane').showModal();
+  }
+  draw();
+});
+</script>
+</body>
+</html>

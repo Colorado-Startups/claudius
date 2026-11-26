@@ -1,285 +1,93 @@
 {
-  "comment": "The 13 pages of a Code Project: each scores Quality, Speed and Consumption from its tabs' metrics (targets/code-project-*.json) and has one process map (maps/<map>.json). The Usage tab has no page yet. tests/pages.test.mjs keeps this file and the pack in step.",
-  "pages": [
-    {
-      "id": "overview",
-      "icon": "🛰️",
-      "name": "Overview and threads",
-      "tabs": [
-        "cp-conversation",
-        "cp-threads"
-      ],
-      "map": "project",
-      "metrics": {
-        "quality": [
-          "cp_conversation.card_share",
-          "cp_threads.attributed_share"
-        ],
-        "speed": [
-          "cp_conversation.minutes_to_thread",
-          "cp_threads.first_green_minutes"
-        ],
-        "consumption": [
-          "cp_conversation.coordinator_token_share",
-          "cp_threads.threads_per_pr"
-        ]
-      }
-    },
-    {
-      "id": "context",
-      "icon": "📎",
-      "name": "Context",
-      "tabs": [
-        "cp-context"
-      ],
-      "map": "context",
-      "metrics": {
-        "quality": [
-          "cp_context.stale_copies"
-        ],
-        "speed": [
-          "cp_context.first_read_share"
-        ],
-        "consumption": [
-          "cp_context.context_tokens"
-        ]
-      }
-    },
-    {
-      "id": "general",
-      "icon": "⚙️",
-      "name": "General and Advanced",
-      "tabs": [
-        "cp-general"
-      ],
-      "map": "decide",
-      "metrics": {
-        "quality": [
-          "cp_general.model_fit_share"
-        ],
-        "speed": [
-          "cp_general.high_effort_share"
-        ],
-        "consumption": [
-          "cp_general.above_default_share"
-        ]
-      }
-    },
-    {
-      "id": "memory",
-      "icon": "🧠",
-      "name": "Memory",
-      "tabs": [
-        "cp-memory"
-      ],
-      "map": "guard",
-      "metrics": {
-        "quality": [
-          "cp_memory.stale_notes"
-        ],
-        "speed": [
-          "cp_memory.repeat_questions"
-        ],
-        "consumption": [
-          "cp_memory.start_tokens"
-        ]
-      }
-    },
-    {
-      "id": "environment",
-      "icon": "🌩️",
-      "name": "Environment",
-      "tabs": [
-        "cp-environment",
-        "cp-network-access",
-        "cp-network-secrets",
-        "cp-setup-script"
-      ],
-      "map": "setup-check",
-      "metrics": {
-        "quality": [
-          "cp_network_access.blocked_hosts",
-          "cp_network_secrets.secrets_in_logs",
-          "cp_setup_script.smoke_failures",
-          "cp_environment.keys_in_variables"
-        ],
-        "speed": [
-          "cp_network_access.first_fetch_seconds",
-          "cp_network_secrets.key_reprompts",
-          "cp_setup_script.script_seconds",
-          "cp_environment.thread_start_seconds"
-        ],
-        "consumption": [
-          "cp_network_access.unused_hosts",
-          "cp_network_secrets.unused_keys",
-          "cp_setup_script.cache_hit_share",
-          "cp_environment.failed_servers"
-        ]
-      }
-    },
-    {
-      "id": "scheduled-tasks",
-      "icon": "⏰",
-      "name": "Scheduled tasks",
-      "tabs": [
-        "cp-scheduled-tasks"
-      ],
-      "map": "scheduled-task",
-      "metrics": {
-        "quality": [
-          "cp_scheduled_tasks.last_run_ok_share"
-        ],
-        "speed": [
-          "cp_scheduled_tasks.on_time_share"
-        ],
-        "consumption": [
-          "cp_scheduled_tasks.connectors_per_task"
-        ]
-      }
-    },
-    {
-      "id": "local-threads",
-      "icon": "💻",
-      "name": "Threads on your computer",
-      "tabs": [
-        "cp-work-locally"
-      ],
-      "map": "local-thread",
-      "metrics": {
-        "quality": [
-          "cp_work_locally.unclean_ends"
-        ],
-        "speed": [
-          "cp_work_locally.first_command_minutes"
-        ],
-        "consumption": [
-          "cp_work_locally.folder_context_tokens"
-        ]
-      }
-    },
-    {
-      "id": "pull-requests",
-      "icon": "🔀",
-      "name": "Pull requests and auto-fix",
-      "tabs": [
-        "cp-pr-auto-fix"
-      ],
-      "map": "pr-flow",
-      "metrics": {
-        "quality": [
-          "cp_pr_auto_fix.skipped_tests"
-        ],
-        "speed": [
-          "cp_pr_auto_fix.red_to_green_minutes"
-        ],
-        "consumption": [
-          "cp_pr_auto_fix.fix_attempts"
-        ]
-      }
-    },
-    {
-      "id": "connectors",
-      "icon": "🔌",
-      "name": "Connectors",
-      "tabs": [
-        "cp-connectors"
-      ],
-      "map": "connectors",
-      "metrics": {
-        "quality": [
-          "cp_connectors.incomplete_sign_ins"
-        ],
-        "speed": [
-          "cp_connectors.connect_seconds"
-        ],
-        "consumption": [
-          "cp_connectors.connector_tool_tokens"
-        ]
-      }
-    },
-    {
-      "id": "plugins",
-      "icon": "🧩",
-      "name": "Plugins",
-      "tabs": [
-        "cp-plugins",
-        "cp-extensions"
-      ],
-      "map": "plugins",
-      "metrics": {
-        "quality": [
-          "cp_plugins.unverified_sets_on",
-          "cp_extensions.unknown_provenance"
-        ],
-        "speed": [
-          "cp_plugins.plugin_load_seconds",
-          "cp_extensions.tools_ready_seconds"
-        ],
-        "consumption": [
-          "cp_plugins.plugin_skill_tokens",
-          "cp_extensions.tool_list_tokens"
-        ]
-      }
-    },
-    {
-      "id": "skills",
-      "icon": "📚",
-      "name": "Skills",
-      "tabs": [
-        "cp-skills"
-      ],
-      "map": "skills",
-      "metrics": {
-        "quality": [
-          "cp_skills.fired_when_due_share"
-        ],
-        "speed": [
-          "cp_skills.skill_first_try_share"
-        ],
-        "consumption": [
-          "cp_skills.skill_listing_tokens"
-        ]
-      }
-    },
-    {
-      "id": "subagents",
-      "icon": "🤖",
-      "name": "Subagents",
-      "tabs": [
-        "cp-subagents"
-      ],
-      "map": "subagents",
-      "metrics": {
-        "quality": [
-          "cp_subagents.reviewer_real_share"
-        ],
-        "speed": [
-          "cp_subagents.explorer_one_pass_share"
-        ],
-        "consumption": [
-          "cp_subagents.small_model_share"
-        ]
-      }
-    },
-    {
-      "id": "hooks",
-      "icon": "🪝",
-      "name": "Hooks",
-      "tabs": [
-        "cp-hooks"
-      ],
-      "map": "hooks",
-      "metrics": {
-        "quality": [
-          "cp_hooks.unsafe_hooks"
-        ],
-        "speed": [
-          "cp_hooks.hook_ms"
-        ],
-        "consumption": [
-          "cp_hooks.hook_text_tokens"
-        ]
-      }
-    }
-  ]
+ "version": 1,
+ "why": "One Quality, Speed and Consumption page per tab or feature of a Claude Code Project. Names and goals only: a project's readings stay in its own private repo",
+ "read": "2026-11-26",
+ "sources": [
+  {"title": "Claude Code Projects", "url": "https://code.claude.com/docs/en/claude-projects"},
+  {"title": "Cloud environments", "url": "https://code.claude.com/docs/en/cloud-environments"},
+  {"title": "Claude Code on the web", "url": "https://code.claude.com/docs/en/claude-code-on-the-web"},
+  {"title": "Claude Desktop", "url": "https://code.claude.com/docs/en/desktop"}
+ ],
+ "pages": [
+  {"id": "projects", "name": "Projects and Overview", "icon": "🗂", "map": null,
+   "quality": {"metric": "Overview cards in Waiting on you older than a day", "goal": "0"},
+   "speed": {"metric": "Minutes from a new project to its first thread", "goal": "≤ 10"},
+   "consumption": {"metric": "Projects idle 30 days and not archived", "goal": "0"}},
+  {"id": "conversation", "name": "Project chat", "icon": "💬", "map": "board",
+   "quality": {"metric": "Asks that became a thread, a card or an answer", "goal": "100%"},
+   "speed": {"metric": "Minutes from an ask to its thread starting", "goal": "≤ 2"},
+   "consumption": {"metric": "Coordinator tokens per ask", "goal": "falling"}},
+  {"id": "threads", "name": "Threads", "icon": "🧵", "map": "delivery",
+   "quality": {"metric": "Threads that end merged, answered or resolved", "goal": "≥ 90%"},
+   "speed": {"metric": "Hours from thread start to result", "goal": "≤ 4"},
+   "consumption": {"metric": "Threads revived after the one-hour cache", "goal": "≤ 10%"}},
+  {"id": "pull-requests", "name": "Pull requests", "icon": "📬", "map": "delivery",
+   "quality": {"metric": "PRs linking an issue or card", "goal": "100%"},
+   "speed": {"metric": "Minutes from green CI to merge", "goal": "≤ 30"},
+   "consumption": {"metric": "PRs over 400 lines", "goal": "0"}},
+  {"id": "auto-fix", "name": "Auto-fix", "icon": "🔧", "map": "delivery",
+   "quality": {"metric": "Open PRs a thread watches", "goal": "100%"},
+   "speed": {"metric": "Minutes from a failing check to a fix pushed", "goal": "≤ 30"},
+   "consumption": {"metric": "Fix pushes per PR", "goal": "≤ 2"}},
+  {"id": "tracking", "name": "Tracking", "icon": "🧾", "map": "triage",
+   "quality": {"metric": "Bugs as issues and features as cards, each with a facts table", "goal": "100%"},
+   "speed": {"metric": "Days a bug stays open", "goal": "≤ 7"},
+   "consumption": {"metric": "Duplicate issues filed", "goal": "0"}},
+  {"id": "instructions", "name": "Instructions", "icon": "📜", "map": null,
+   "quality": {"metric": "Rules that link a repo file instead of copying it", "goal": "100%"},
+   "speed": {"metric": "Days since the instructions were checked against AGENTS.md", "goal": "≤ 30"},
+   "consumption": {"metric": "Instruction characters, of the 16,000 cap", "goal": "≤ 8,000"}},
+  {"id": "memory", "name": "Memory", "icon": "🧠", "map": null,
+   "quality": {"metric": "Memory files with no key, private name or stale fact", "goal": "100%"},
+   "speed": {"metric": "Facts saved in the turn they were learned", "goal": "100%"},
+   "consumption": {"metric": "Memory files over 4 KB", "goal": "0"}},
+  {"id": "library", "name": "Context and Library", "icon": "📚", "map": "document",
+   "quality": {"metric": "Deliverables attached to the reply that made them", "goal": "100%"},
+   "speed": {"metric": "Files a later thread read again instead of rebuilding", "goal": "rising"},
+   "consumption": {"metric": "Scratch files left in the shared folder", "goal": "0"}},
+  {"id": "artifacts", "name": "Artifacts", "icon": "🖼", "map": "document",
+   "quality": {"metric": "Artifacts that pass the light, dark and phone checks", "goal": "100%"},
+   "speed": {"metric": "Edits published in the same turn", "goal": "100%"},
+   "consumption": {"metric": "Artifacts over 1 MB", "goal": "0"}},
+  {"id": "repositories", "name": "Repositories", "icon": "📦", "map": "adopt",
+   "quality": {"metric": "Attached repos that read a file and push a branch", "goal": "100%"},
+   "speed": {"metric": "Seconds to clone every attached repo at thread start", "goal": "≤ 60"},
+   "consumption": {"metric": "Attached repos no thread touched in 30 days", "goal": "0"}},
+  {"id": "environment", "name": "Environment", "icon": "☁️", "map": "secure",
+   "quality": {"metric": "Hosts the work needs that the network policy allows", "goal": "100%"},
+   "speed": {"metric": "Seconds the setup script runs, cached under the 5 minute limit", "goal": "≤ 120"},
+   "consumption": {"metric": "Allowed hosts no thread used in 30 days", "goal": "0"}},
+  {"id": "secrets", "name": "Network secrets", "icon": "🔑", "map": "secure",
+   "quality": {"metric": "Keys a thread printed, copied or committed", "goal": "0"},
+   "speed": {"metric": "Days from a key's expiry warning to its rotation", "goal": "≤ 7"},
+   "consumption": {"metric": "Secrets no thread used in 30 days", "goal": "0"}},
+  {"id": "plugins", "name": "Plugins and skills", "icon": "🧩", "map": null,
+   "quality": {"metric": "Plugins and skills turned off app-wide", "goal": "0"},
+   "speed": {"metric": "Skill loads that ran on the first try", "goal": "≥ 95%"},
+   "consumption": {"metric": "Skill text tokens loaded per thread", "goal": "falling"}},
+  {"id": "connectors", "name": "Connectors", "icon": "🔌", "map": null,
+   "quality": {"metric": "Connectors a thread needed that answered", "goal": "100%"},
+   "speed": {"metric": "Expired sign-ins fixed within a day", "goal": "100%"},
+   "consumption": {"metric": "Connector calls that failed at the network", "goal": "0"}},
+  {"id": "permissions", "name": "Allow cards", "icon": "✅", "map": null,
+   "quality": {"metric": "Steps that cannot be undone that waited for the owner", "goal": "100%"},
+   "speed": {"metric": "Minutes an allow card waited", "goal": "≤ 60"},
+   "consumption": {"metric": "Allow cards per thread", "goal": "≤ 1"}},
+  {"id": "schedules", "name": "Scheduled tasks", "icon": "⏰", "map": "measure",
+   "quality": {"metric": "Scheduled runs that ended with a result", "goal": "≥ 95%"},
+   "speed": {"metric": "Minutes a run started after its time", "goal": "≤ 15"},
+   "consumption": {"metric": "Runs with nothing to do", "goal": "≤ 20%"}},
+  {"id": "remote-control", "name": "Remote Control", "icon": "🖥", "map": null,
+   "quality": {"metric": "Local runs that reported back to their thread", "goal": "100%"},
+   "speed": {"metric": "Seconds to reach the computer", "goal": "≤ 120"},
+   "consumption": {"metric": "Long runs on the computer that fell back to the cloud", "goal": "≤ 10%"}},
+  {"id": "models", "name": "Models and effort", "icon": "🎚", "map": null,
+   "quality": {"metric": "Threads on the model and effort the project sets", "goal": "100%"},
+   "speed": {"metric": "Turns that hit a fallback model", "goal": "≤ 5%"},
+   "consumption": {"metric": "High-effort turns outside review", "goal": "0"}},
+  {"id": "usage", "name": "Usage", "icon": "📈", "map": "spend",
+   "quality": {"metric": "Metered extras capped at $0", "goal": "100%"},
+   "speed": {"metric": "Days from a usage read to its action", "goal": "≤ 1"},
+   "consumption": {"metric": "Share of the plan's weekly allowance used by idle threads", "goal": "≤ 5%"}}
+ ]
 }

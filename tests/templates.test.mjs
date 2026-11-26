@@ -60,3 +60,19 @@ test('templates: the Code Project template carries no em dash and links Git Craf
   assert.ok(!readme.includes('\u2014'), 'em dash');
   assert.match(readme, /SoulCraft-Org\/git-crafter\/(tree|blob)\/main\/templates\/projects/);
 });
+
+test('templates: the Code Project pages name 20 tabs, each with a Quality, Speed and Consumption metric and goal, and no reading', () => {
+  const spec = JSON.parse(readFileSync('templates/claude/code-project/pages.json', 'utf8'));
+  assert.equal(spec.pages.length, 20);
+  assert.equal(new Set(spec.pages.map((p) => p.id)).size, 20, 'ids are unique');
+  for (const p of spec.pages) {
+    for (const k of ['quality', 'speed', 'consumption']) {
+      assert.ok(p[k]?.metric && p[k]?.goal, `${p.id} ${k}`);
+      assert.deepEqual(Object.keys(p[k]).sort(), ['goal', 'metric'], `${p.id} ${k} holds no value`);
+    }
+  }
+  const html = readFileSync('templates/claude/code-project/pages.html', 'utf8');
+  assert.match(html, /fetch\(f\)/);
+  assert.ok(!html.includes('—') && !readFileSync('templates/claude/code-project/pages.json', 'utf8').includes('—'), 'em dash');
+  assert.match(readFileSync('.gitignore', 'utf8'), /^readings\.json$/m);
+});

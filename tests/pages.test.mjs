@@ -1,4 +1,4 @@
-// The 13 Code Project pages (templates/claude/code-project/pages.json), their maps and the page kit, held to the
+// The 13 Code Project pages (templates/claude/code-project/page-index.json), their maps and the page kit, held to the
 // pack's targets: no page names a metric, tab or map the pack lacks, every Code Project metric belongs to one page,
 // and each map the pack ships for a page scores Quality, Speed and Consumption in six steps at most.
 import assert from 'node:assert/strict';
@@ -8,7 +8,7 @@ import { test } from 'node:test';
 const read = (f) => JSON.parse(readFileSync(f, 'utf8'));
 // The Usage tab has metrics but no page yet: its page would need a map of its own.
 const NO_PAGE = ['cp-usage'];
-const { pages } = read('templates/claude/code-project/pages.json');
+const { pages } = read('templates/claude/code-project/page-index.json');
 const all = ['code-project-tabs', 'code-project-features'].flatMap((f) => read(`targets/${f}.json`));
 const metrics = Object.fromEntries(all.filter((m) => !NO_PAGE.includes(m.tab)).map((m) => [m.id, m]));
 const pack = read('pack.json').tabs.map((t) => t[0]).filter((id) => id.startsWith('cp-') && !NO_PAGE.includes(id));

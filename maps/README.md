@@ -189,7 +189,7 @@ Each lane scores one tab or feature of a Claude Code Project. A map holds six st
 
 ## Page maps: one per page
 
-Each page of a Code Project has a map of its own, six steps at most, scoring Quality, Speed and Consumption. The index of all 13 pages, with their tabs and metrics, is [`pages.json`](../templates/claude/code-project/pages.json); the kit to add one is [`page/`](../templates/claude/code-project/page/README.md).
+Each page of a Code Project has a map of its own, six steps at most, scoring Quality, Speed and Consumption. The index of all 13 pages, with their tabs and metrics, is [`page-index.json`](../templates/claude/code-project/page-index.json); the kit to add one is [`page/`](../templates/claude/code-project/page/README.md).
 
 ```mermaid
 flowchart LR
