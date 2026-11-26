@@ -13,8 +13,8 @@ The plugin itself collects nothing and sends nothing of its own. Its one script,
 |---|---|---|
 | `plan` | `gh` commands Claude runs to file issues in your repository, and an Artifact holding the plan | GitHub through your own `gh` sign-in; your claude.ai account |
 | `merge` | `gh` commands Claude runs to read checks, post a verdict and merge | Through your own `gh` sign-in |
-| `equip` | Claude Code plugin records and session transcripts, only when you ask it to measure use | On your machine, read and not copied |
-| `visibility` | `gh api` reads of an org's repos, one signed-out request to each private repo's site, a clone of a public repo, and a term list file you name | Through your own `gh` sign-in; on your machine, counts only |
+| `equip` | Claude Code plugin records and session transcripts, only when you ask it to measure use. It installs official plugins, restores installs left off and sets `skillListingBudgetFraction` | On your machine, read and not copied |
+| `visibility` | `gh api` reads of an org's repos, writes that turn on secret scanning and make a private repo's site private, one signed-out request to each private repo's site, a clone of a public repo, and a term list file you name | Through your own `gh` sign-in; on your machine, counts only |
 
 Anything a skill does on GitHub, GitHub receives under your account and handles under [its privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement). Anything Claude reads in a session goes to Anthropic as part of that session, under [Anthropic's privacy policy](https://www.anthropic.com/legal/privacy).
 

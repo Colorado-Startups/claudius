@@ -11,7 +11,7 @@ flowchart LR
 
 | Who | Does |
 |---|---|
-| You | Give the objective and vision. Answer a question only when it is about vision, billing or a one-way change (a delete, a public post), or when the platform forces a human step (a passkey, a typed release word, a signing step) |
+| You | Give the objective and vision. Answer a question only when it is about vision, billing or a one-way change (a delete, a public post), or when the platform forces a human step (a passkey, a typed-word safety check, a signing step) |
 | Claude | Everything else: plan, issues, branches, tests, reviews, merges, setup in the desktop app, and fixing what a Quality page scores low |
 
 Every other file here is held to this outcome. A gate that waits for a person, a click Claude could make, or a dashboard only a person reads is a defect to remove.
