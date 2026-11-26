@@ -9,7 +9,7 @@ flowchart LR
 
 | # | Do | Where |
 |---|---|---|
-| 1 | Create a Project and attach the one or two repos most tasks touch. Idle projects cost nothing. Then read one file and push a branch in each repo. An attached repo can still fail with `Unable to access your repository` or `Unable to connect to repository` ([Claude Code Projects](https://code.claude.com/docs/en/claude-projects), read 2026-11-25) | Code tab of the desktop app, or claude.ai/code |
+| 1 | Create a Project and attach the one or two repos most tasks touch. Then read one file and push a branch in each repo. An attached repo can still fail with `Unable to access your repository` or `Unable to connect to repository` ([Claude Code Projects](https://code.claude.com/docs/en/claude-projects), read 2026-11-25) | Code tab of the desktop app, or claude.ai/code |
 | 2 | Paste Git Crafter's `instructions.md`, filled in, into the Project's instructions | Project settings |
 | 3 | Check each attached repo for `AGENTS.md`, a `CLAUDE.md` that imports it, the main rule, a short PR template, an issue form, CI and a valid `.claude/settings.json` | The setup prompt below |
 | 4 | Ask for one change. The thread branches, pushes after each step and opens a draft PR | The project chat |

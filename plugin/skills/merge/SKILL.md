@@ -31,19 +31,19 @@ flowchart LR
 | 8 | Conflict | A PR the queue drops for a conflict goes back: merge `main` into its branch, resolve each hunk, push, review the delta (step 4) and queue the new head |
 | 9 | After | The PR's `Closes #N` closes the issue. Where the board's "Pull request merged" workflow is on, its card moves itself: no move is needed. Otherwise move the card to Done (`gh project item-edit`; no board, skip quietly). If the merge deploys, load the live page once |
 
-## In a cloud thread (fallback only)
+## In a cloud thread
 
-Use this only when a Claude Code Project cloud thread cannot reach GraphQL. That thread refused GraphQL with HTTP 403 (observed 2026-11-25), so `gh pr checks`, `gh pr view`, `gh pr diff`, `gh pr merge` and the queue mutation fail. Everywhere else, use the steps above. The REST merge skips the merge queue, so it keeps steps 1 to 5 (green checks, review, verdict at the head SHA) and merges only that SHA.
+A Claude Code Project cloud thread's proxy blocks GraphQL, so `gh pr checks`, `gh pr view`, `gh pr diff`, `gh pr merge` and the queue mutation fail there. Do steps 1 to 5 with `gh api` REST reads and a comment, then hand the merge off.
 
 | Step | REST form |
 |---|---|
-| 1 Checks | `gh api repos/{owner}/{repo}/commits/<sha>/check-runs`, and `gh api repos/{owner}/{repo}/commits/<sha>/status` for a status that a local run posts |
+| 1 Checks | `gh api repos/{owner}/{repo}/commits/<sha>/check-runs` |
 | 3 Head SHA | `gh api repos/{owner}/{repo}/pulls/N --jq .head.sha` |
 | 3 Diff | `gh api -H 'Accept: application/vnd.github.diff' repos/{owner}/{repo}/pulls/N` |
 | 5 Verdict | `gh api repos/{owner}/{repo}/issues/N/comments -f body=...` |
-| 6 and 7 Merge | `gh api -X PUT repos/{owner}/{repo}/pulls/N/merge -f merge_method=squash -f sha=<sha>`, one pull request at a time, because the queue is GraphQL only |
+| 6 and 7 Merge | From a local thread or a Remote Control session: `gh pr merge N --squash --match-head-commit <reviewed sha>`, or the queue (step 6). Where the session offers ready-for-review and auto-merge calls, use them with the reviewed head SHA as the guard |
 
-A merge returned 5xx, then 405 `Merge already in progress` for about 8 minutes, then 200 (observed 2026-11-25). Retry once a minute. A REST branch delete returned 403 (observed 2026-11-25), so leave it to the repo's delete-on-merge setting.
+Green CI, a separate review and the head SHA guard all stay. Never bypass a required merge queue.
 
 | Repo setup | Rule |
 |---|---|
