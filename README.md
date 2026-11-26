@@ -28,7 +28,7 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 |---|---|---|
 | 1 | Adopt Git Crafter: CI, open-repo files, `AGENTS.md` and `CLAUDE.md` | Git Crafter's [quickstart](https://github.com/SoulCraft-Org/git-crafter#quickstart-3-steps) |
 | 2 | Copy the Claude files, and keep every plugin, skill and connector on ([All on, app-wide](templates/claude/README.md#all-on-app-wide)) | `cp -r ../claudius/templates/claude/.claude .` |
-| 3 | Run the script below. It pins the latest release in `quality/config.json`, adds the pack's tab ids, checks the pack out and draws the full page, with the numbers CI never sees ([the command](#the-one-local-command)) | your repo's root |
+| 3 | Run the script below. It pins the latest release, adds the pack's tab ids when `quality/config.json` lists `tabs`, and draws the full page locally ([the command](#the-one-local-command)) | your repo's root |
 
 ```bash
 U=https://github.com/Colorado-Startups/claudius

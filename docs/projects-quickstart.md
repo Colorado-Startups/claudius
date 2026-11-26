@@ -9,7 +9,7 @@ flowchart LR
 
 | # | Do | Where |
 |---|---|---|
-| 1 | Create a Project, attach the one or two repos most tasks touch, and paste Git Crafter's `instructions.md`, filled in, into its instructions (16,000 characters at most) | Code tab of the desktop app, or claude.ai/code |
+| 1 | Create a Project, attach the one or two repos most tasks touch, and paste Git Crafter's `instructions.md`, filled in, into its instructions. They hold 16,000 characters at most ([Claude Code Projects](https://code.claude.com/docs/en/claude-projects), read 2026-11-26) | Code tab of the desktop app, or claude.ai/code |
 | 2 | Paste the [setup prompt](#setup-prompt) as the first message. The thread reads a file and pushes a branch in each repo, then checks its files. An attached repo can fail to connect ([Claude Code Projects](https://code.claude.com/docs/en/claude-projects), read 2026-11-26) | The project chat |
 | 3 | Ask for one change. The thread branches and opens a PR | The project chat |
 
