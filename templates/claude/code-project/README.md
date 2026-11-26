@@ -26,7 +26,7 @@ Each page scores one Project tab or feature on Quality, Speed and Consumption. [
 | View | How |
 |---|---|
 | Scored | The pack builds the pages into the Quality site, as with any other tab |
-| At a glance, no engine | Serve the repo root and open [`pages.html`](pages.html). Dots stay grey until a `readings.json` beside it fills them: `{"<metric id>": {"value": "92%", "met": true}}`. Keep readings in the project's private repo, never here |
+| At a glance, no engine | Serve the repo root and open [`pages.html`](pages.html). Dots stay grey until a `readings.json` beside it fills them: `{"<metric id>": {"value": "92%", "met": true}}`. `.gitignore` keeps that file out of git, so readings never reach this public repo |
 
 ## Where a guard lives
 
