@@ -21,7 +21,7 @@ flowchart LR
 1. On Free, Pro, Max or Ultra, go to Customize > Connectors, select Add, then Add custom connector. On Team or Enterprise, an Owner goes to Organization settings > Connectors and selects Add, then Custom ([Add unlisted](https://claude.com/docs/connectors/custom/add-unlisted), read 2026-11-26).
 2. Enter a name and the server URL, path included. Keep any option marked Detected unless the server's documentation says otherwise, then select Add.
 3. On Team or Enterprise, each member opens their connectors, finds the one labeled custom and selects Connect.
-4. Select Always allow only for servers you trust. A tool can also be set to Blocked under its connector's Tool permissions.
+4. Select Always allow only for servers you trust. A session ignores a tool it does not need; none is turned off app-wide ([All on, app-wide](../README.md#all-on-app-wide)).
 
 Where the Code tab and Cowork take their connectors from: Cowork takes them from your claude.ai account, not from the CLI's `~/.claude` directory ([Desktop docs](https://code.claude.com/docs/en/desktop), read 2026-11-26).
 

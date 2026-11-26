@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Stdio <-> Streamable HTTP bridge for an MCP server that listens only on this computer (loopback).
-// Claude Desktop runs it as a desktop extension, so Cowork and the Code tab both get the server.
+// It is packaged as a desktop extension (manifest.json); which desktop sessions see an installed extension is in guides/claude-desktop-mcp/loopback.md.
 // No dependencies: Node 18+ fetch only. Never forwards to a host that is not a loopback address, and never follows a redirect.
 // It holds no secret: it sends no auth header and writes only fixed messages to stderr.
 //
