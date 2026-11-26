@@ -1,6 +1,6 @@
 # Process maps
 
-Five maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }` and `{ "use": "visibility" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
+Six maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }` and `{ "use": "cloud" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
 
 ## Guard: a tool call, through the guards, to run or blocked
 
@@ -96,3 +96,22 @@ flowchart LR
 Probe and Decide need an admin token: in CI without `ADMIN_READ_TOKEN` they read not measured, never 0. The [`visibility`](../plugin/skills/visibility/SKILL.md) skill runs the same audit in a session.
 
 Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json).
+
+## Cloud: a task, from a cloud session's environment to a PR merged by a local session
+
+What a worker loads and can reach, in [Cloud sessions](../templates/claude/README.md#cloud-sessions).
+
+```mermaid
+flowchart LR
+  environment["Environment"] --> load["Load"] --> work["Work"] --> pr["PR"] --> merge["Merge"]
+```
+
+| Step | Ideal | Metric |
+|---|---|---|
+| Environment | Limited network access plus the hosts the repo needs; the repo commits its setup files | `claude_settings.setup_files` |
+| Load | Only what the clone holds loads, so the repo's `CLAUDE.md` stays short | `claude.instruction_tokens` |
+| Work | The worker runs under the repo's deny rules | `claude_settings.deny_coverage` |
+| PR | `gh api` opens the PR, since the proxy refuses `gh pr` and `gh issue` | `blockers.pushes_per_merged_pr` |
+| Merge | A local session merges it, after a review at the head SHA | `lead_time.hours` |
+
+Every Cloud step reads the repo's committed files or GitHub, so all five show on the public page.
