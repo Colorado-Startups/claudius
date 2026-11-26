@@ -63,12 +63,12 @@ Cloud threads load a repo's `.claude/agents/`. The explorer reads and reports, s
 
 ## Scheduled tasks
 
-These tasks are suggestions to set up as scheduled tasks. A task ignores the connectors it does not need and leaves them on ([All on, app-wide](../README.md#all-on-app-wide)).
+These tasks are suggestions to set up as scheduled tasks. Each ends in an issue, a thread or a pull request, never in a report for a person to read. A task ignores the connectors it does not need and leaves them on ([All on, app-wide](../README.md#all-on-app-wide)).
 
 | Task | When | Does |
 |---|---|---|
-| Dependency and CI digest | Weekly | Lists open Dependabot PRs and failing checks, one table |
-| Quality read | Weekly | Reads each Quality page, lists the three biggest misses |
+| Dependency and CI sweep | Weekly | Files one issue per failing check or stale Dependabot PR (search first) and starts a worker thread on each. A green Dependabot PR merges after two AI reviews |
+| Quality read | Weekly | Reads each Quality page, files one issue per missed metric (Git Crafter's issue sync) and starts a worker thread on the three biggest |
 | Pin check | Monthly | Runs `bump-pins`, opens a PR if a pin moved |
 
 ## Limits

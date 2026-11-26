@@ -33,7 +33,7 @@ flowchart LR
 | Arise | Surfaces once with its fix named | `blockers.costly` |
 | Claude decides | Decides within its delegation, records reason and reversal in the PR | `blockers.latest_block_tokens` |
 | Owner's queue | Only questions and human steps reach the owner | `claude_settings.prompts_per_100_calls` |
-| Plan | Checked once before it is shown, so the owner approves it as first shown | `desktop_app.plans_first_pass` |
+| Plan | Checked once before it is shown, so it runs as first shown with no reply needed | `desktop_app.plans_first_pass` |
 | Clear | Each blocker that costs more than it helps is fixed or removed by PR | `blockers.costly` |
 
 ## Equip: every capability on, app-wide, and put to work

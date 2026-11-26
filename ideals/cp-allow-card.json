@@ -1,5 +1,5 @@
 {
-  "ideal": "Answer the Allow card in the project conversation, with Worktree for a shared folder, and each approval prompt in its thread, within minutes.",
+  "ideal": "No thread needs an Allow card: the allow list and Auto mode cover its work. Any card is answered where asked, within minutes.",
   "sources": [
     {
       "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
@@ -9,5 +9,5 @@
   ],
   "quality": "No two threads share a folder without a worktree.",
   "speed": "A card or prompt is answered where it was asked within 15 minutes.",
-  "consumption": "Few approval prompts per Mac thread, with auto mode where Claude Code allows it."
+  "consumption": "No approval prompts per Mac thread, with Auto mode and an allow list set before the thread starts."
 }
