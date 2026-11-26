@@ -40,11 +40,12 @@ The rule every step serves: [All on, app-wide](../templates/claude/README.md#all
 
 ```mermaid
 flowchart LR
-  source["🔒 Source"] --> keep["🔒 Keep"] --> connect["🔒 Connect"] --> fix["🔒 Fix"] --> stale["🔒 Restore"]
+  on["🔒 On"] --> source["🔒 Source"] --> keep["🔒 Keep"] --> connect["🔒 Connect"] --> fix["🔒 Fix"] --> stale["🔒 Restore"]
 ```
 
 | Step | Ideal | Metric |
 |---|---|---|
+| On | No setting turns a plugin, skill or connector off; a session ignores what it does not need | `desktop_app.off_switches` |
 | Source | 🅰 official marketplaces or 🅱 Anthropic's reviewed directory, official equivalents beside custom copies, which stay on; anything else named | `desktop_app.plugins_untrusted` |
 | Keep | A listing over budget is fixed by `skillListingBudgetFraction`, never by turning one off | `desktop_app.listing_tokens` |
 | Connect | Every listed connector connected before the first prompt | `desktop_app.connectors_pending` |
