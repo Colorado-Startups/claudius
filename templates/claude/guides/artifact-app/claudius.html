@@ -1,6 +1,6 @@
 <title>Claudius</title>
 <style>
-/* Layout: a night-blue title band with the gnome, four views under it (Today, Builds, Quality, Repos),
+/* Layout: a night-blue title band with the gnome, four views under it (Needs you, Builds, Quality, Repos),
    one working surface on warm ground. Colors, type and radii come from the Claudius pages' own tokens. */
 :root{
   --ground:#FFFBF3; --surface:#FDF1D8; --surface-2:#F8E3B8; --rule:#E6D3AE;
@@ -59,11 +59,6 @@ h3{font-size:.8125rem;margin:0 0 6px;font-weight:700;color:var(--dim)}
 .empty{color:var(--dim);padding:14px 12px} p.empty{padding:0}
 .sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .err{background:var(--bad-wash);color:var(--bad);border-radius:var(--r-chip);padding:8px 12px;margin-bottom:12px;overflow-wrap:anywhere}
-.counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 12px;margin:0 0 4px;padding:0;list-style:none}
-@media (max-width:420px){.counts{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.counts li{font-variant-numeric:tabular-nums}
-.counts li{display:flex;flex-direction:column}
-.counts b{font-size:1.5rem;line-height:1.2}
 .meter{display:block;height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;min-width:60px}
 .meter i{display:block;height:100%;background:var(--good)}
 .meter.warn i{background:var(--accent-deep)} .meter.bad i{background:var(--bad)}
@@ -117,7 +112,8 @@ const GOAL = 90, LOW = 70;    // a score at the goal is good, under LOW needs wo
 const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const URL_RE = /^https:\/\/[A-Za-z0-9.-]+(\/[A-Za-z0-9._~\/-]*)?$/;
 const SHA_RE = /^[0-9a-f]{40}$/;
-const VIEWS = [["today", "Today"], ["builds", "Builds"], ["quality", "Quality"], ["repos", "Repos"]];
+const ASK_LABEL = "needs-owner";   // an issue or pull request carrying this label is something only the owner can do
+const VIEWS = [["needs", "Needs you"], ["builds", "Builds"], ["quality", "Quality"], ["repos", "Repos"]];
 const blob = (id) => {   // an embedded image: base64 text only, anything else is dropped
   const t = document.getElementById(id)?.textContent.trim() ?? "";
   return /^[A-Za-z0-9+\/]+={0,2}$/.test(t) ? t : "";
@@ -161,19 +157,6 @@ function idleMinutes(updatedAt, now = Date.now()) { return Math.max(0, Math.roun
 function isIdle(p) { return ["Running", "No checks", "Draft"].includes(label(p).text) && idleMinutes(p.updated) >= IDLE_MIN; }
 function ago(m) { return m < 60 ? m + "m" : m < 1440 ? Math.round(m / 60) + "h" : Math.round(m / 1440) + "d"; }
 function band(v) { return v >= GOAL ? "ok" : v >= LOW ? "warn" : "bad"; }
-function changes(prev, now) {    // notifications worth sending
-  const out = [];
-  for (const [key, p] of Object.entries(now)) {
-    const before = prev[key];
-    if (!before) continue;
-    const s = label(p).text, was = label(before).text;
-    if (s === was) continue;
-    if (s === "Ready") out.push(`${key} is ready for review`);
-    else if (s === "Failing") out.push(`${key} has failing checks`);
-  }
-  for (const key of Object.keys(prev)) if (!now[key]) out.push(`${key} was merged or closed`);
-  return out;
-}
 const CHECKS = [   // what a repo needs before agents can build in it, each read from GitHub
   ["AGENTS.md", (r) => r.files.includes("AGENTS.md")],
   ["CLAUDE.md", (r) => r.files.includes("CLAUDE.md")],
@@ -203,32 +186,6 @@ function parseQuality(out) {   // the lines `grep -o` keeps from a Quality page:
   }
   return { totals, tabs: tabs.filter((t) => Object.keys(t.scores).length) };
 }
-function needs(all, ready, quals) {   // what to look at first, worst news first
-  const out = [];
-  for (const p of all) {
-    const l = label(p);
-    if (l.text === "Failing") out.push({ rank: 0, kind: "bad", tag: "CI failing", title: p.title, sub: `${p.key} on ${p.branch}`, url: p.url });
-    else if (l.text === "Ready") out.push({ rank: 2, kind: "ok", tag: "Green, needs review", title: p.title, sub: `${p.key} on ${p.branch}`, url: p.url });
-    else if (isIdle(p)) out.push({ rank: 1, kind: "warn", tag: "Quiet " + ago(idleMinutes(p.updated)), title: p.title, sub: `${p.key} on ${p.branch}`, url: p.url });
-  }
-  for (const [repo, r] of Object.entries(ready)) {
-    const s = readiness(r), gaps = s.rows.filter((x) => x.ok === false).map((x) => x.name);
-    if (gaps.length) out.push({ rank: 1, kind: "warn", tag: `${s.pass} of ${s.of} ready`, title: repo, sub: "Missing: " + gaps.join(", "), url: `https://github.com/${repo}` });
-  }
-  for (const q of quals) {
-    const low = [];
-    for (const t of q.tabs) {
-      const worst = Object.entries(t.scores).sort((a, b) => a[1] - b[1])[0];
-      if (worst && worst[1] < LOW) low.push({ rank: 1, kind: "bad", tag: `${worst[0][0].toUpperCase()}${worst[0].slice(1)} ${worst[1]}`, title: `${t.name} tab`, sub: `Under ${LOW} on the Quality page`, url: q.url, score: worst[1] });
-    }
-    low.sort((a, b) => a.score - b.score);
-    out.push(...low.slice(0, 3));
-    if (low.length > 3) out.push({ rank: 1, kind: "bad", tag: `${low.length - 3} more`, title: "More tabs under " + LOW, sub: "See every tab, lowest first", url: "#quality", here: true });
-  }
-  const KIND = { bad: 0, warn: 1, ok: 2 };
-  return out.sort((a, b) => a.rank - b.rank || KIND[a.kind] - KIND[b.kind]).slice(0, 12);
-}
-
 // ---- reading through the desktop app ----------------------------------------
 const q = (s) => "'" + s.replace(/'/g, "'\\''") + "'";
 async function sh(desktop, cmd) {
@@ -260,7 +217,7 @@ async function gh(desktop, args, jq) {
   }
   try { return JSON.parse(out); } catch { throw new Error("gh did not return JSON"); }
 }
-async function readPRs(desktop, repo) {   // the result's `partial` is true when the page was full, so some open PRs may be missing
+async function readPRs(desktop, repo) {   // the first 50 open pull requests: Builds shows no more
   const prs = await gh(desktop, `api -X GET repos/${repo}/pulls -f state=open -f per_page=100`,
     "[.[]|{number,title,html_url,draft,updated_at,ref:.head.ref,sha:.head.sha}]");
   const out = [];
@@ -273,8 +230,12 @@ async function readPRs(desktop, repo) {   // the result's `partial` is true when
     out.push({ key: `${repo}#${p.number}`, repo, number: p.number, title: p.title, url: p.html_url,
       branch: p.ref, draft: !!p.draft, updated: p.updated_at, checks });
   }
-  out.partial = prs.length > 50;   // a full page or a cut list: some may be missing, so this repo raises no alerts
   return out;
+}
+async function readAsks(desktop, repo) {   // open issues and pull requests that wait on the owner
+  const rows = await gh(desktop, `api -X GET repos/${repo}/issues -f labels=${ASK_LABEL} -f state=open -f per_page=50`, "[.[]|{number,title,html_url,updated_at}]");
+  if (rows.length >= 50) throw new Error("50 or more items carry the " + ASK_LABEL + " label, so the list may be cut off");
+  return rows.map((x) => ({ key: `${repo}#${x.number}`, repo, title: x.title, url: x.html_url, updated: x.updated_at }));
 }
 async function readRepo(desktop, repo) {
   const base = await gh(desktop, `api repos/${repo}`, "{squash:.allow_squash_merge,merge:.allow_merge_commit,rebase:.allow_rebase_merge,delbr:.delete_branch_on_merge,branch:.default_branch}");
@@ -301,7 +262,7 @@ async function readQuality(desktop, url) {
 }
 
 // ---- views ----------------------------------------------------------------
-const S = { data: [], errors: [], slowErrs: [], failed: new Set(), ready: {}, quals: [], at: null, repos: DEFAULT_REPOS, view: "today" };
+const S = { data: [], asks: [], errors: [], slowErrs: [], failed: new Set(), askFailed: new Set(), ready: {}, quals: [], at: null, repos: DEFAULT_REPOS, view: "needs" };
 
 function scoreRow(name, v, cls = "") {
   const meter = h("span", { class: "meter " + band(v), role: "meter", "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": String(v), "aria-label": name }, h("i", { style: `width:${v}%` }));
@@ -330,20 +291,14 @@ function qualityCard(qs) {
     ...["quality", "speed", "consumption"].filter((k) => x.totals[k] !== undefined).map((k) => scoreRow(k[0].toUpperCase() + k.slice(1), x.totals[k])),
     h("p", { class: "note" }, h("a", { href: x.url, target: "_blank", rel: "noopener", text: "Open the live page" })))));
 }
-function viewToday() {
-  const all = S.data.flat(), n = (f) => all.filter(f).length;
-  const list = needs(all, S.ready, S.quals), rows = list.length ? list.map((x) =>
-    h("div", { class: "row " + x.kind }, h("span", { class: "pill " + x.kind, text: x.tag }), h("span", { class: "t" }, h("a", x.here ? { href: x.url, text: x.title } : { href: x.url, target: "_blank", rel: "noopener", text: x.title })), h("span"), h("span", { class: "sub", text: x.sub })))
-    : [h("div", { class: "empty", text: !S.at ? "Checking GitHub." : S.errors.length ? "Could not read everything. See the errors above." : "Nothing needs you. Claudius will say when that changes." })];
-  const counts = h("ul", { class: "counts", "aria-label": "Open pull requests" },
-    ...[["Open", all.length], ["Running", n((p) => p.checks === "running")], ["Ready", n((p) => label(p).text === "Ready")], ["Failing", n((p) => p.checks === "fail")]]
-      .map(([k, v]) => {
-        const unread = !S.at || (S.failed.size && !all.length);
-        return h("li", unread ? { "aria-label": k + ", unknown" } : {}, h("b", { text: unread ? "–" : String(v) }), k);
-      }));   // a dash, not 0, when the count could not be read
-  return h("div", { class: "cols" },
-    h("section", {}, h("h2", { text: "Needs a look" }), h("div", { class: "card list", style: "padding:4px 0" }, ...rows)),
-    h("div", { class: "stack" }, h("section", { class: "card" }, h("h2", { text: "Pull requests" }), counts, S.failed.size && all.length ? h("p", { class: "note", text: "Repos that could not be read are not counted." }) : null), qualityCard(S.quals)));
+function viewNeeds() {
+  const rows = S.asks.map((x) => h("div", { class: "row warn" },
+    h("span", { class: "pill warn", text: "Waiting " + ago(idleMinutes(x.updated)) }),
+    h("span", { class: "t" }, h("a", { href: x.url, target: "_blank", rel: "noopener", text: x.title })), h("span"), h("span", { class: "sub", text: x.repo })));
+  if (!rows.length) rows.push(h("div", { class: "empty", text: !S.at ? "Checking GitHub." : S.errors.length ? "Could not read everything. See the errors above." : "Nothing needs you. Claudius will say when that changes." }));
+  return h("div", { class: "stack" },
+    h("section", {}, h("h2", { text: "Needs you" }), h("div", { class: "card list", style: "padding:4px 0" }, ...rows),
+      h("p", { class: "note", text: `A thread adds the ${ASK_LABEL} label to an issue or pull request when only you can do the step: an install, a passkey, typed words or billing. Pull requests, Quality and repo setup stay under Builds, Quality and Repos.` })));
 }
 function viewBuilds() {
   const parts = [];
@@ -396,7 +351,7 @@ function render() {
     case "builds": view = viewBuilds(); break;
     case "quality": view = viewQuality(); break;
     case "repos": view = viewRepos(); break;
-    default: view = viewToday();
+    default: view = viewNeeds();
   }
   nav.replaceChildren(...VIEWS.map(([id, name]) => {
     const b = h("button", { text: name, type: "button" });
@@ -409,7 +364,7 @@ function render() {
 }
 function route() {
   const id = location.hash.slice(1);
-  S.view = VIEWS.some(([v]) => v === id) ? id : "today";
+  S.view = VIEWS.some(([v]) => v === id) ? id : "needs";
   render();
 }
 window.addEventListener("hashchange", route);
@@ -418,12 +373,11 @@ function installView(state) {
   document.body.classList.add("plain");
   nav.hidden = true;
   const card = h("section", { class: "card install" }, h("h2", { text: "Claudius runs as a Mac app" }),
-    h("p", { text: "Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing, a one-way change or a step the platform forces." }),
-    h("p", { text: "This app is only a window onto that work, and the work runs without it. It watches your pull requests, builds, Quality scores and repo readiness with your own GitHub login (gh), and tells you when something needs a look. It needs its own window, so install it from the Claude desktop app." }));
+    h("p", { text: "It shows only what needs you, such as an install, a passkey, typed words or billing, and keeps pull requests, Quality scores and repo readiness one click away. It reads GitHub with your own login (gh) and tells you when something new needs you. It needs its own window, so install it from the Claude desktop app." }));
   if (state === "available") {
     const b = h("button", { class: "primary", text: "Install as app" });
     b.onclick = () => window.__desktop.install.request().catch(() => {});
-    card.append(h("p", {}, b), h("p", { class: "note", text: "On install, Claude asks for full access, notifications and a menu bar item. All three are used. Claudius only reads: pull requests, checks, repo settings and public pages." }));
+    card.append(h("p", {}, b), h("p", { class: "note", text: "On install, Claude asks for full access, notifications and a menu bar item. All three are used. Claudius only reads: issues, pull requests, checks, repo settings and public pages." }));
   } else {
     card.append(h("p", { class: "note", text: "Open this artifact in the Claude desktop app on a Mac, then choose Install as app." }));
   }
@@ -440,15 +394,15 @@ if (!desktop?.childProcess) {
   desktop.app.dock.setIcon("data:image/png;base64," + blob("img-dock")).catch(() => {});
   desktop.window.setOptions({ titleBarStyle: "hiddenInset", dragHeight: 36, width: 860, height: 680 }).catch(() => {});
   refreshBtn.hidden = false;
-  let prev = null, prevMaster = null;   // in memory only: the first check after a start never notifies
+  let askPrev = new Map(), askSeen = new Set();   // in memory only: the asks seen last time, and the repos read in full at least once, so a repo's first read never notifies
   let timer = null, busy = false, again = false, againSlow = false, gen = 0, tick = 0;
 
-  async function setBar(all, failing, qs) {
-    const title = failing ? `PR ${all.length} ✕${failing}` : `PR ${all.length}`;
-    const items = needs(all, {}, []).slice(0, 10).map((x) => ({ label: `${x.tag}: ${x.title}`.slice(0, 80), href: x.url }));
-    const link = qs[0] ? [{ label: "Open the Quality page", href: qs[0].url }] : [];
+  async function setBar(asks, unread) {
+    const n = asks.length;
+    const title = n ? `Needs you ${n}${unread ? "+" : ""}` : unread ? "?" : "✓";
+    const items = asks.slice(0, 10).map((x) => ({ label: x.title.slice(0, 80), href: x.url }));
     await desktop.tray.set({ icon: "data:image/png;base64," + blob("img-tray"), iconIsTemplate: false, title, toolTip: "Claudius", menu: [
-      ...items, ...(items.length ? [{ type: "separator" }] : []), ...link,
+      ...items, ...(items.length ? [{ type: "separator" }] : []),
       { label: "Open Claudius", click: () => desktop.window.show().catch(() => {}) },
       { label: "Refresh now", click: () => window.__refresh(true) }] }).catch(() => {});
   }
@@ -465,37 +419,37 @@ if (!desktop?.childProcess) {
       meta.textContent = "Checking";
       const errs = [], data = [], slowErrs = doSlow ? [] : S.slowErrs;   // slow reads keep their errors until the next slow read
       let setup = false;   // gh missing or signed out: say it once and skip the rest
-      const failed = new Set();
+      const failed = new Set(), askFailed = new Set(), asks = [];
+      for (const repo of repos) {   // what waits on the owner comes first
+        try { asks.push(...await readAsks(desktop, repo)); }
+        catch (e) { askFailed.add(repo); if (e instanceof SetupError) { setup = true; if (!errs.includes(e.message)) errs.push(e.message); break; } else errs.push(`${repo} issues: ${e.message}`); }
+      }
+      if (setup) for (const repo of repos) askFailed.add(repo);
       for (const repo of repos) {
         if (setup) { failed.add(repo); data.push([]); continue; }
         try { data.push(await readPRs(desktop, repo)); }
         catch (e) { failed.add(repo); if (e instanceof SetupError) { setup = true; errs.push(e.message); } else errs.push(`${repo}: ${e.message}`); data.push([]); }
       }
-      const okRepos = new Set(repos.filter((r, i) => !failed.has(r) && !data[i].partial));   // repos read in full this time
       let ready = S.ready, quals = S.quals;
       if (doSlow) {
         ready = {}; quals = [];
         if (!setup) for (const repo of repos.filter((r) => !failed.has(r))) { try { ready[repo] = await readRepo(desktop, repo); } catch (e) { slowErrs.push(`${repo} settings: ${e.message}`); } }
         for (const u of urls) { try { quals.push(await readQuality(desktop, u)); } catch (e) { slowErrs.push(`${u}: ${e.message}`); } }
       }
-      Object.assign(S, { data, errors: [...errs, ...slowErrs], slowErrs, failed, ready, quals, repos, at: new Date() });
+      const kept = S.asks.filter((a) => askFailed.has(a.repo));   // a repo that could not be read keeps its last asks, so it raises no false change
+      const allAsks = [...asks, ...kept].sort((a, b) => a.updated.localeCompare(b.updated));   // longest waiting first
+      Object.assign(S, { data, asks: allAsks, errors: [...errs, ...slowErrs], slowErrs, failed, askFailed, ready, quals, repos, at: new Date() });
       render();
-      const all = data.flat();
-      // A repo that failed or came back partial keeps its old entries, so it neither alerts nor reports a false merge.
-      const carried = prev ? Object.entries(prev).filter(([, p]) => !okRepos.has(p.repo)) : [];
-      const now = { ...Object.fromEntries(carried), ...Object.fromEntries(all.filter((p) => okRepos.has(p.repo)).map((p) => [p.key, p])) };
       if (myGen === gen) {
-        const msgs = prev ? changes(prev, now) : [];
-        const master = quals[0]?.totals.master;
-        if (prevMaster !== null && master !== undefined && master !== prevMaster) msgs.push(`Quality master score ${master > prevMaster ? "rose" : "fell"} from ${prevMaster} to ${master}`);
-        if (master !== undefined) prevMaster = master;
-        if (msgs.length) desktop.notification.show({ body: msgs.join(". ").slice(0, 280) }).catch(() => {});
-        prev = now;
+        const fresh = allAsks.filter((x) => askSeen.has(x.repo) && !askPrev.has(x.key));
+        if (fresh.length) desktop.notification.show({ body: fresh.map((x) => x.title).join(". ").slice(0, 280) }).catch(() => {});
+        askPrev = new Map(allAsks.map((x) => [x.key, x]));
+        for (const repo of repos) if (!askFailed.has(repo)) askSeen.add(repo);
       }
-      const n = needs(all, ready, quals).length;
-      const summary = S.errors.length ? "Could not read everything" : n === 0 ? "Nothing needs a look" : n === 1 ? "1 item needs a look" : `${n} items need a look`;
+      const n = allAsks.length;
+      const summary = S.errors.length ? "Could not read everything" : n === 0 ? "Nothing needs you" : n === 1 ? "1 item needs you" : `${n} items need you`;
       if (live.textContent !== summary) live.textContent = summary;   // announced only when it changes
-      await setBar(all, all.filter((p) => p.checks === "fail").length, quals);
+      await setBar(allAsks, askFailed.size > 0);
       meta.textContent = `Watching ${repos.length} ${repos.length === 1 ? "repo" : "repos"}, checked ` + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + (S.errors.length ? ", with errors" : "");
     } catch (e) {
       meta.textContent = "Check failed: " + e.message;
@@ -505,7 +459,7 @@ if (!desktop?.childProcess) {
       timer = setTimeout(() => window.__refresh(rerunSlow), rerun ? 0 : POLL_MS);
     }
   };
-  window.__reset = () => { prev = null; prevMaster = null; gen++; };
+  window.__reset = () => { askPrev = new Map(); askSeen = new Set(); gen++; };
   refreshBtn.onclick = () => window.__refresh(true);
   route();
   // A call that needs a permission waits for a click while the window is hidden (during install),
@@ -532,7 +486,7 @@ if (!desktop?.childProcess) {
       await offerManage(); window.__refresh(true);
     };
     app.replaceChildren(h("section", { class: "card install" }, h("h2", { text: "Claudius needs three permissions" }),
-      h("p", { text: "Full access runs gh and curl on this Mac to read GitHub and the public Quality pages. Notifications tell you when a pull request is ready or failing. The menu bar item shows the open count. Claudius reads only and changes nothing." }),
+      h("p", { text: "Full access runs gh and curl on this Mac to read GitHub and the public Quality pages. Notifications tell you when something new needs you. The menu bar item shows how many things need you. Claudius reads only and changes nothing." }),
       h("p", {}, go)));
   }
 }
