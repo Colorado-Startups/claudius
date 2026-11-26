@@ -15,6 +15,7 @@ The owner's rule (2026-11-19). One desktop app serves every repo and project, so
 | How | Works by |
 |---|---|
 | A session ignores | Not loading it, never turning it off: connector tool schemas stay deferred until a session loads one, and a skill's body loads only when invoked ([MCP](https://code.claude.com/docs/en/mcp), [skills](https://code.claude.com/docs/en/skills)) |
+| A session picks | The plan maps the session's skills, plugins and connectors and picks one per step. Each step loads its picks on use, and nothing is hidden. A skill body loads only when invoked. Connector tool schemas stay deferred behind tool search, so keep `ENABLE_TOOL_SEARCH` at its default. A skill missing from the listing stays reachable through the Skill tool ([skills](https://code.claude.com/docs/en/skills), [MCP](https://code.claude.com/docs/en/mcp), [sub-agents](https://code.claude.com/docs/en/sub-agents), read 2026-11-23) |
 | A sub-session gets the full suite | A side session starts as a new session with everything on, and a subagent inherits every tool unless its definition lists them ([sub-agents](https://code.claude.com/docs/en/sub-agents)). So a brief names the task, never a tool list |
 
 ## Files
