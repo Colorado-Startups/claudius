@@ -59,14 +59,14 @@ A cloud session starts from a fresh clone of the repo, so it loads what the repo
 
 | Question | Standalone session, one repo | Thread in a Project |
 |---|---|---|
-| Loads | `CLAUDE.md`, `.claude/rules/`, `.claude/skills/`, `agents/` and `commands/`, plus `.claude/settings.json` hooks and permission rules and `.mcp.json` servers | `CLAUDE.md` and `.claude/rules/` (path-specific rules not at the start), plus skills, agents and commands |
+| Loads | `CLAUDE.md`, `.claude/rules/`, `.claude/skills/`, `agents/` and `commands/`, plus `.claude/settings.json` hooks and permission rules and `.mcp.json` servers | `CLAUDE.md` and `.claude/rules/` (path-specific rules not at the start), plus skills, agents and commands, unless the thread skips them |
 | Does not load | `~/.claude` files, user-scope plugins, `claude mcp add` servers at local or user scope, marketplaces under `extraKnownMarketplaces` | The same, plus `.claude/settings.json` hooks, permission rules and `env`, and `.mcp.json` servers |
 | Opens a PR with | `gh api repos/{owner}/{repo}/pulls`, since the GitHub proxy returns 403 for GraphQL, `gh pr` and `gh issue` | The same |
 | Network | **Limited** by default: the default allowlist plus the hosts you list under **Allowed domains** | The same, set on the project's environment |
 
 So a guard that must hold in a Project thread lives in the instruction files, a GitHub ruleset or CI, not in a hook or a deny rule. [All on, app-wide](#all-on-app-wide) still holds: a cloud thread simply starts with fewer files.
 
-Sources, read 2026-11-26: [what carries over](https://code.claude.com/docs/en/cloud-environments#what-carries-over-from-your-setup), [GitHub proxy](https://code.claude.com/docs/en/cloud-environments#github-proxy), [settings in cloud sessions](https://code.claude.com/docs/en/settings#settings-in-cloud-sessions) and [what threads pick up](https://code.claude.com/docs/en/claude-projects#what-threads-pick-up-from-your-repositories).
+Sources, read 2026-11-26: [what carries over](https://code.claude.com/docs/en/cloud-environments#what-carries-over-from-your-setup), [GitHub proxy](https://code.claude.com/docs/en/cloud-environments#github-proxy), [settings in cloud sessions](https://code.claude.com/docs/en/settings#settings-in-cloud-sessions), [what threads pick up](https://code.claude.com/docs/en/claude-projects#what-threads-pick-up-from-your-repositories) and [network access](https://code.claude.com/docs/en/cloud-environments#network-access).
 
 ## Desktop app (Code tab)
 
