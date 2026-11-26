@@ -300,6 +300,7 @@ test('catalog: duplicate keys, odd single quotes and YAML floats fail, and a fol
   assert.throws(() => parseFrontmatter(`---\nname: a\nname: b\ndescription: d\n---\n`, 'x'), /appears twice/);
   for (const v of ["'a' # c'", "'it's'", '.inf', '.NaN']) assert.throws(() => parseFrontmatter(fm(`x: ${v}`), 'x'), /plain YAML scalar/, v);
   assert.equal(parseFrontmatter(fm("x: 'it''s'"), 'x').x, "it's");
+  assert.throws(() => parseFrontmatter(fm('x:y'), 'x'), /flat/);
   const long = 'a'.repeat(65);
   assert.throws(() => buildCatalog(fixture({ [`${long}/SKILL.md`]: `---\nname: ${long}\ndescription: d\n---\n` })), /not a valid skill name/);
   const dir = fixture({ 'real/SKILL.md': '---\nname: a\ndescription: d\n---\n' });

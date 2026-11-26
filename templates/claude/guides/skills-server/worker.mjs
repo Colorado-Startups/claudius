@@ -73,7 +73,7 @@ export function createHandler(catalog, { allowedOrigins = [] } = {}) {
   const legacyOnly = Object.assign(Object.create(null), { ping: () => ({}) });
 
   return async function fetch(request, env = {}) {
-    const extra = (env.ALLOWED_ORIGINS ?? '').split(',').map((o) => o.trim()).filter(Boolean);
+    const extra = String(env.ALLOWED_ORIGINS ?? '').split(',').map((o) => o.trim()).filter(Boolean);
     const origin = request.headers.get('origin');
     if (origin && ![...origins, ...extra].includes(origin)) return fail(403, null, -32600, 'Origin not allowed');
     if (request.method !== 'POST') return text(405, 'POST only', { allow: 'POST' });

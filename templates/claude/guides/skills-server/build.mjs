@@ -22,7 +22,7 @@ export function parseFrontmatter(src, where) {
   const out = {};
   for (const line of m[1].split(/\r?\n/)) {
     if (!line.trim() || line.trimStart().startsWith('#')) continue;
-    const kv = /^([A-Za-z][\w-]*):[ \t]*(.*)$/.exec(line);
+    const kv = /^([A-Za-z][\w-]*):[ \t]+(.*)$/.exec(line);
     if (!kv || kv[2] === '' || /^[|>]/.test(kv[2]) || /^[[{]/.test(kv[2])) throw new Error(`${where}: frontmatter line is not a flat "key: value": ${line}`);
     let v = kv[2];
     if (/^"[\s\S]*"$/.test(v)) { try { v = JSON.parse(v); } catch { throw new Error(`${where}: bad double-quoted value: ${line}`); } }
