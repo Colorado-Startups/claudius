@@ -28,6 +28,12 @@ function session(projects, name, { effort = 'medium', model = 'claude-sonnet-5-5
   ];
   fs.writeFileSync(path.join(folder, `${name}.jsonl`), rows.map(line).join('\n') + '\n');
 }
+// Puts a record after the session's start records and before its first reply.
+const addAtStart = (file, line) => {
+  const lines = fs.readFileSync(file, 'utf8').split('\n').filter(Boolean);
+  lines.splice(3, 0, line);
+  fs.writeFileSync(file, lines.join('\n') + '\n');
+};
 const go = (params, projectsDir, home = tmp()) => collect({ root: '/home/user/demo', params: { window_days: 30, subagents_dir: 'subagents', default_model: 'sonnet', project_match: 'demo', ...params }, now: NOW, home, projectsDir });
 
 test('cp-local: thread-start lines come from one session, in lengths and times only', async () => {
@@ -48,12 +54,29 @@ test('cp-local: thread-start lines come from one session, in lengths and times o
   assert.ok(!JSON.stringify(out).includes('SECRET PROMPT TEXT'), 'a prompt is never kept');
 });
 
+test('cp-local: only the start of a session counts for hook text: a later SessionStart record is not added', async () => {
+  const projects = tmp();
+  session(projects, 'a');
+  const file = path.join(projects, '-home-user-demo', 'a.jsonl');
+  for (const sec of [100, 200]) fs.appendFileSync(file, JSON.stringify({ type: 'attachment', timestamp: t(sec), attachment: { type: 'hook_additional_context', hookEvent: 'SessionStart', content: 'h'.repeat(80) } }) + '\n');
+  const out = await go({}, projects);
+  assert.equal(out['cp_hooks.hook_text_tokens'].value, 20, 'one start record of 80 characters, not three');
+});
+
 test('cp-local: needed servers named as failed in the latest start text are counted; other failures and error text are not', async () => {
   const projects = tmp();
   session(projects, 'a');
   const file = path.join(projects, '-home-user-demo', 'a.jsonl');
   const rendered = ['x', 'The following MCP servers are configured but failed to connect:', 'plugin:a:one (ERR_PROXY_TUNNEL): "ERROR TEXT"', 'plugin:b:two: "needs auth"', 'plugin:c:three (CONNECTION_CLOSED): "x"', '', 'later text', 'The following MCP servers are configured but failed to connect:', 'plugin:d:four (-32603): "x"', 'plugin:e:five (410): "x"'].join('\n');
-  fs.appendFileSync(file, JSON.stringify({ type: 'attachment', timestamp: t(2), rendered: [{ role: 'user', content: rendered }], attachment: { type: 'deferred_tools_delta' } }) + '\n');
+  const rec = (text, sec) => JSON.stringify({ type: 'attachment', timestamp: t(sec), rendered: [{ role: 'user', content: text }], attachment: { type: 'deferred_tools_delta' } });
+  const none = await go({ needed_servers: ['plugin:a:one'] }, projects);
+  assert.match(none['cp_environment.failed_servers'].could_not_check, /no tool listing record/, 'no start record is not measured, never 0');
+  addAtStart(file, rec('x', 2));
+  const clean = await go({ needed_servers: ['plugin:a:one'] }, projects);
+  assert.equal(clean['cp_environment.failed_servers'].value, 0, 'a start record that lists no failure reads 0');
+  fs.writeFileSync(file, fs.readFileSync(file, 'utf8').split('\n').filter((l) => !l.includes('deferred_tools_delta')).join('\n'));
+  addAtStart(file, rec(rendered, 2));
+  fs.appendFileSync(file, rec('The following MCP servers are configured but failed to connect:\nplugin:z:none: "x"', 95) + '\n');
   const out = await go({ needed_servers: ['plugin:a:one', 'plugin:b:two', 'plugin:d:four', 'plugin:z:none'] }, projects);
   assert.equal(out['cp_environment.failed_servers'].value, 3, 'a code such as (-32603) and a second failed block are read');
   assert.deepEqual(out['cp_environment.failed_servers'].detail, [{ label: 'of 4 needed servers', value: 3, unit: 'servers' }]);

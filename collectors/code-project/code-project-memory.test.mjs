@@ -13,7 +13,7 @@ const dir = (files) => {
   for (const [name, text] of Object.entries(files)) fs.writeFileSync(path.join(d, name), text);
   return d;
 };
-const go = (params) => collect({ params, now: NOW, home: os.tmpdir() });
+const go = (params, root = os.tmpdir()) => collect({ params, root, now: NOW, home: os.tmpdir() });
 
 test('cp-memory: the index bytes / 4, rounded up, and the notes it points to are not counted', async () => {
   assert.equal(area, 'cp-memory');
@@ -61,4 +61,16 @@ test('cp-memory: stale notes are those whose modified line, or else file time, i
 test('cp-memory: a folder with only the index has no note to date, so the stale count is not measured', async () => {
   const out = await go({ memory_dir: dir({ 'MEMORY.md': 'index' }) });
   assert.match(out['cp_memory.stale_notes'].could_not_check, /no note besides the index/);
+});
+
+test('cp-memory: a relative memory_dir is under the repo root, a symlinked note is skipped and only the head of a note is read', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'cp-memory-root-'));
+  fs.mkdirSync(path.join(root, 'mem'));
+  fs.writeFileSync(path.join(root, 'mem', 'MEMORY.md'), 'index');
+  fs.writeFileSync(path.join(root, 'mem', 'late.md'), `${'x'.repeat(5000)}\nmodified: 2026-11-24T00:00:00Z\n`);
+  fs.utimesSync(path.join(root, 'mem', 'late.md'), new Date('2026-09-01'), new Date('2026-09-01'));
+  fs.symlinkSync(path.join(root, 'mem', 'late.md'), path.join(root, 'mem', 'link.md'));
+  const out = await go({ memory_dir: 'mem' }, root);
+  assert.equal(out['cp_memory.start_tokens'].value, 2);
+  assert.deepEqual(out['cp_memory.stale_notes'].detail, [{ label: 'of 1 notes', value: 1, unit: 'notes' }], 'the symlink is not counted and a modified line past the head is not read');
 });

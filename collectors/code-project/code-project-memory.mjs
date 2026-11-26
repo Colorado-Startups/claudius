@@ -10,12 +10,12 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { redact, useLib } from '../lib/engine.mjs';
+import { redact, resolvePath, useLib } from '../lib/engine.mjs';
 
 export const area = 'cp-memory';
 export const metricIds = ['cp_memory.start_tokens', 'cp_memory.stale_notes'];
 
-const TARGETS = ['code-project.json', 'code-project-tabs.json'].flatMap((f) => JSON.parse(fs.readFileSync(new URL(`../../targets/${f}`, import.meta.url), 'utf8')));
+const TARGETS = ['code-project.json', 'code-project-tabs.json', 'code-project-features.json'].flatMap((f) => JSON.parse(fs.readFileSync(new URL(`../../targets/${f}`, import.meta.url), 'utf8')));
 const TEMPLATE = Object.assign({}, ...TARGETS.map((t) => t.params ?? {}));
 const DEFINED = Object.fromEntries(TARGETS.map((t) => [t.id, t]));
 const [START, STALE] = metricIds;
@@ -28,17 +28,17 @@ export async function collect(opts = {}) {
   return redact(gather(opts), opts.home);
 }
 
-const under = (dir, home) => (dir.startsWith('~/') ? path.join(home, dir.slice(2)) : path.resolve(dir));
-
-function gather({ params = {}, allParams = {}, now = Date.now(), home = os.homedir() } = {}) {
-  const p = { ...TEMPLATE, ...allParams['code-project.json'], ...allParams['code-project-tabs.json'], ...params };
+function gather({ params = {}, allParams = {}, root = '.', now = Date.now(), home = os.homedir() } = {}) {
+  const p = { ...TEMPLATE, ...allParams['code-project.json'], ...allParams['code-project-tabs.json'], ...allParams['code-project-features.json'], ...params };
   const cnc = (why) => ({ [START]: { could_not_check: why, source: DEFINED[START].source }, [STALE]: { could_not_check: why, source: DEFINED[STALE].source } });
   if (!p.memory_dir) return cnc('no memory_dir param: set it to the folder that holds the memory index');
-  const dir = under(p.memory_dir, home);
+  const dir = resolvePath(p.memory_dir, { home, root });
   const stamp = new Date(now).toISOString();
   const out = {};
   try {
-    const text = fs.readFileSync(path.join(dir, p.memory_index), 'utf8');
+    const index = resolvePath(p.memory_index, { home, root: dir });
+    if (fs.lstatSync(index).isSymbolicLink()) throw new Error('symlink');
+    const text = fs.readFileSync(index, 'utf8');
     const loaded = text.split('\n').slice(0, MAX_LINES).join('\n');
     const bytes = Math.min(Buffer.byteLength(loaded), MAX_BYTES);
     const value = Math.ceil(bytes / 4);
@@ -55,7 +55,7 @@ function staleNotes(dir, p, now) {
   const source = `${DEFINED[STALE].source}; the notes' own date lines or file times, ${p.stale_days} days`;
   let notes;
   try {
-    notes = fs.readdirSync(dir).filter((n) => n.endsWith('.md') && n !== p.memory_index);
+    notes = fs.readdirSync(dir, { withFileTypes: true }).filter((e) => e.isFile() && !e.isSymbolicLink() && e.name.endsWith('.md') && e.name !== p.memory_index).map((e) => e.name);
   } catch {
     return { could_not_check: 'could not list the memory folder on this machine', source };
   }
@@ -66,7 +66,14 @@ function staleNotes(dir, p, now) {
     const file = path.join(dir, n);
     let at = NaN;
     try {
-      const head = fs.readFileSync(file, 'utf8').split('\n').slice(0, 12).join('\n');
+      const fd = fs.openSync(file, 'r');
+      let head;
+      try {
+        const buf = Buffer.alloc(4096);
+        head = buf.subarray(0, fs.readSync(fd, buf, 0, 4096, 0)).toString('utf8').split('\n').slice(0, 12).join('\n');
+      } finally {
+        fs.closeSync(fd);
+      }
       at = Date.parse(/^\s*modified:\s*(\S+)/m.exec(head)?.[1] ?? '');
       if (!Number.isFinite(at)) at = fs.statSync(file).mtimeMs;
     } catch {

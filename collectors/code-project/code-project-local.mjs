@@ -81,18 +81,23 @@ function failedServers(text, into) {
 
 // What one session's first records say. Reads names, counts and lengths only.
 export function readSession(file) {
-  const s = { failed: new Set(), start: null, skills: null, pluginSkills: null, startText: 0, hookMs: [], firstTool: null, firstBash: null, effort: null, model: null };
+  const s = { failed: new Set(), start: null, skills: null, pluginSkills: null, startText: 0, rendered: 0, begun: false, hookMs: [], firstTool: null, firstBash: null, effort: null, model: null };
   eachLine(file, (r) => {
     const at = Date.parse(r.timestamp);
     if (s.start === null && Number.isFinite(at)) s.start = at;
     const a = r.type === 'attachment' ? r.attachment : null;
-    if (a && r.rendered) failedServers(renderedText(r.rendered), s.failed);
+    // The start of a session ends at its first reply or its first compaction: a SessionStart hook runs again on resume and compaction.
+    if (r.type === 'assistant' || r.subtype === 'compact_boundary' || r.isCompactSummary) s.begun = true;
+    if (a && r.rendered && !s.begun) {
+      s.rendered += 1;
+      failedServers(renderedText(r.rendered), s.failed);
+    }
     if (a?.type === 'skill_listing' && s.skills === null) {
       const text = textOf(a.content);
       s.skills = tokens(text.length);
       s.pluginSkills = tokens(text.split('\n').filter((l) => PLUGIN_LINE.test(l)).join('\n').length);
     } else if (a?.type === 'hook_additional_context' && a.hookEvent === 'SessionStart') {
-      s.startText += textOf(a.content).length;
+      if (!s.begun) s.startText += textOf(a.content).length;
     } else if ((a?.type === 'hook_success' || a?.type === 'hook_non_blocking_error') && a.hookEvent === 'PreToolUse' && Number.isFinite(a.durationMs)) {
       s.hookMs.push(a.durationMs);
     } else if (r.type === 'assistant') {
@@ -162,6 +167,7 @@ function gather({ params = {}, allParams = {}, root = '.', now = Date.now(), hom
   const latest = starts.rows ? [...starts.rows].sort((a, b) => (b.start ?? 0) - (a.start ?? 0))[0] : null;
   if (!latest) cnc('cp_environment.failed_servers', starts.why);
   else if (!Array.isArray(p.needed_servers) || !p.needed_servers.length) cnc('cp_environment.failed_servers', 'no needed_servers param: set it to the servers this project needs');
+  else if (!latest.rendered) cnc('cp_environment.failed_servers', "the latest session's start has no tool listing record to read");
   else {
     const failed = p.needed_servers.filter((n) => latest.failed.has(n)).length;
     val('cp_environment.failed_servers', failed, [{ label: `of ${p.needed_servers.length} needed servers`, value: failed, unit: 'servers' }], "the servers of params.needed_servers named as failed to connect in the latest session's start text");
