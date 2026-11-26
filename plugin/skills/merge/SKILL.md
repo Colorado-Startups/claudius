@@ -43,7 +43,7 @@ flowchart LR
 | 3 Head SHA | `gh api repos/{owner}/{repo}/pulls/N --jq .head.sha` |
 | 3 Diff | `gh api -H 'Accept: application/vnd.github.diff' repos/{owner}/{repo}/pulls/N` |
 | 5 Verdict | `gh api repos/{owner}/{repo}/issues/N/comments -f body=...` |
-| 6 and 7 Merge | `gh api -X PUT repos/{owner}/{repo}/pulls/N/merge -f merge_method=squash -f sha=<reviewed sha>`: GitHub refuses it if the head moved. Where the repo requires a merge queue and no REST route enqueues, leave the PR with both MERGE verdicts and the queue mutation for a local thread: the only case that needs one |
+| 6 and 7 Merge | `gh api -X PUT repos/{owner}/{repo}/pulls/N/merge -f merge_method=squash -f sha=<reviewed sha>`: GitHub refuses it if the head moved. Where the repo requires a merge queue, enqueue with the GitHub MCP `enable_pr_auto_merge` (squash), which needs no GraphQL. Only without that tool, leave the PR with both MERGE verdicts and the queue mutation for a local thread |
 
 Green CI, two separate reviews and the head SHA guard all stay. Never bypass a required merge queue.
 

@@ -9,6 +9,7 @@ Instructions for every coding agent in this repo, from Git Crafter `templates/ag
 | What this repo is | The Claude pack for Git Crafter: 33 Quality tabs, the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps, fifteen page maps, the Brief and Runtime maps, and the Claude setup templates in `templates/claude/` (18 Code Project pages and a page kit) |
 | Build and test | `node --test tests/<file>.test.mjs`, one file at a time. Suites, the engine tests and the page build run in CI through Git Crafter's `ci-standard.yml` and `actions/pages` |
 | Shipping | Branch, commit, push the branch and open a pull request. Never push to `main` |
+| Releases | A release is automatic: change `VERSION` in a pull request, and the `release` workflow tags and publishes it once the PR merges. No person creates a release by hand |
 | Bugs and quick fixes | An issue typed Bug or Task in the repo at fault, filed when found. It stays off the board |
 | Features and improvements | A draft card on the owner's board, filed when found. A feature filed as an issue carries `enhancement`, so the board's auto-add cards it. A planned feature step is such an issue, typed Feature |
 | Filing in a cloud session | Over REST, since its proxy blocks GraphQL: the commands are in `plugin/skills/plan/SKILL.md`. If filing fails, list the item in a `To card` table in the PR body |
