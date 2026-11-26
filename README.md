@@ -54,7 +54,7 @@ Then, each optional:
 | Add | Do |
 |---|---|
 | Process maps | Add `{ "use": "<id>" }` to your Process config's `maps` for each map you want, one per file in [`maps/`](maps/). This repo's own [`quality/process/config.json`](quality/process/config.json) names every one ([maps/README.md](maps/README.md)) |
-| Page maps | If you run a Code Project, also add the ten page maps (`{ "use": "<id>" }` each): [maps/README.md](maps/README.md#page-maps-one-per-page) |
+| Page maps | If you run a Code Project, also add the ten page maps and the `brief` and `runtime` maps (`{ "use": "<id>" }` each): [maps/README.md](maps/README.md#page-maps-one-per-page) |
 | Code Project | Attach the repo to a project and paste the [setup prompt](docs/projects-quickstart.md#setup-prompt) as its first message: [3 steps](docs/projects-quickstart.md). Score each Project tab with the [page kit](templates/claude/code-project/page/README.md) |
 
 The pin, the tab ids and the Pages setup in detail: [Add the pack](#add-the-pack).
@@ -90,9 +90,9 @@ flowchart LR
 | --- | --- |
 | `templates/claude/` | the Claude templates; `AGENTS.md`, `CLAUDE.md` and `.claude/` at the root are this repo's own |
 | `pack.json` | the 28 tabs |
-| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps, and the ten page maps |
+| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps, the ten page maps and the Brief and Runtime maps |
 | `collectors/<tab>/`, `fixtures/` | the collectors, their tests and test fixtures |
-| `quality/process/config.json` | the Process page: the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps and the ten page maps, named by `use` |
+| `quality/process/config.json` | the Process page: the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps, the ten page maps and the Brief and Runtime maps, named by `use` |
 | `quality/public.mjs`, `quality/public-params.json` | write `quality/public/`, the configs CI builds the public pages from. Each metric that needs local files is dropped but the repo-file ones. Each map is written out in full without the steps those metrics score |
 | `tests/moved.json` | where each file came from in Git Crafter |
 | `tests/engine-tests.sh` | CI: each file matches its source or is listed as edited, then the tests run beside the pinned engine |

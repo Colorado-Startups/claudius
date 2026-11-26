@@ -1,6 +1,6 @@
 # Process maps
 
-Twenty-two maps for an agent-driven repo (twelve process maps and the ten [page maps](#page-maps-one-per-page)), each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }`, `{ "use": "remember" }`, `{ "use": "setup" }`, `{ "use": "memory" }` and `{ "use": "schedule" }`, then the ten page maps `context`, `setup-check`, `scheduled-task`, `local-thread`, `pr-flow`, `connectors`, `plugins`, `skills`, `subagents` and `hooks` the same way, once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
+Twenty-four maps for an agent-driven repo (twelve process maps, the ten [page maps](#page-maps-one-per-page) and the two [cross-page maps](#brief-and-runtime-two-maps-that-span-several-pages)), each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }`, `{ "use": "remember" }`, `{ "use": "setup" }`, `{ "use": "memory" }` and `{ "use": "schedule" }`, then the ten page maps `context`, `setup-check`, `scheduled-task`, `local-thread`, `pr-flow`, `connectors`, `plugins`, `skills`, `subagents` and `hooks`, and the two cross-page maps `brief` and `runtime`, the same way, once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
 
 ## Guard: a tool call, through the guards, to run or blocked
 
@@ -186,6 +186,32 @@ Each lane scores one tab or feature of a Claude Code Project. A map holds six st
 | `setup` | General, Environment, Network access, Network secrets, Setup script, Work locally |
 | `memory` | Conversation, Context, Memory, Extensions, Connectors, Plugins |
 | `schedule` | Threads, Scheduled tasks, Hooks, Subagents, Pull request auto fix, Skills |
+
+## Brief and Runtime: two maps that span several pages
+
+A page has one map, so these two score the readings that cut across pages. Brief follows the owner's question to a thread that needs no second question. Runtime follows a thread's files, environment and settings to its scheduled runs and token spread.
+
+```mermaid
+flowchart LR
+  ask["Ask"] --> write["Write"] --> load["Load"] --> start["Start"] --> recall["Recall"]
+  setup["Setup"] --> env["Environment"] --> settings["Settings"] --> run["Run"] --> fresh["Fresh"] --> spend["Spend"]
+```
+
+| Map | Step | Ideal | Metric |
+|---|---|---|---|
+| `brief` | Ask | A question for the owner goes out as one decision card | `cp_conversation.card_share` |
+| `brief` | Write | The brief says the guards a thread cannot skip | `code_project.guard_rules_missing` |
+| `brief` | Load | The memory index adds few tokens to a thread at start | `cp_memory.start_tokens` |
+| `brief` | Start | A thread starts within minutes of the owner's message | `cp_conversation.minutes_to_thread` |
+| `brief` | Recall | A thread never asks what memory or the brief already says | `cp_memory.repeat_questions` |
+| `runtime` | Setup | Every file a cloud thread needs is in the repo | `code_project.setup_missing` |
+| `runtime` | Environment | The environment holds every host and variable the project needs | `cp_environment.environment_gaps` |
+| `runtime` | Settings | Every project setting matches the plan | `cp_general.settings_gaps` |
+| `runtime` | Run | The latest run of every scheduled task ends without an error | `cp_scheduled_tasks.task_failures` |
+| `runtime` | Fresh | Some scheduled task has run within the week | `cp_scheduled_tasks.hours_since_last_run` |
+| `runtime` | Spend | No single thread spends most of the project's tokens | `cp_threads.largest_thread_token_share` |
+
+Five of these readings (`environment_gaps`, `settings_gaps`, `task_failures`, `hours_since_last_run` and `largest_thread_token_share`) read small record files that the machine holding the setting saves under `quality/data/` ([`code-project-records.mjs`](../collectors/code-project/code-project-records.mjs), params on `cp_general.settings_gaps` in [`code-project-tabs.json`](../targets/code-project-tabs.json)). A missing, undated or old record is not measured, never 0, and the public page leaves these readings out.
 
 ## Page maps: one per page
 

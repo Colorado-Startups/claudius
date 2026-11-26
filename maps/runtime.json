@@ -1,0 +1,95 @@
+{
+  "id": "runtime",
+  "name": "Runtime",
+  "why": "A thread's runtime, from the files and settings it starts with to its scheduled runs and token spread",
+  "ideal": "A thread starts with every file, host and setting it needs, scheduled runs end clean and no thread spends most tokens.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Cloud environments",
+      "url": "https://code.claude.com/docs/en/cloud-environments",
+      "date": "2026-11-26"
+    },
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-26"
+    },
+    {
+      "title": "Claude Code Docs: Automate work with scheduled tasks",
+      "url": "https://code.claude.com/docs/en/routines",
+      "date": "2026-11-26"
+    },
+    {
+      "title": "Claude Code Docs: Manage costs effectively",
+      "url": "https://code.claude.com/docs/en/costs",
+      "date": "2026-11-26"
+    }
+  ],
+  "critical_path": [
+    "setup",
+    "environment",
+    "run"
+  ],
+  "steps": [
+    {
+      "id": "setup",
+      "name": "Setup",
+      "tools": [
+        "Instructions"
+      ],
+      "rule": "Every file a cloud thread needs is in the repo.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "code_project.setup_missing"
+    },
+    {
+      "id": "environment",
+      "name": "Environment",
+      "tools": [
+        "Environment"
+      ],
+      "rule": "The environment holds every host and variable the project needs.",
+      "rule_ref": "https://code.claude.com/docs/en/cloud-environments",
+      "metric": "cp_environment.environment_gaps"
+    },
+    {
+      "id": "settings",
+      "name": "Settings",
+      "tools": [
+        "General"
+      ],
+      "rule": "Every project setting matches the plan.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_general.settings_gaps"
+    },
+    {
+      "id": "run",
+      "name": "Run",
+      "tools": [
+        "Scheduled tasks"
+      ],
+      "rule": "The latest run of every scheduled task ends without an error.",
+      "rule_ref": "https://code.claude.com/docs/en/routines",
+      "metric": "cp_scheduled_tasks.task_failures"
+    },
+    {
+      "id": "fresh",
+      "name": "Fresh",
+      "tools": [
+        "Scheduled tasks"
+      ],
+      "rule": "Some scheduled task has run within the week.",
+      "rule_ref": "https://code.claude.com/docs/en/routines",
+      "metric": "cp_scheduled_tasks.hours_since_last_run"
+    },
+    {
+      "id": "spend",
+      "name": "Spend",
+      "tools": [
+        "Threads"
+      ],
+      "rule": "No single thread spends most of the project's tokens.",
+      "rule_ref": "https://code.claude.com/docs/en/costs",
+      "metric": "cp_threads.largest_thread_token_share"
+    }
+  ]
+}

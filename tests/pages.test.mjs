@@ -13,6 +13,8 @@ const all = ['code-project-tabs', 'code-project-features'].flatMap((f) => read(`
 const metrics = Object.fromEntries(all.filter((m) => !NO_PAGE.includes(m.tab)).map((m) => [m.id, m]));
 const pack = read('pack.json').tabs.map((t) => t[0]).filter((id) => id.startsWith('cp-') && !NO_PAGE.includes(id));
 const KINDS = ['quality', 'speed', 'consumption'];
+// Two maps that no page names: the Brief and Runtime maps score the readings of several pages.
+const EXTRA_MAPS = ['brief', 'runtime'];
 const NEW_MAPS = ['context', 'setup-check', 'scheduled-task', 'local-thread', 'pr-flow', 'connectors', 'plugins', 'skills', 'subagents', 'hooks'];
 
 test('pages: thirteen pages with their own ids, each scoring all three kinds', () => {
@@ -50,6 +52,18 @@ test('pages: each page names a map, and a map of the pack is a file that scores 
     const m = read(`maps/${id}.json`);
     assert.deepEqual([...new Set(m.steps.map((s) => metrics[s.metric]?.kind ?? knownKind(s.metric)))].sort(), [...KINDS].sort(), `${id} scores all three kinds`);
     assert.ok(pages.some((p) => p.map === id), `${id} is a page's map`);
+  }
+});
+
+test('pages: the Brief and Runtime maps score all three kinds, in six steps at most, and draw on the public page', () => {
+  for (const id of EXTRA_MAPS) {
+    const m = read(`maps/${id}.json`);
+    assert.equal(m.id, id);
+    assert.ok(m.steps.length >= 1 && m.steps.length <= 6, `${id}: ${m.steps.length} steps`);
+    assert.deepEqual([...new Set(m.steps.map((s) => metrics[s.metric]?.kind ?? knownKind(s.metric)))].sort(), [...KINDS].sort(), `${id} scores all three kinds`);
+    assert.ok(m.steps.some((s) => (metrics[s.metric] ?? ['code-project'].flatMap((f) => read(`targets/${f}.json`)).find((d) => d.id === s.metric))?.needs !== 'local-files'), `${id} has a step the public page can draw`);
+    assert.ok(read('quality/process/config.json').maps.some((x) => x.use === id), `${id} is on the Process page`);
+    for (const st of m.steps) assert.ok(st.rule.split(/\s+/).length <= 20, `${id}/${st.id}`);
   }
 });
 
