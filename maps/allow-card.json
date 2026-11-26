@@ -23,7 +23,7 @@
     "Allow card",
     "Worktree"
    ],
-   "rule": "Answer the Allow card in the project conversation, with Worktree on when another thread uses the folder.",
+   "rule": "Turn on Worktree on the Allow card when another thread uses the same folder.",
    "rule_ref": "https://code.claude.com/docs/en/claude-projects",
    "metric": "cp_allow_card.shared_folder_threads"
   },
