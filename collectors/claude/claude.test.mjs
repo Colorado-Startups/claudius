@@ -290,7 +290,7 @@ test('without gh, PR metrics are could_not_check and token metrics still read', 
     'claude.escaped_bugs_per_10_prs',
     'claude.compactions_per_10_prs',
   ]) {
-    assert.match(r[id].could_not_check, /^gh could not read 7 of 7 linked PRs \(spawn gh ENOENT\)$/, id);
+    assert.match(r[id].could_not_check, /^gh could not read 7 of 7 linked PRs \(gh api graphql failed\)$/, id);
   }
   assert.equal(value(r, 'claude.cache_read_share'), 90.8);
   assert.equal(value(r, 'claude.context_per_call'), 6010);
@@ -344,11 +344,13 @@ test('a failed first-push or bug query only blanks its own metric', async () => 
     };
   };
   const push = await collect({ ...base, gh: gh((args) => args[1] === 'graphql' && args[3].includes('object(oid:')) });
-  assert.match(push['claude.first_push_green_share'].could_not_check, /gh api graphql failed \(HTTP 502\)/);
+  assert.match(push['claude.first_push_green_share'].could_not_check, /gh api graphql failed/);
+  assert.doesNotMatch(push['claude.first_push_green_share'].could_not_check, /HTTP 502/, 'the error text never reaches the page');
   assert.equal(value(push, 'claude.pr_merge_share'), 60);
 
   const bugs = await collect({ ...base, gh: gh((args) => args[0] === 'issue' && args[1] === 'list') });
-  assert.match(bugs['claude.escaped_bugs_per_10_prs'].could_not_check, /gh issue list failed for acme\/site \(HTTP 502\)/);
+  assert.match(bugs['claude.escaped_bugs_per_10_prs'].could_not_check, /gh issue list failed for acme\/site/);
+  assert.doesNotMatch(bugs['claude.escaped_bugs_per_10_prs'].could_not_check, /HTTP 502/, 'the error text never reaches the page');
   assert.equal(value(bugs, 'claude.code_prs_with_tests_share'), 33.3);
 });
 
@@ -368,7 +370,26 @@ test('a repository GitHub will not show fails its PRs, never marks them missing'
     'claude.first_push_green_share',
     'claude.hours_session_to_pr',
   ]) {
-    assert.equal(r[id].could_not_check, "gh could not read 7 of 7 linked PRs (Could not resolve to a Repository with the name 'acme/site'.)", id);
+    assert.equal(r[id].could_not_check, 'gh could not read 7 of 7 linked PRs (gh api graphql failed)', id);
+  }
+});
+
+// GitHub's rate-limit message names an installation or user ID, and an adopter's privacy gate refuses an ID
+// on the public page (Claudius#115). Both ways it reaches the collector say only "rate limited".
+test('a rate limit says so on the page and never names its ID', async () => {
+  const want = 'gh could not read 7 of 7 linked PRs (gh api graphql failed: rate limited)';
+  // As a GraphQL error in the response body, which gh prints with exit 1.
+  const repoError = { type: 'RATE_LIMITED', message: 'API rate limit already exceeded for user ID 1234567.' };
+  const inBody = await collect({ ...base, gh: fakeGh([], { repoError }) });
+  // As a gh process error with only stderr.
+  const thrown = async () => {
+    throw Object.assign(new Error('Command failed: gh api graphql'), { stderr: 'gh: API rate limit already exceeded for installation ID 87654321. (HTTP 403)' });
+  };
+  const viaStderr = await collect({ ...base, gh: thrown });
+  for (const r of [inBody, viaStderr]) {
+    for (const id of ['claude.pr_merge_share', 'claude.first_push_green_share', 'claude.hours_session_to_pr']) {
+      assert.equal(r[id].could_not_check, want, id);
+    }
   }
 });
 
@@ -382,7 +403,7 @@ test('any other gh error on one linked PR blanks every PR metric, never a partia
     'claude.tokens_per_merged_pr',
   ];
   for (const id of prIds) {
-    assert.equal(r[id].could_not_check, 'gh could not read 1 of 7 linked PRs (Resource not accessible by integration)', id);
+    assert.equal(r[id].could_not_check, 'gh could not read 1 of 7 linked PRs (gh api graphql failed: auth)', id);
     assert.ok(!('value' in r[id]), id);
   }
   assert.equal(value(r, 'claude.cache_read_share'), 90.8);

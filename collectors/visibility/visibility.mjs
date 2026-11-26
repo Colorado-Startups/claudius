@@ -8,6 +8,7 @@
 // Privacy: detail rows name public repos only; an email is counted, never kept.
 import fs from 'node:fs';
 import { ghClient, ownRepo, redact, useLib } from '../lib/engine.mjs';
+import { ghFailed } from '../lib/gh-failure.mjs';
 
 export const area = 'visibility';
 
@@ -48,7 +49,7 @@ async function gather({ root = '.', mode, params = TEMPLATE, gh, fetchPage = sig
     org = await rest(`orgs/${owner}`);
     repos = await restAll(`orgs/${owner}/repos?per_page=100&type=all`);
   } catch (err) {
-    return all(`gh api orgs/${owner}: ${firstLine(err)}`);
+    return all(ghFailed(`gh api orgs/${owner}`, err));
   }
   const pub = repos.filter((r) => r.visibility === 'public');
   const priv = repos.filter((r) => r.visibility !== 'public');
@@ -66,7 +67,7 @@ async function gather({ root = '.', mode, params = TEMPLATE, gh, fetchPage = sig
       }))).filter(Boolean).length;
       val('visibility.private_public_pages', open, `${pagesSource}; ${priv.length} private repos`);
     } catch (err) {
-      cnc('visibility.private_public_pages', firstLine(err), pagesSource);
+      cnc('visibility.private_public_pages', ghFailed('gh api repos/<repo>/pages or the request to its site', err), pagesSource);
     }
   }
 
@@ -100,7 +101,7 @@ async function gather({ root = '.', mode, params = TEMPLATE, gh, fetchPage = sig
     if (detail.length) detail.push({ label: 'forks holding a copy', value: forks, unit: 'forks' });
     val('visibility.personal_author_emails', seen.size, `${emailSource}; ${pub.length} public repos`, detail);
   } catch (err) {
-    cnc('visibility.personal_author_emails', firstLine(err), emailSource);
+    cnc('visibility.personal_author_emails', ghFailed('gh api repos/<repo>/branches or commits', err), emailSource);
   }
 
   val('visibility.audit_seconds', Math.round((Date.now() - started) / 100) / 10, `wall time of this collector, from the org read to the last commit read; ${repos.length} repos this token sees`);
@@ -116,5 +117,3 @@ async function signedOut(url) {
 
 // The org profile's own domains: its site's host and its public email's domain.
 const orgDomains = (org) => [org.blog && /^https?:\/\//.test(org.blog) ? new URL(org.blog).hostname.replace(/^www\./, '') : '', String(org.email ?? '').split('@')[1] ?? ''].filter(Boolean);
-
-const firstLine = (err) => String(err?.message || err).trim().split('\n')[0].slice(0, 160);

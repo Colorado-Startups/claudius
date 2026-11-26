@@ -48,7 +48,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { managedClaudeMd, ownRepo, PROJECTS_DIR, projectMatch, resolvePath, ruleLoadsAlways } from '../claude/claude.mjs';
-import { CI_REASON, GITHUB_IDS, LAST_PRS, TEMPLATE, attempt, defaultExec, defaultGh, firstLine, metricIds } from './blockers-core.mjs';
+import { ghFailed } from '../lib/gh-failure.mjs';
+import { CI_REASON, GITHUB_IDS, LAST_PRS, TEMPLATE, attempt, defaultExec, defaultGh, metricIds } from './blockers-core.mjs';
 import { fixSignals } from './blockers-neutral.mjs';
 import { readTranscripts } from './blockers-transcripts.mjs';
 import { graphql, readLater, readMerged } from './blockers-github.mjs';
@@ -137,10 +138,10 @@ async function readGithub(repo, gh, nowMs) {
       const last = github.prs.slice(0, LAST_PRS);
       github.later = await readLater(repo, gh, Math.min(...last.map((pr) => Date.parse(pr.mergedAt)), nowMs));
     } catch (err) {
-      github.laterError = `gh pr list or gh issue list failed (${firstLine(err)})`;
+      github.laterError = ghFailed('gh pr list or gh issue list', err);
     }
   } catch (err) {
-    github = { error: `gh api graphql failed (${firstLine(err)})` };
+    github = { error: ghFailed('gh api graphql', err) };
   }
   return github;
 }

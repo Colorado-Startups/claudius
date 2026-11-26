@@ -65,7 +65,7 @@ export function attempt(read) {
 }
 
 // An error's first line of stderr or message, cut to 160 characters.
-export function firstLine(err) {
+function firstLine(err) {
   return String(err?.stderr || err?.message || err).trim().split('\n')[0].slice(0, 160);
 }
 

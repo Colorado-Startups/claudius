@@ -80,6 +80,27 @@ test('visibility: no org, or an org gh cannot read, is not measured', async () =
   for (const id of metricIds) assert.match(gone[id].could_not_check, /orgs\/acme/, id);
 });
 
+// GitHub's rate-limit message names an installation or user ID, and an adopter's privacy gate refuses an ID on
+// the public page (Claudius#115). Whichever read it stops, only the class of the failure is public.
+test('visibility: a rate limit on any read says so and never names its ID', async () => {
+  const failing = (route) => {
+    const ok = fakeGh();
+    const rest = async (r) => {
+      if (r !== route) return ok.rest(r);
+      throw Object.assign(new Error('API rate limit already exceeded for installation ID 87654321.'), { status: 403 });
+    };
+    return { rest, restAll: async (r) => (r === route ? rest(r) : ok.restAll(r)) };
+  };
+  const org = await run({ gh: failing('orgs/acme') });
+  for (const id of metricIds) assert.equal(org[id].could_not_check, 'gh api orgs/acme failed: rate limited', id);
+  const pages = await run({ gh: failing('repos/acme/vault/pages') });
+  assert.equal(pages['visibility.private_public_pages'].could_not_check, 'gh api repos/<repo>/pages or the request to its site failed: rate limited');
+  assert.equal(pages['visibility.public_without_secret_scanning'].value, 1, 'the other reads still stand');
+  const emails = await run({ gh: failing('repos/acme/site/branches?per_page=100') });
+  assert.equal(emails['visibility.personal_author_emails'].could_not_check, 'gh api repos/<repo>/branches or commits failed: rate limited');
+  for (const out of [org, pages, emails]) assert.ok(!JSON.stringify(out).includes('87654321'), 'no ID on the page');
+});
+
 test('visibility: personal is any address but GitHub noreply or an org domain', () => {
   assert.deepEqual(['1+a@users.noreply.github.com', 'noreply@github.com', 'ops@ACME.example', 'me@mail.example', ''].map((e) => personal(e, ['acme.example'])), [false, false, false, true, false]);
 });

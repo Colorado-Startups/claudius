@@ -18,6 +18,7 @@
 // could_not_check.
 
 import { ghClient, greenAt, redact, useLib } from '../lib/engine.mjs';
+import { ghFailed } from '../lib/gh-failure.mjs';
 import { median, round } from './claude-lib.mjs';
 import { ownRepo, prSessionStarts, projectMatch, PROJECTS_DIR, resolvePath } from './claude.mjs';
 
@@ -127,7 +128,8 @@ export async function collect({ root = '.', mode, params = {}, allParams = {}, g
     const [owner, name] = repo.split('/');
     data = (await gh.graphql(QUERY, { owner, name, env: p.environment })).repository;
   } catch (err) {
-    return { [ID]: { could_not_check: `gh api graphql failed: ${String(err?.message ?? err).split('\n')[0].slice(0, 160)}`, source } };
+    // The error's own text names an ID when GitHub rate-limits; only its class is public (Claudius#115).
+    return { [ID]: { could_not_check: ghFailed('gh api graphql', err), source } };
   }
   const starts = startsFor({ mode, root, repo, claude: allParams['claude.json'] ?? {}, home });
   const got = leadTime(data?.pullRequests?.nodes ?? [], liveTimes(data?.deployments?.nodes), { starts, n: p.last_prs, environment: p.environment });
