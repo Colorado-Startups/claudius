@@ -8,7 +8,10 @@ Instructions for every coding agent in this repo, from Git Crafter `templates/ag
 | --- | --- |
 | What this repo is | The Claude pack for Git Crafter: 33 Quality tabs, the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps, fifteen page maps, the Brief and Runtime maps, and the Claude setup templates in `templates/claude/` (18 Code Project pages and a page kit) |
 | Build and test | `node --test tests/<file>.test.mjs`, one file at a time. Suites, the engine tests and the page build run in CI through Git Crafter's `ci-standard.yml` and `actions/pages` |
-| Shipping | Branch, commit, push the branch and open a pull request. Never push to `main` |
+| Shipping | Branch, commit, push the branch and open a draft pull request. Never push to `main`. A merge waits for green CI and a review at the head commit, and names the head SHA as its guard |
+| Cloud and Mac | A cloud thread has no GraphQL, so use `gh api` REST. Network and variables are set in the cloud environment, not `settings.json`. Work that needs a local tool goes to a local thread or Remote Control |
+| Auto-fix | A thread watches its pull request with auto-fix until it merges, then stops watching |
+| Memory | Save a lasting fact to project memory in the turn you learn it, with no key or private name |
 | Releases | A release is automatic: change `VERSION` in a pull request, and the `release` workflow tags and publishes it once the PR merges. No person creates a release by hand |
 | Setup | Once the vision and plan are approved, Claude executes and never asks the owner to set anything up. It tries config files, plugins, the CLI, the API, CI and a local session first. It never enters a password, passkey or code, makes a purchase, or bypasses a platform restriction, and never uses an account the owner has not given the session. It escalates only a passkey or sign-in, a billing purchase, or a CAPTCHA or typed-word confirmation, as one exact line. It never turns a plugin off. |
 | Bugs and quick fixes | An issue typed Bug or Task in the repo at fault, filed when found. It stays off the board |
