@@ -104,3 +104,105 @@ test('visibility: a rate limit on any read says so and never names its ID', asyn
 test('visibility: personal is any address but GitHub noreply or an org domain', () => {
   assert.deepEqual(['1+a@users.noreply.github.com', 'noreply@github.com', 'ops@ACME.example', 'me@mail.example', ''].map((e) => personal(e, ['acme.example'])), [false, false, false, true, false]);
 });
+
+test('visibility: the address Claude Code cloud sessions commit as is a tool, not a person', async () => {
+  assert.deepEqual(['noreply@anthropic.com', ' NoReply@Anthropic.com ', 'me@anthropic.com'].map((e) => personal(e, [])), [false, false, true]);
+  assert.equal(personal('noreply@anthropic.com', [], []), true, 'params.bot_emails replaces the default');
+  const routes = { ...ROUTES, 'repos/acme/tools/branches?per_page=100': [{ name: 'main' }], 'repos/acme/tools/commits?sha=main&per_page=100': [commit('noreply@anthropic.com'), commit('bot@tools.example')] };
+  assert.equal((await run({ routes }))['visibility.personal_author_emails'].value, 2, 'default: the Anthropic address is skipped, the other bot counts');
+  const listed = await collect({ params: { ...params, bot_emails: ['bot@tools.example'] }, gh: fakeGh({ routes }), fetchPage: async () => false });
+  assert.equal(listed['visibility.personal_author_emails'].value, 2, 'a listed address is skipped, the Anthropic one now counts');
+  const none = await collect({ params: { ...params, bot_emails: ['noreply@anthropic.com', 'bot@tools.example'] }, gh: fakeGh({ routes }), fetchPage: async () => false });
+  assert.equal(none['visibility.personal_author_emails'].value, 1, 'both skipped: only the first repo\'s own address is left');
+});
+
+// A personal account: orgs/<owner> answers 404, so the account is read through users/<owner> and user/repos.
+const MINE = { login: 'jo' };
+const PERSONAL_REPOS = [
+  { name: 'blog', full_name: 'jo/blog', visibility: 'public', archived: false, forks_count: 1, owner: MINE },
+  { name: 'diary', full_name: 'jo/diary', visibility: 'private', has_pages: true, owner: MINE },
+  { name: 'other', full_name: 'sam/other', visibility: 'public', archived: false, owner: { login: 'sam' } },
+];
+const PERSONAL_ROUTES = {
+  user: { login: 'jo' },
+  'users/jo': { login: 'jo', total_private_repos: 1, blog: 'https://jo.example', email: 'jo@jo.example' },
+  'repos/jo/diary/pages': { public: false, html_url: 'https://jo.github.io/diary/' },
+  'repos/jo/blog': { security_and_analysis: sa() },
+  'repos/jo/blog/branches?per_page=100': [{ name: 'main' }],
+  'repos/jo/blog/commits?sha=main&per_page=100': [commit('jo@jo.example'), commit('noreply@anthropic.com'), commit('2+jo@users.noreply.github.com')],
+};
+function fakeUser({ repos = PERSONAL_REPOS, routes = PERSONAL_ROUTES } = {}) {
+  const rest = async (route) => {
+    if (route in routes) return structuredClone(routes[route]);
+    throw Object.assign(new Error(`HTTP 404: ${route}`), { status: 404 });
+  };
+  return { rest, restAll: async (route) => (route.startsWith('user/repos') ? structuredClone(repos) : rest(route)) };
+}
+const runUser = (opts = {}) => collect({ params: { owner: 'jo', org_domains: [] }, gh: opts.gh ?? fakeUser(opts), fetchPage: async () => false });
+
+test('visibility: a personal account is read through users/<owner> and user/repos, scanning per public repo', async () => {
+  const out = await runUser();
+  assert.deepEqual(Object.keys(out).sort(), [...metricIds].sort());
+  for (const id of metricIds) assert.equal(out[id].could_not_check, undefined, id);
+  assert.equal(out['visibility.private_public_pages'].value, 0, 'the private repo\'s site is private');
+  assert.equal(out['visibility.public_without_secret_scanning'].value, 0, 'read from repos/<repo>: the list omitted it');
+  assert.equal(out['visibility.personal_author_emails'].value, 1, 'the profile\'s own address is personal; noreply and the Anthropic address are not');
+  assert.equal(out['visibility.requests'].value, 8, 'org 404, user, signed-in login, list, Pages, one repo, branches, commits');
+  assert.ok(!JSON.stringify(out).includes('jo.example') && !/diary|other/.test(JSON.stringify(out)), 'no address, no private or foreign name');
+  const off = await runUser({ routes: { ...PERSONAL_ROUTES, 'repos/jo/blog': { security_and_analysis: sa({ status: 'disabled' }) } } });
+  assert.deepEqual(off['visibility.public_without_secret_scanning'].detail, [{ label: 'blog', value: 1, unit: 'repos' }]);
+});
+
+test('visibility: an owner that is neither an org nor a user is not measured, never 0', async () => {
+  const neither = await runUser({ routes: { 'repos/jo/blog': {} } });
+  for (const id of metricIds) assert.match(neither[id].could_not_check, /orgs\/jo.*users\/jo/, id);
+});
+
+test('visibility: a check a personal account cannot make reads not measured, never 0', async () => {
+  const hidden = await runUser({ routes: { ...PERSONAL_ROUTES, 'users/jo': { login: 'jo' }, 'repos/jo/blog': {} } });
+  assert.match(hidden['visibility.private_public_pages'].could_not_check, /cannot count/);
+  assert.match(hidden['visibility.public_without_secret_scanning'].could_not_check, /security_and_analysis/);
+  assert.equal(hidden['visibility.personal_author_emails'].value, 1, 'public history reads with any token');
+  const short = await runUser({ routes: { ...PERSONAL_ROUTES, 'users/jo': { login: 'jo', owned_private_repos: 3 } } });
+  assert.match(short['visibility.private_public_pages'].could_not_check, /sees 1 of the account's 3/);
+});
+
+test('visibility: a rate limit on the user read keeps the fixed reason and no ID', async () => {
+  const ok = fakeUser();
+  const gh = { rest: async (r) => { if (r === 'users/jo') throw Object.assign(new Error('API rate limit exceeded for user ID 12345678.'), { status: 403 }); return ok.rest(r); }, restAll: ok.restAll };
+  const out = await collect({ params: { owner: 'jo', org_domains: [] }, gh: { ...gh, rest: (r) => (r === 'orgs/jo' ? Promise.reject(Object.assign(new Error('HTTP 404'), { status: 404 })) : gh.rest(r)) }, fetchPage: async () => false });
+  for (const id of metricIds) assert.match(out[id].could_not_check, /users\/jo failed: rate limited/, id);
+  assert.ok(!JSON.stringify(out).includes('12345678'));
+});
+
+test('visibility: a personal account read by another login is not measured, never 0', async () => {
+  const other = await runUser({ routes: { ...PERSONAL_ROUTES, user: { login: 'sam' } } });
+  for (const id of ['visibility.private_public_pages', 'visibility.public_without_secret_scanning', 'visibility.personal_author_emails']) assert.equal(other[id].could_not_check, 'needs a login as that user', id);
+  assert.ok(typeof other['visibility.requests'].value === 'number');
+  const limited = await runUser({ gh: { rest: async (r) => { if (r === 'user') throw Object.assign(new Error('rate limit, installation ID 5551234'), { status: 403 }); return fakeUser().rest(r); }, restAll: fakeUser().restAll } });
+  assert.equal(limited['visibility.personal_author_emails'].could_not_check, 'gh api user failed: rate limited');
+});
+
+test('visibility: a failed per-repo scanning read keeps a fixed reason, not the admin-token one', async () => {
+  const ok = fakeUser();
+  const gh = { rest: async (r) => { if (r === 'repos/jo/blog') throw Object.assign(new Error('rate limit, installation ID 5551234'), { status: 403 }); return ok.rest(r); }, restAll: ok.restAll };
+  const out = await collect({ params: { owner: 'jo', org_domains: [] }, gh, fetchPage: async () => false });
+  assert.equal(out['visibility.public_without_secret_scanning'].could_not_check, 'gh api repos/<repo> failed: rate limited');
+  assert.ok(!JSON.stringify(out).includes('5551234'));
+});
+
+test('visibility: a short list on a personal account is not measured, never 0', async () => {
+  const out = await runUser({ routes: { ...PERSONAL_ROUTES, 'users/jo': { login: 'jo', total_private_repos: 1, public_repos: 3 } } });
+  for (const id of ['visibility.public_without_secret_scanning', 'visibility.personal_author_emails']) assert.equal(out[id].could_not_check, 'the token lists fewer public repos than the profile counts', id);
+  assert.equal(out['visibility.private_public_pages'].value, 0, 'the private count still matches');
+});
+
+test('visibility: an org never reads repos/<repo> for scanning, even for a public repo with no security_and_analysis', async () => {
+  const seen = [];
+  const bare = REPOS.map(({ security_and_analysis, ...r }) => r);
+  const ok = fakeGh({ repos: bare });
+  const gh = { rest: async (r) => (seen.push(r), ok.rest(r)), restAll: ok.restAll };
+  const out = await collect({ params, gh, fetchPage: async () => false });
+  assert.ok(!seen.some((r) => /^repos\/acme\/[^/?]+$/.test(r)), 'no repos/<repo> read for an org');
+  assert.match(out['visibility.public_without_secret_scanning'].could_not_check, /security_and_analysis/);
+});
