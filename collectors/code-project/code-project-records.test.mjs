@@ -117,4 +117,9 @@ test('cp-records: a hostile or out-of-range record never reads as a good number'
   assert.match(out['cp_threads.largest_thread_token_share'].could_not_check, /too large/);
   put(root, 'scheduled-tasks.json', { read_at: READ, tasks: [{}, { name: 'x' }] });
   assert.match((await go(root))['cp_scheduled_tasks.task_failures'].could_not_check, /has a last_status/);
+  // A status that is neither passed nor failed is not a pass.
+  put(root, 'scheduled-tasks.json', { read_at: READ, tasks: [{ last_status: 'skipped' }, { last_status: 'cancelled', last_run_at: READ }] });
+  assert.match((await go(root))['cp_scheduled_tasks.task_failures'].could_not_check, /has a last_status/);
+  put(root, 'scheduled-tasks.json', { read_at: READ, tasks: [{ last_status: 'skipped' }, { last_status: 'ok' }, { last_status: 'Failed' }] });
+  assert.equal((await go(root))['cp_scheduled_tasks.task_failures'].value, 1, 'two known statuses are read, the skipped one is not counted');
 });

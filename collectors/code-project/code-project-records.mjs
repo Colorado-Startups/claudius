@@ -30,6 +30,7 @@ const TEMPLATE = Object.assign({}, ...TARGETS.map((t) => t.params ?? {}));
 const DEFINED = Object.fromEntries(TARGETS.map((t) => [t.id, t]));
 const SKEW = 5 * 60 * 1000;
 const FAILED = new Set(['failed', 'error']);
+const PASSED = new Set(['ok', 'success', 'succeeded', 'passed']);
 const DAY = 864e5;
 const HOUR = 36e5;
 const round1 = (n) => Math.round(n * 10) / 10;
@@ -98,13 +99,15 @@ function gather({ root = '.', params = {}, allParams = {}, now = Date.now(), hom
     cnc(since, tasks.why);
   } else {
     const all = rows(tasks.record, 'tasks');
-    // A task counts for failures only with a known status: a task with none is not a pass.
-    const list = all.filter((t) => typeof t.last_status === 'string' && t.last_status.trim());
+    // A task counts for failures only with a known status (passed or failed): a task with none, or with a word such as
+    // skipped or cancelled, is neither, so it never reads as a pass.
+    const known = (t) => typeof t.last_status === 'string' && (PASSED.has(t.last_status.trim().toLowerCase()) || FAILED.has(t.last_status.trim().toLowerCase()));
+    const list = all.filter(known);
     if (!all.length) {
       cnc(fail, 'the task record holds no task');
       cnc(since, 'the task record holds no task');
     } else {
-      if (!list.length) cnc(fail, 'no task in the record has a last_status');
+      if (!list.length) cnc(fail, 'no task in the record has a last_status of ok or failed');
       else {
         const failed = list.filter((t) => FAILED.has(t.last_status.trim().toLowerCase())).length;
         val(fail, failed, [{ label: `of ${list.length} tasks`, value: failed, unit: 'tasks' }], `${list.length} tasks in the record`);
@@ -114,7 +117,7 @@ function gather({ root = '.', params = {}, allParams = {}, now = Date.now(), hom
       if (!runs.length) cnc(since, 'no task in the record has a run time at or before it was read');
       else {
         const hours = Math.max(0, round1((tasks.at - Math.max(...runs)) / HOUR));
-        val(since, hours, [{ label: 'since the newest run', value: hours, unit: 'hours' }], `${runs.length} of ${list.length} tasks have a run time`);
+        val(since, hours, [{ label: 'since the newest run', value: hours, unit: 'hours' }], `${runs.length} of ${all.length} tasks have a run time`);
       }
     }
   }
