@@ -1,5 +1,5 @@
 name: Bug
-description: "Something does not work as written. An improvement goes on the project board, not here."
+description: "Something does not work as written. A new capability goes in a Feature."
 title: "Area: what breaks"
 type: Bug
 body:
