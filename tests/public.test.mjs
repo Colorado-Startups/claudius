@@ -85,7 +85,7 @@ test('public: the Process config writes each pack map in full, without the steps
   const dropped = new Set(writePublic(root));
   const mine = read(join(ROOT, 'quality', 'process', 'config.json'));
   const pub = read(join(root, 'quality', 'public', 'process.json'));
-  const PAGE_MAPS = ['context', 'setup-check', 'scheduled-task', 'local-thread', 'pr-flow', 'connectors', 'plugins', 'skills', 'subagents', 'hooks', 'brief', 'runtime'];
+  const PAGE_MAPS = ['context', 'setup-check', 'scheduled-task', 'local-thread', 'pr-flow', 'connectors', 'plugins', 'skills', 'subagents', 'hooks', 'notifications', 'library', 'newer-features', 'allow-card', 'projects-list', 'brief', 'runtime'];
   assert.deepEqual(mine.maps, [...['guard', 'decide', 'equip', 'publish', 'visibility', 'project', 'ship', 'environment', 'remember', 'setup', 'memory', 'schedule', ...PAGE_MAPS].map((use) => ({ use }))]);
   assert.deepEqual({ ...pub, comment: mine.comment, maps: mine.maps }, {
     ...mine,

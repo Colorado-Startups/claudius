@@ -1,0 +1,13 @@
+{
+  "ideal": "A Mac thread gets one Allow once card, in a worktree if its folder is shared, and the card is answered inside its thread within minutes.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-26"
+    }
+  ],
+  "quality": "No two threads share a folder without a worktree.",
+  "speed": "A card is answered in its thread within 15 minutes.",
+  "consumption": "One Allow once card per Mac thread, then auto mode when available."
+}

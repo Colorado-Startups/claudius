@@ -1,0 +1,13 @@
+{
+  "ideal": "Every running task lives in a project, a waiting thread is two clicks from the sidebar, and a project idle for 30 days is archived.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-26"
+    }
+  ],
+  "quality": "No cloud session carries project work outside its project.",
+  "speed": "A waiting thread is within two clicks of the sidebar.",
+  "consumption": "No idle project keeps a watching thread or scheduled task running."
+}

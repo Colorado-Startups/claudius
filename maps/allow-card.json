@@ -1,0 +1,52 @@
+{
+ "id": "allow-card",
+ "name": "Allow cards",
+ "why": "How a thread gets a folder on your computer, and how fast you answer in its thread",
+ "ideal": "One Allow once card per Mac thread, a worktree for a shared folder, and an answer inside the thread within minutes.",
+ "sources": [
+  {
+   "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+   "url": "https://code.claude.com/docs/en/claude-projects",
+   "date": "2026-11-26"
+  }
+ ],
+ "critical_path": [
+  "card",
+  "answer",
+  "run"
+ ],
+ "steps": [
+  {
+   "id": "card",
+   "name": "Card",
+   "tools": [
+    "Allow card",
+    "Worktree"
+   ],
+   "rule": "Turn on Worktree on the card when another thread works in the same folder.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_allow_card.shared_folder_threads"
+  },
+  {
+   "id": "answer",
+   "name": "Answer",
+   "tools": [
+    "Allow once",
+    "Thread"
+   ],
+   "rule": "Answer a card or prompt in its own thread: a go-ahead in the project conversation does not reach it.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_allow_card.card_wait_minutes"
+  },
+  {
+   "id": "run",
+   "name": "Run",
+   "tools": [
+    "Auto mode"
+   ],
+   "rule": "The thread runs in auto mode when that computer's Claude Code allows it, so it raises one Allow once card.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_allow_card.prompts_per_thread"
+  }
+ ]
+}
