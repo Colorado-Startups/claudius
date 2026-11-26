@@ -37,13 +37,13 @@ flowchart LR
 
 | View | Shows | Read with |
 | --- | --- | --- |
-| Today | What to look at first: failing CI, quiet pull requests, green pull requests that need a review, repos missing a setup piece, and Quality tabs under the page's `LOW` score of 70 | all sources |
+| Today | What to look at first: failing CI, quiet pull requests, green pull requests that need a review, repos missing a setup piece, and the three lowest Quality tabs under the page's `LOW` score of 70, with a count of the rest | all sources |
 | Builds | Open pull requests per repo with CI state, age and branch | `gh api repos/{repo}/pulls` and `commits/{sha}/check-runs` |
 | Quality | Master, Quality, Speed and Consumption scores, every tab lowest first | the public Quality page, trimmed with `curl` and `grep -o` |
 | Repos | Eight setup checks per repo: AGENTS.md, CLAUDE.md, README, SECURITY.md, a CI workflow, rules on the default branch, squash only, deletes merged branches | `gh api repos/{repo}`, `contents`, `contents/.github`, `contents/.github/workflows`, `rules/branches/{default branch}` |
 
 Change what it watches in the page's Settings, or edit the `claudius-config` JSON block at the top of the file. It cannot read Project threads, plan limits or credit use. They sit behind the Claude app and the Console rather than behind `gh`. The page says so instead of guessing.
 
-The page's logic was run in headless Chromium with the desktop API mocked. No test in this repo covers it. The real install, the permission prompts and Mac notifications were not run.
+The page's logic was run in headless Chromium with the desktop API mocked, in light and dark, at 430 px, with the keyboard, and with gh signed out, offline and a repo that returns 404. No test in this repo covers it. The real install, the permission prompts and Mac notifications were not run.
 
 The feature is in beta and its permissions change, so read the cited article again before you rely on a limit.
