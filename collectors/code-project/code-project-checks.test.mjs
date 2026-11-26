@@ -87,3 +87,26 @@ test('checkState and skipsATest', () => {
   assert.equal(skipsATest([{ filename: 'src/x.py', status: 'removed' }]), false);
   assert.equal(skipsATest([{ filename: 'a.py', status: 'modified', patch: '+@pytest.mark.skip' }]), true);
 });
+
+test('cp-pulls: a thread that never went red reads no fix pushes, so skipped tests is not measured, never 0', async () => {
+  const pulls = [{ number: 1, head: { ref: 'claude/a' }, created_at: '2026-11-24T10:00:00Z', merged_at: '2026-11-24T12:00:00Z', body: ATTR }];
+  const gh = {
+    rest: async (route) => {
+      if (route.startsWith('repos/acme/app/pulls?')) return pulls;
+      if (route.startsWith('repos/acme/app/pulls/1/commits')) return [{ sha: 'aaaaaaa1' }];
+      if (route.startsWith('repos/acme/app/commits/aaaaaaa1/check-runs')) return { check_runs: [run('success', '2026-11-24T10:20:00Z')] };
+      throw new Error(`HTTP 404: ${route}`);
+    },
+  };
+  const out = await go(gh);
+  assert.equal(out['cp_pr_auto_fix.fix_attempts'].value, 0, 'it never went red');
+  assert.equal(out['cp_pr_auto_fix.skipped_tests'].could_not_check, 'no fix pushes to read');
+  assert.equal(out['cp_pr_auto_fix.skipped_tests'].value, undefined);
+});
+
+test('cp-pulls: the repo settings arrive as the engine passes them, under allParams of code-project.json', async () => {
+  const seen = [];
+  const gh = { rest: async (route) => { seen.push(route); return []; } };
+  await collect({ root: '.', params: {}, allParams: { 'code-project.json': { repo: 'acme/app', branch_prefix: 'bot/', window_days: 30, max_prs: 10 } }, gh, now: NOW });
+  assert.ok(seen[0].startsWith('repos/acme/app/pulls?'), seen[0]);
+});

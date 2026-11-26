@@ -260,7 +260,7 @@
     "tab": "cp-pr-auto-fix",
     "kind": "speed",
     "label": "Minutes from red to green",
-    "means": "Median minutes from a failed required check to the next green one.",
+    "means": "Median minutes from a failed check run to the next commit whose check runs all passed.",
     "unit": "min",
     "goal": 30,
     "near": 60,

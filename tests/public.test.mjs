@@ -49,7 +49,10 @@ test('public: each metric that needs local files is dropped but the repo-file on
   const ids = (f) => JSON.parse(readFileSync(join(ROOT, 'targets', f), 'utf8')).map((d) => d.id);
   const defs = (f) => JSON.parse(readFileSync(join(ROOT, 'targets', f), 'utf8'));
   const stays = (f) => defs(f).filter((d) => d.needs !== 'local-files').map((d) => d.id);
-  const [practices, visibility, codeProject] = [ids('practices.json'), ids('visibility.json'), [...stays('code-project.json'), ...stays('code-project-tabs.json'), ...stays('code-project-features.json')]];
+  const [practices, visibility] = [ids('practices.json'), ids('visibility.json')];
+  // Pinned, not derived: a Code Project line that goes public is a privacy decision, so adding or moving one means editing this list.
+  const codeProject = ['code_project.agents_unsafe', 'code_project.agents_without_model', 'code_project.autofix_rules_missing', 'code_project.cloud_rules_missing', 'code_project.draft_first_share', 'code_project.draft_pr_minutes', 'code_project.guard_rules_missing', 'code_project.instruction_lines', 'code_project.memory_rules_missing', 'code_project.plugins_untrusted', 'code_project.ready_to_merge_hours', 'code_project.requests', 'code_project.setup_missing', 'code_project.ship_rules_missing', 'code_project.tasks_missing', 'cp_hooks.unsafe_hooks', 'cp_pr_auto_fix.fix_attempts', 'cp_pr_auto_fix.red_to_green_minutes', 'cp_pr_auto_fix.skipped_tests', 'cp_threads.attributed_share', 'cp_threads.first_green_minutes'];
+  assert.deepEqual([...stays('code-project.json'), ...stays('code-project-tabs.json'), ...stays('code-project-features.json')].sort(), [...codeProject].sort(), 'the Code Project ids that need no local files');
   // The practices and visibility lines all read GitHub or repo files; a Code Project line stays public unless it needs local files.
   for (const f of ['practices.json', 'visibility.json']) assert.ok(defs(f).every((d) => d.needs !== 'local-files'), f);
   assert.deepEqual(kept.sort(), ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr', 'claude.instruction_tokens', 'claude_settings.deny_coverage', 'claude_settings.setup_files', 'claude_settings.valid', 'instructions.description_tokens', 'lead_time.hours', ...practices, ...visibility, ...codeProject].sort());

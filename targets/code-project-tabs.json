@@ -68,7 +68,7 @@
     "tab": "cp-threads",
     "kind": "speed",
     "label": "Draft PR to first green check",
-    "means": "Median minutes from a thread's draft pull request to its first green required check.",
+    "means": "Median minutes from a thread's draft pull request to its first commit whose check runs all passed.",
     "unit": "min",
     "goal": 15,
     "near": 30,

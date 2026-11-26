@@ -51,10 +51,10 @@ export function skipsATest(files) {
   return files.some((f) => (f.status === 'removed' && TEST_PATH.test(f.filename)) || String(f.patch ?? '').split('\n').some((l) => SKIP_LINE.test(l)));
 }
 
-async function gather({ root = '.', params = TEMPLATE, gh, now = Date.now() } = {}) {
+async function gather({ root = '.', params = {}, allParams = {}, gh, now = Date.now() } = {}) {
   const readAt = new Date(now).toISOString();
   const out = {};
-  const pull = { ...TEMPLATE, ...params };
+  const pull = { ...TEMPLATE, ...allParams['code-project.json'], ...params };
   const maxCommits = pull.max_commits ?? 10;
   const sourceOf = (id) => DEFINED[id]?.source ?? 'gh api repos';
   const val = (id, value, note, detail) => (out[id] = { value, ...(detail?.length ? { detail } : {}), source: `${sourceOf(id)}; ${note}`, read_at: readAt });
@@ -104,13 +104,10 @@ async function gather({ root = '.', params = TEMPLATE, gh, now = Date.now() } = 
     else cnc('cp_threads.first_green_minutes', 'no pull request had a commit whose check runs all passed');
     if (redToGreen.length) val('cp_pr_auto_fix.red_to_green_minutes', median(redToGreen), `${window}; median of ${redToGreen.length} red-to-green recoveries`);
     else cnc('cp_pr_auto_fix.red_to_green_minutes', 'no pull request went red and then green');
-    if (attempts.length) {
-      val('cp_pr_auto_fix.fix_attempts', mean(attempts), `${window}; mean of ${attempts.length} pull requests, 0 for one that never went red`);
-      val('cp_pr_auto_fix.skipped_tests', skipped.length, `${window}; fix pushes read: ${redToGreen.length}`, skipped);
-    } else {
-      cnc('cp_pr_auto_fix.fix_attempts', 'no pull request finished green after a red commit and none stayed green');
-      cnc('cp_pr_auto_fix.skipped_tests', 'no fix pushes to read');
-    }
+    if (attempts.length) val('cp_pr_auto_fix.fix_attempts', mean(attempts), `${window}; mean of ${attempts.length} pull requests, 0 for one that never went red`);
+    else cnc('cp_pr_auto_fix.fix_attempts', 'no pull request finished green after a red commit and none stayed green');
+    if (redToGreen.length) val('cp_pr_auto_fix.skipped_tests', skipped.length, `${window}; fix pushes read: ${redToGreen.length}`, skipped);
+    else cnc('cp_pr_auto_fix.skipped_tests', 'no fix pushes to read');
   } catch (err) {
     for (const id of metricIds) if (!out[id]) cnc(id, firstLine(err));
   }
