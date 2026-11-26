@@ -305,6 +305,14 @@
               "pattern": "## Scheduled tasks"
             },
             {
+              "label": "A dependency and CI sweep task",
+              "pattern": "dependency and ci sweep"
+            },
+            {
+              "label": "A quality read task",
+              "pattern": "quality read"
+            },
+            {
               "label": "A pin check task",
               "pattern": "pin check"
             }
