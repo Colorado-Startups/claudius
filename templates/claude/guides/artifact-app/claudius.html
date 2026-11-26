@@ -246,7 +246,7 @@ async function readPRs(desktop, repo) {   // the result's `partial` is true when
   const prs = await gh(desktop, `api -X GET repos/${repo}/pulls -f state=open -f per_page=100`,
     "[.[]|{number,title,html_url,draft,updated_at,ref:.head.ref,sha:.head.sha}]");
   const out = [];
-  for (const p of prs) {            // one command at a time: the app may hold 32 processes at most
+  for (const p of prs.slice(0, 50)) {            // one command at a time, and at most 50 pull requests so a huge repo stays cheap: the app may hold 32 processes at most
     let checks = "none";
     if (SHA_RE.test(p.sha)) {
       const runs = await gh(desktop, `api -X GET repos/${repo}/commits/${p.sha}/check-runs -f per_page=100`, "[.check_runs[]|{status,conclusion}]");
@@ -255,7 +255,7 @@ async function readPRs(desktop, repo) {   // the result's `partial` is true when
     out.push({ key: `${repo}#${p.number}`, repo, number: p.number, title: p.title, url: p.html_url,
       branch: p.ref, draft: !!p.draft, updated: p.updated_at, checks });
   }
-  out.partial = prs.length >= 100;
+  out.partial = prs.length > 50;   // a full page or a cut list: some may be missing, so this repo raises no alerts
   return out;
 }
 async function readRepo(desktop, repo) {
@@ -357,8 +357,13 @@ function foot() {
 }
 function render() {
   if (S.waiting) return;   // the permission card is showing
-  const draw = new Map([["today", viewToday], ["builds", viewBuilds], ["quality", viewQuality], ["repos", viewRepos]]).get(S.view) ?? viewToday;
-  const view = draw();
+  let view;
+  switch (S.view) {   // a fixed list of views, so the address bar never picks a function
+    case "builds": view = viewBuilds(); break;
+    case "quality": view = viewQuality(); break;
+    case "repos": view = viewRepos(); break;
+    default: view = viewToday();
+  }
   nav.replaceChildren(...VIEWS.map(([id, name]) => {
     const b = h("button", { text: name, type: "button" });
     if (id === S.view) b.setAttribute("aria-current", "page");

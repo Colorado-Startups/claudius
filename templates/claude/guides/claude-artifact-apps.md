@@ -42,8 +42,8 @@ flowchart LR
 | Quality | Master, Quality, Speed and Consumption scores, every tab lowest first | the public Quality page, trimmed with `curl` and `grep -o` |
 | Repos | Eight setup checks per repo: AGENTS.md, CLAUDE.md, README, SECURITY.md, a CI workflow, rules on the default branch, squash only, deletes merged branches | `gh api repos/{repo}`, `contents`, `contents/.github`, `contents/.github/workflows`, `rules/branches/{default branch}` |
 
-Change what it watches in the page's Settings, or edit the `claudius-config` JSON block at the top of the file. It cannot read Project threads, plan limits or credit use. They sit behind the Claude app and the Console rather than behind `gh`, and the page says so instead of guessing.
+Change what it watches in the page's Settings, or edit the `claudius-config` JSON block at the top of the file. It cannot read Project threads, plan limits or credit use. They sit behind the Claude app and the Console rather than behind `gh`. The page says so instead of guessing.
 
-The page's logic was run in headless Chromium with the desktop API mocked, and no test in this repo covers it. The real install, the permission prompts and Mac notifications were not run.
+The page's logic was run in headless Chromium with the desktop API mocked. No test in this repo covers it. The real install, the permission prompts and Mac notifications were not run.
 
 The feature is in beta and its permissions change, so read the cited article again before you rely on a limit.
