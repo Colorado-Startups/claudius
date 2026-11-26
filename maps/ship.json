@@ -1,0 +1,111 @@
+{
+ "id": "ship",
+ "name": "Ship",
+ "why": "A Code Project idea, from a ready repo to a merged pull request",
+ "ideal": "A fresh thread finds the repo ready, opens a draft pull request, a separate reviewer reads it at its head commit, and tokens fall.",
+ "sources": [
+  {
+   "title": "Claude Code Projects",
+   "url": "https://code.claude.com/docs/en/claude-projects",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Claude Code: cloud sessions and auto-fix",
+   "url": "https://code.claude.com/docs/en/claude-code-on-the-web",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Claude Code: best practices",
+   "url": "https://code.claude.com/docs/en/best-practices",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "GitHub Docs: Merge a pull request",
+   "url": "https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Git Crafter: tracking issues and cards",
+   "url": "https://github.com/SoulCraft-Org/git-crafter/blob/main/templates/projects/tracking.md",
+   "date": "2026-11-25"
+  }
+ ],
+ "critical_path": [
+  "ready",
+  "build",
+  "check",
+  "merge"
+ ],
+ "steps": [
+  {
+   "id": "ready",
+   "name": "Ready",
+   "tools": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/settings.json",
+    "PR template"
+   ],
+   "rule": "A fresh thread finds the shared rules, their import, templates, CI and settings in place.",
+   "rule_ref": "https://code.claude.com/docs/en/memory",
+   "metric": "code_project.setup_missing"
+  },
+  {
+   "id": "track",
+   "name": "Track",
+   "tools": [
+    "Issue typed Task or Bug",
+    "Card on the project board"
+   ],
+   "rule": "Each piece of work is an issue or a card, searched for first, and its pull request names it and is merged, not closed.",
+   "rule_ref": "https://github.com/SoulCraft-Org/git-crafter/blob/main/templates/projects/tracking.md",
+   "metric": "claude.pr_merge_share"
+  },
+  {
+   "id": "build",
+   "name": "Build",
+   "tools": [
+    "Cloud thread",
+    "Project instructions",
+    "git push"
+   ],
+   "rule": "A thread builds on its own claude/ branch, and a thread idle past the one hour cache is replaced, not revived.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects#see-and-reduce-a-projects-usage",
+   "metric": "code_project.idle_revivals"
+  },
+  {
+   "id": "check",
+   "name": "Check",
+   "tools": [
+    "Draft pull request",
+    "CI",
+    "Auto-fix"
+   ],
+   "rule": "The thread opens its pull request as a draft and watches CI with auto-fix, so a person reads it after the checks.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-code-on-the-web#auto-fix-pull-requests",
+   "metric": "code_project.draft_first_share"
+  },
+  {
+   "id": "review",
+   "name": "Review",
+   "tools": [
+    "Claudius merge skill",
+    "A reviewer that did not write the change"
+   ],
+   "rule": "A separate reviewer, which has not seen how the code was written, reads the pull request at its head commit.",
+   "rule_ref": "https://code.claude.com/docs/en/best-practices#give-claude-a-check-to-run",
+   "metric": "claude.escaped_bugs_per_10_prs"
+  },
+  {
+   "id": "merge",
+   "name": "Merge",
+   "tools": [
+    "Squash merge on green CI",
+    "Head SHA as the guard"
+   ],
+   "rule": "A green, reviewed pull request squash merges, and each merged one costs fewer tokens.",
+   "rule_ref": "https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request",
+   "metric": "code_project.tokens_per_merged_pr"
+  }
+ ]
+}

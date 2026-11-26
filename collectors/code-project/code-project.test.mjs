@@ -86,3 +86,39 @@ test('code-project: a read only agent with no tools list inherits every tool, an
   assert.equal(unsafeAgent(parseAgent(agent('name: a\ndescription: Read-only look.\ndisallowedTools: Write, Edit, NotebookEdit'))), false, 'no tools list, every writing tool denied');
   assert.equal(unsafeAgent(parseAgent(agent('name: a\ndescription: Read-only look.\ndisallowedTools: Write'))), true, 'Edit still inherited');
 });
+
+const SETUP = {
+  'AGENTS.md': 'x\n', 'CLAUDE.md': '@AGENTS.md\n', '.github/PULL_REQUEST_TEMPLATE.md': 'x', '.github/ISSUE_TEMPLATE/bug.yml': 'x', '.github/workflows/ci.yml': 'x',
+  '.claude/settings.json': JSON.stringify({ enabledPlugins: { 'a@claude-plugins-official': true } }),
+};
+
+test('code-project parts: a ready repo has no setup gap, and a missing file is listed by label', async () => {
+  const ok = await run(repo(SETUP), fakeGh([]));
+  assert.equal(ok['code_project.setup_missing'].value, 0);
+  const { 'CLAUDE.md': _drop, '.github/workflows/ci.yml': _ci, ...rest } = SETUP;
+  const gap = await run(repo({ ...rest, 'CLAUDE.md': 'no import\n', '.claude/settings.json': '{' }), fakeGh([]));
+  assert.deepEqual(gap['code_project.setup_missing'].detail.map((d) => d.label), ['CLAUDE.md imports AGENTS.md', 'CI workflow', 'Valid .claude/settings.json']);
+});
+
+test('code-project parts: each rule metric lists the rules its files leave unsaid', async () => {
+  const said = 'gh api REST. The cloud environment sets the network. Use a local thread. Project memory. An issue. No key or private name. Auto-fix; stop watching. A draft pull request, review at the head, head SHA.\n';
+  const full = await run(repo({ ...SETUP, 'AGENTS.md': said, 'templates/claude/code-project/README.md': '## Scheduled tasks\nDigest, weekly\nPin check\n' }), fakeGh([]));
+  for (const id of ['cloud', 'memory', 'tasks', 'autofix', 'ship']) assert.equal(full[`code_project.${id}_rules_missing`]?.value ?? full[`code_project.${id}_missing`].value, 0, id);
+  const bare = await run(repo({ 'AGENTS.md': 'Nothing.\n' }), fakeGh([]));
+  assert.equal(bare['code_project.cloud_rules_missing'].value, 3);
+  assert.equal(bare['code_project.autofix_rules_missing'].value, 2);
+  assert.ok(bare['code_project.tasks_missing'].could_not_check, 'no template README is not measured, never 0');
+});
+
+test('code-project parts: a plugin that is not official or own, and each .mcp.json server, count', async () => {
+  const settings = JSON.stringify({ enabledPlugins: { 'a@claude-plugins-official': true, 'claudius@claudius': true, 'x@community': true, 'off@community': false } });
+  const out = await run(repo({ '.claude/settings.json': settings, '.mcp.json': JSON.stringify({ mcpServers: { s: {} } }) }), fakeGh([]));
+  assert.deepEqual(out['code_project.plugins_untrusted'].detail.map((d) => d.label), ['x@community', '.mcp.json: s']);
+  const none = await run(repo({}), fakeGh([]));
+  assert.ok(none['code_project.plugins_untrusted'].could_not_check);
+});
+
+test('code-project parts: .mcp.json servers count even with no settings.json', async () => {
+  const out = await run(repo({ '.mcp.json': JSON.stringify({ mcpServers: { s: {} } }) }), fakeGh([]));
+  assert.equal(out['code_project.plugins_untrusted'].value, 1);
+});
