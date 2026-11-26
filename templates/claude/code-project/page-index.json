@@ -1,5 +1,5 @@
 {
-  "comment": "The 13 pages of a Code Project: each scores Quality, Speed and Consumption from its tabs' metrics (targets/code-project-*.json) and has one process map (maps/<map>.json). The Usage tab has no page yet. tests/pages.test.mjs keeps this file and the pack in step.",
+  "comment": "The 18 pages of a Code Project: each scores Quality, Speed and Consumption from its tabs' metrics (targets/code-project-*.json) and has one process map (maps/<map>.json). The Usage tab has no page yet. tests/pages.test.mjs keeps this file and the pack in step.",
   "pages": [
     {
       "id": "overview",
@@ -283,6 +283,106 @@
         ],
         "consumption": [
           "cp_hooks.hook_text_tokens"
+        ]
+      }
+    },
+    {
+      "id": "notifications",
+      "icon": "🔔",
+      "name": "Notifications",
+      "tabs": [
+        "cp-notifications"
+      ],
+      "map": "notifications",
+      "metrics": {
+        "quality": [
+          "cp_notifications.needed_alert_share"
+        ],
+        "speed": [
+          "cp_notifications.oldest_waiting_hours"
+        ],
+        "consumption": [
+          "cp_notifications.alerts_per_day"
+        ]
+      }
+    },
+    {
+      "id": "library",
+      "icon": "📚",
+      "name": "Library and artifacts",
+      "tabs": [
+        "cp-library"
+      ],
+      "map": "library",
+      "metrics": {
+        "quality": [
+          "cp_library.current_share"
+        ],
+        "speed": [
+          "cp_library.publish_minutes"
+        ],
+        "consumption": [
+          "cp_library.api_requests_per_read"
+        ]
+      }
+    },
+    {
+      "id": "newer-features",
+      "icon": "🆕",
+      "name": "Newer features",
+      "tabs": [
+        "cp-newer-features"
+      ],
+      "map": "newer-features",
+      "metrics": {
+        "quality": [
+          "cp_newer_features.nudged_threads"
+        ],
+        "speed": [
+          "cp_newer_features.finish_share"
+        ],
+        "consumption": [
+          "cp_newer_features.prompts_per_thread"
+        ]
+      }
+    },
+    {
+      "id": "allow-card",
+      "icon": "🛡️",
+      "name": "Allow cards",
+      "tabs": [
+        "cp-allow-card"
+      ],
+      "map": "allow-card",
+      "metrics": {
+        "quality": [
+          "cp_allow_card.shared_folder_threads"
+        ],
+        "speed": [
+          "cp_allow_card.card_wait_minutes"
+        ],
+        "consumption": [
+          "cp_allow_card.prompts_per_thread"
+        ]
+      }
+    },
+    {
+      "id": "projects-list",
+      "icon": "🧭",
+      "name": "Projects list",
+      "tabs": [
+        "cp-projects-list"
+      ],
+      "map": "projects-list",
+      "metrics": {
+        "quality": [
+          "cp_projects_list.loose_sessions"
+        ],
+        "speed": [
+          "cp_projects_list.clicks_to_waiting_thread"
+        ],
+        "consumption": [
+          "cp_projects_list.idle_active_projects"
         ]
       }
     }

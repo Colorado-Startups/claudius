@@ -1,0 +1,13 @@
+{
+  "ideal": "Each dashboard is a private page with one URL, republished within a day of the last merge, and reads little.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Share session output as artifacts",
+      "url": "https://code.claude.com/docs/en/artifacts",
+      "date": "2026-11-26"
+    }
+  ],
+  "quality": "Every dashboard is republished within a day of the last merge.",
+  "speed": "A data change reaches its page in minutes.",
+  "consumption": "A metrics read makes few API requests, with one URL per page."
+}

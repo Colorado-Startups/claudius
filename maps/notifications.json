@@ -1,0 +1,49 @@
+{
+ "id": "notifications",
+ "name": "Notifications",
+ "why": "What raises an alert and how fast you clear it",
+ "ideal": "Only a post, an error or a request for input raises an alert, and the oldest wait clears within a day.",
+ "sources": [
+  {
+   "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+   "url": "https://code.claude.com/docs/en/claude-projects",
+   "date": "2026-11-26"
+  }
+ ],
+ "critical_path": [
+  "event",
+  "act"
+ ],
+ "steps": [
+  {
+   "id": "event",
+   "name": "Event",
+   "tools": [
+    "Thread"
+   ],
+   "rule": "An alert is a post in the conversation, a thread error or a thread that needs your input.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_notifications.needed_alert_share"
+  },
+  {
+   "id": "sort",
+   "name": "Sort",
+   "tools": [
+    "Notifications"
+   ],
+   "rule": "Keep the default alerts; add one per finished turn only if you need it.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_notifications.alerts_per_day"
+  },
+  {
+   "id": "act",
+   "name": "You act",
+   "tools": [
+    "Threads tab"
+   ],
+   "rule": "Answer a thread listed under Waiting on you within a day.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_notifications.oldest_waiting_hours"
+  }
+ ]
+}

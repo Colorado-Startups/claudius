@@ -1,5 +1,5 @@
 {
-  "comment": "Claudius's own Quality page: the seven Claude tabs, Visibility, Code Project and its 19 page tabs, read from this repo's own targets, collectors and ideals, then four Git Crafter tabs that re-check the free GitHub features each build. Keys: Git Crafter quality/CONFIG.md.",
+  "comment": "Claudius's own Quality page: the seven Claude tabs, Visibility, Code Project and its 24 page tabs, read from this repo's own targets, collectors and ideals, then four Git Crafter tabs that re-check the free GitHub features each build. Keys: Git Crafter quality/CONFIG.md.",
   "tabs": [
     ["claude", "Claude"],
     ["claude-settings", "Claude settings"],
@@ -28,7 +28,7 @@
     ["cp-work-locally", "Work locally"],
     ["cp-network-access", "Network access"],
     ["cp-network-secrets", "Network secrets"],
-    ["cp-setup-script", "Setup script"],
+    ["cp-setup-script", "Setup script"], ["cp-notifications", "Notifications"], ["cp-library", "Library"], ["cp-newer-features", "Newer features"], ["cp-allow-card", "Allow card"], ["cp-projects-list", "Projects list"],
     "dependabot",
     "scanning",
     "insights",

@@ -1,4 +1,4 @@
-// The 13 Code Project pages (templates/claude/code-project/page-index.json), their maps and the page kit, held to the
+// The 18 Code Project pages (templates/claude/code-project/page-index.json), their maps and the page kit, held to the
 // pack's targets: no page names a metric, tab or map the pack lacks, every Code Project metric belongs to one page,
 // and each map the pack ships for a page scores Quality, Speed and Consumption in six steps at most.
 import assert from 'node:assert/strict';
@@ -15,11 +15,11 @@ const pack = read('pack.json').tabs.map((t) => t[0]).filter((id) => id.startsWit
 const KINDS = ['quality', 'speed', 'consumption'];
 // Two maps that no page names: the Brief and Runtime maps score the readings of several pages.
 const EXTRA_MAPS = ['brief', 'runtime'];
-const NEW_MAPS = ['context', 'setup-check', 'scheduled-task', 'local-thread', 'pr-flow', 'connectors', 'plugins', 'skills', 'subagents', 'hooks'];
+const NEW_MAPS = ['context', 'setup-check', 'scheduled-task', 'local-thread', 'pr-flow', 'connectors', 'plugins', 'skills', 'subagents', 'hooks', 'notifications', 'library', 'newer-features', 'allow-card', 'projects-list'];
 
-test('pages: thirteen pages with their own ids, each scoring all three kinds', () => {
-  assert.equal(pages.length, 13);
-  assert.equal(new Set(pages.map((p) => p.id)).size, 13);
+test('pages: eighteen pages with their own ids, each scoring all three kinds', () => {
+  assert.equal(pages.length, 18);
+  assert.equal(new Set(pages.map((p) => p.id)).size, 18);
   for (const p of pages) for (const k of KINDS) assert.ok(p.metrics[k].length > 0, `${p.id} has no ${k} metric`);
 });
 

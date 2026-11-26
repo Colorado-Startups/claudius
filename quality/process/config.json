@@ -1,5 +1,5 @@
 {
- "comment": "Claudius's Process page (Git Crafter templates/process/config.json; keys: actions/pages/action.yml). Its maps are the pack's own, maps/guard.json, maps/decide.json, maps/equip.json, maps/publish.json, maps/visibility.json, maps/project.json, maps/ship.json, maps/environment.json, maps/remember.json, maps/setup.json, maps/memory.json, maps/schedule.json the ten page maps (maps/context.json, setup-check, scheduled-task, local-thread, pr-flow, connectors, plugins, skills, subagents, hooks) and the two cross-page maps (maps/brief.json, maps/runtime.json), named by use. CI builds the page from quality/public/process.json, which quality/public.mjs writes from this file: each pack map in full, each step whose metric needs local files left out, and a map with no step left out too.",
+ "comment": "Claudius's Process page (Git Crafter templates/process/config.json; keys: actions/pages/action.yml). Its maps are the pack's own, maps/guard.json, maps/decide.json, maps/equip.json, maps/publish.json, maps/visibility.json, maps/project.json, maps/ship.json, maps/environment.json, maps/remember.json, maps/setup.json, maps/memory.json, maps/schedule.json the fifteen page maps (maps/context.json, setup-check, scheduled-task, local-thread, pr-flow, connectors, plugins, skills, subagents, hooks, notifications, library, newer-features, allow-card, projects-list) and the two cross-page maps (maps/brief.json, maps/runtime.json), named by use. CI builds the page from quality/public/process.json, which quality/public.mjs writes from this file: each pack map in full, each step whose metric needs local files left out, and a map with no step left out too.",
  "repos": [
   "claudius"
  ],
@@ -73,6 +73,21 @@
   },
   {
    "use": "hooks"
+  },
+  {
+   "use": "notifications"
+  },
+  {
+   "use": "library"
+  },
+  {
+   "use": "newer-features"
+  },
+  {
+   "use": "allow-card"
+  },
+  {
+   "use": "projects-list"
   },
   {
    "use": "brief"

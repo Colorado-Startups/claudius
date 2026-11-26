@@ -1,6 +1,6 @@
 # Process maps
 
-Twenty-four maps for an agent-driven repo (twelve process maps, the ten [page maps](#page-maps-one-per-page) and the two [cross-page maps](#brief-and-runtime-two-maps-that-span-several-pages)), each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }`, `{ "use": "remember" }`, `{ "use": "setup" }`, `{ "use": "memory" }` and `{ "use": "schedule" }`, then the ten page maps `context`, `setup-check`, `scheduled-task`, `local-thread`, `pr-flow`, `connectors`, `plugins`, `skills`, `subagents` and `hooks`, and the two cross-page maps `brief` and `runtime`, the same way, once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
+Twenty-nine maps for an agent-driven repo (twelve process maps, the fifteen [page maps](#page-maps-one-per-page) and the two [cross-page maps](#brief-and-runtime-two-maps-that-span-several-pages)), each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }`, `{ "use": "remember" }`, `{ "use": "setup" }`, `{ "use": "memory" }` and `{ "use": "schedule" }`, then the fifteen page maps `context`, `setup-check`, `scheduled-task`, `local-thread`, `pr-flow`, `connectors`, `plugins`, `skills`, `subagents`, `hooks`, `notifications`, `library`, `newer-features`, `allow-card` and `projects-list`, and the two cross-page maps `brief` and `runtime`, the same way, once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
 
 ## Guard: a tool call, through the guards, to run or blocked
 
@@ -215,7 +215,7 @@ Five of these readings (`environment_gaps`, `settings_gaps`, `task_failures`, `h
 
 ## Page maps: one per page
 
-Each page of a Code Project has a map of its own, six steps at most, scoring Quality, Speed and Consumption. The index of all 13 pages, with their tabs and metrics, is [`page-index.json`](../templates/claude/code-project/page-index.json); the kit to add one is [`page/`](../templates/claude/code-project/page/README.md).
+Each page of a Code Project has a map of its own, six steps at most, scoring Quality, Speed and Consumption. The index of all 18 pages, with their tabs and metrics, is [`page-index.json`](../templates/claude/code-project/page-index.json); the kit to add one is [`page/`](../templates/claude/code-project/page/README.md).
 
 ```mermaid
 flowchart LR
@@ -237,5 +237,10 @@ flowchart LR
 | 📚 Skills | `skills` | New |
 | 🤖 Subagents | `subagents` | New |
 | 🪝 Hooks | `hooks` | New |
+| 🔔 Notifications | `notifications` | New |
+| 📚 Library and artifacts | `library` | New |
+| 🆕 Newer features | `newer-features` | New |
+| 🛡️ Allow cards | `allow-card` | New |
+| 🧭 Projects list | `projects-list` | New |
 
 Steps that read local files show only on a `--local` page. A step on `code_project.*` or `practices.*` reads repo files, so it also shows on the public page.
