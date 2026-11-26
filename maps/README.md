@@ -200,10 +200,10 @@ flowchart LR
 | Map | Step | Ideal | Metric |
 |---|---|---|---|
 | `brief` | Ask | A question for the owner goes out as one decision card | `cp_conversation.card_share` |
-| `brief` | Write | The brief says the guards a thread cannot skip | `code_project.guard_rules_missing` |
+| `brief` | Write | Each guard is said in a file a cloud thread reads | `code_project.guard_rules_missing` |
 | `brief` | Load | The memory index adds few tokens to a thread at start | `cp_memory.start_tokens` |
 | `brief` | Start | A thread starts within minutes of the owner's message | `cp_conversation.minutes_to_thread` |
-| `brief` | Recall | A thread never asks what memory or the brief already says | `cp_memory.repeat_questions` |
+| `brief` | Recall | A thread never asks what memory already says | `cp_memory.repeat_questions` |
 | `runtime` | Setup | Every file a cloud thread needs is in the repo | `code_project.setup_missing` |
 | `runtime` | Environment | The environment holds every host and variable the project needs | `cp_environment.environment_gaps` |
 | `runtime` | Settings | Every project setting matches the plan | `cp_general.settings_gaps` |

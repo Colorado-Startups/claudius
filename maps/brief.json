@@ -36,7 +36,7 @@
       "tools": [
         "Instructions"
       ],
-      "rule": "The brief says the guards a thread cannot skip.",
+      "rule": "Each guard is said in a file a cloud thread reads.",
       "rule_ref": "https://code.claude.com/docs/en/claude-projects",
       "metric": "code_project.guard_rules_missing"
     },
@@ -66,7 +66,7 @@
       "tools": [
         "Memory"
       ],
-      "rule": "A thread never asks what memory or the brief already says.",
+      "rule": "A thread never asks what memory already says.",
       "rule_ref": "https://code.claude.com/docs/en/memory",
       "metric": "cp_memory.repeat_questions"
     }
