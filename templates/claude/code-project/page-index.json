@@ -21,7 +21,8 @@
         ],
         "consumption": [
           "cp_conversation.coordinator_token_share",
-          "cp_threads.threads_per_pr"
+          "cp_threads.threads_per_pr",
+          "cp_threads.largest_thread_token_share"
         ]
       }
     },
@@ -55,7 +56,8 @@
       "map": "decide",
       "metrics": {
         "quality": [
-          "cp_general.model_fit_share"
+          "cp_general.model_fit_share",
+          "cp_general.settings_gaps"
         ],
         "speed": [
           "cp_general.high_effort_share"
@@ -101,7 +103,8 @@
           "cp_network_access.blocked_hosts",
           "cp_network_secrets.secrets_in_logs",
           "cp_setup_script.smoke_failures",
-          "cp_environment.keys_in_variables"
+          "cp_environment.keys_in_variables",
+          "cp_environment.environment_gaps"
         ],
         "speed": [
           "cp_network_access.first_fetch_seconds",
@@ -127,10 +130,12 @@
       "map": "scheduled-task",
       "metrics": {
         "quality": [
-          "cp_scheduled_tasks.last_run_ok_share"
+          "cp_scheduled_tasks.last_run_ok_share",
+          "cp_scheduled_tasks.task_failures"
         ],
         "speed": [
-          "cp_scheduled_tasks.on_time_share"
+          "cp_scheduled_tasks.on_time_share",
+          "cp_scheduled_tasks.hours_since_last_run"
         ],
         "consumption": [
           "cp_scheduled_tasks.connectors_per_task"

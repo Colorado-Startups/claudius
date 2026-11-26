@@ -1,0 +1,74 @@
+{
+  "id": "brief",
+  "name": "Brief",
+  "why": "A thread's brief, from the owner's question to a thread that needs no second question",
+  "ideal": "A brief states its guards, reaches a thread in one message, starts within minutes and is never asked about twice.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-26"
+    },
+    {
+      "title": "Claude Code Docs: How Claude remembers your project",
+      "url": "https://code.claude.com/docs/en/memory",
+      "date": "2026-11-26"
+    }
+  ],
+  "critical_path": [
+    "write",
+    "start"
+  ],
+  "steps": [
+    {
+      "id": "ask",
+      "name": "Ask",
+      "tools": [
+        "Conversation"
+      ],
+      "rule": "A question for the owner goes out as one decision card.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_conversation.card_share"
+    },
+    {
+      "id": "write",
+      "name": "Write",
+      "tools": [
+        "Instructions"
+      ],
+      "rule": "Each guard is said in a file a cloud thread reads.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "code_project.guard_rules_missing"
+    },
+    {
+      "id": "load",
+      "name": "Load",
+      "tools": [
+        "Memory"
+      ],
+      "rule": "The memory index adds few tokens to a thread at start.",
+      "rule_ref": "https://code.claude.com/docs/en/memory",
+      "metric": "cp_memory.start_tokens"
+    },
+    {
+      "id": "start",
+      "name": "Start",
+      "tools": [
+        "Conversation"
+      ],
+      "rule": "A thread starts within minutes of the owner's message.",
+      "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+      "metric": "cp_conversation.minutes_to_thread"
+    },
+    {
+      "id": "recall",
+      "name": "Recall",
+      "tools": [
+        "Memory"
+      ],
+      "rule": "A thread never asks what memory already says.",
+      "rule_ref": "https://code.claude.com/docs/en/memory",
+      "metric": "cp_memory.repeat_questions"
+    }
+  ]
+}
