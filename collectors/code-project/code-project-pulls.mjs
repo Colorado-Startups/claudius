@@ -1,5 +1,5 @@
 // What the Claude Code Projects collector reads from GitHub: the merged pull requests of the threads'
-// branches, whether each opened as a draft, and the week each merged in (code-projects.mjs).
+// branches, whether each opened as a draft, and the week each merged in (code-project.mjs).
 
 const QUERY = `query($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {

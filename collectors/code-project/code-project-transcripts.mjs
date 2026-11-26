@@ -1,4 +1,4 @@
-// What the Claude Code Projects collector reads from this machine's session transcripts (code-projects.mjs).
+// What the Claude Code Projects collector reads from this machine's session transcripts (code-project.mjs).
 // From a record it keeps the type, the timestamp, the origin kind, whether a tool result is in it, and a
 // reply's message id and token counts. A prompt, a reply and a tool result are never read.
 
