@@ -8,7 +8,7 @@ Instructions for every coding agent in this repo, from Git Crafter `templates/ag
 | --- | --- |
 | What this repo is | The Claude pack for Git Crafter: 33 Quality tabs, the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps, fifteen page maps, the Brief and Runtime maps, and the Claude setup templates in `templates/claude/` (18 Code Project pages and a page kit) |
 | Build and test | `node --test tests/<file>.test.mjs`, one file at a time. Suites, the engine tests and the page build run in CI through Git Crafter's `ci-standard.yml` and `actions/pages` |
-| Shipping | Branch, commit, push the branch and open a draft pull request. Never push to `main`. A merge waits for green CI and a review at the head commit, and names the head SHA as its guard |
+| Shipping | Branch, commit, push the branch and open a draft pull request. Never push to `main`. A merge waits for green CI and a review at the head commit from each of two separate AI reviewers, then names the head SHA as its guard (`plugin/skills/merge`) |
 | Cloud and Mac | A cloud thread has no GraphQL, so use `gh api` REST. Network and variables are set in the cloud environment, not `settings.json`. Work that needs a local tool goes to a local thread or Remote Control |
 | Auto-fix | A thread watches its pull request with auto-fix until it merges, then stops watching |
 | Memory | Save a lasting fact to project memory in the turn you learn it, with no key or private name |
