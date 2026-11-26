@@ -1,0 +1,84 @@
+{
+ "id": "setup",
+ "name": "Setup",
+ "why": "The project settings a cloud thread starts on, each lane held to one metric",
+ "ideal": "The project starts every thread on the right model, a clean environment and a narrow network, with no key in sight.",
+ "sources": [
+  {
+   "title": "Claude Code Docs: Configure cloud environments",
+   "url": "https://code.claude.com/docs/en/cloud-environments",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+   "url": "https://code.claude.com/docs/en/claude-projects",
+   "date": "2026-11-26"
+  }
+ ],
+ "critical_path": [
+  "general",
+  "work-locally"
+ ],
+ "steps": [
+  {
+   "id": "general",
+   "name": "General",
+   "tools": [
+    "General"
+   ],
+   "rule": "The thread model and effort fit the task: the default for build work, a smaller model for docs and lint.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_general.model_fit_share"
+  },
+  {
+   "id": "environment",
+   "name": "Environment",
+   "tools": [
+    "Environment"
+   ],
+   "rule": "The cloud environment holds no key in a variable, and a thread starts fast on it.",
+   "rule_ref": "https://code.claude.com/docs/en/cloud-environments",
+   "metric": "cp_environment.thread_start_seconds"
+  },
+  {
+   "id": "network-access",
+   "name": "Network",
+   "tools": [
+    "Network access"
+   ],
+   "rule": "No thread hits a blocked host, and the allow list holds only hosts a thread uses.",
+   "rule_ref": "https://code.claude.com/docs/en/cloud-environments",
+   "metric": "cp_network_access.unused_hosts"
+  },
+  {
+   "id": "network-secrets",
+   "name": "Secrets",
+   "tools": [
+    "Network secrets"
+   ],
+   "rule": "No secret appears in a log or a file, and a thread never asks for a key twice.",
+   "rule_ref": "https://code.claude.com/docs/en/cloud-environments",
+   "metric": "cp_network_secrets.secrets_in_logs"
+  },
+  {
+   "id": "setup-script",
+   "name": "Script",
+   "tools": [
+    "Setup script"
+   ],
+   "rule": "The setup script passes its smoke test, adds little time and hits its cache.",
+   "rule_ref": "https://code.claude.com/docs/en/cloud-environments",
+   "metric": "cp_setup_script.script_seconds"
+  },
+  {
+   "id": "work-locally",
+   "name": "Local",
+   "tools": [
+    "Work locally"
+   ],
+   "rule": "A local thread ends clean and pushed, and logs each Remote Control and Chrome step.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_work_locally.folder_context_tokens"
+  }
+ ]
+}

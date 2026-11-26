@@ -4,7 +4,7 @@ Instructions for every coding agent in this repo, from Git Crafter `templates/ag
 
 | Topic | Rule |
 | --- | --- |
-| What this repo is | The Claude pack for Git Crafter: nine Quality tabs, the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment and Remember maps, and the Claude setup templates in `templates/claude/` |
+| What this repo is | The Claude pack for Git Crafter: 28 Quality tabs, the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps, and the Claude setup templates in `templates/claude/` |
 | Build and test | `node --test tests/<file>.test.mjs`, one file at a time. Suites, the engine tests and the page build run in CI through Git Crafter's `ci-standard.yml` and `actions/pages` |
 | Shipping | Branch, commit, push the branch and open a pull request. Never push to `main` |
 | Bugs and quick fixes | An issue typed Bug or Task in the repo at fault, filed when found. It stays off the board |

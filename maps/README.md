@@ -1,6 +1,6 @@
 # Process maps
 
-Nine maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }` and `{ "use": "remember" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
+Twelve maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }`, `{ "use": "remember" }`, `{ "use": "setup" }`, `{ "use": "memory" }` and `{ "use": "schedule" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
 
 ## Guard: a tool call, through the guards, to run or blocked
 
@@ -175,4 +175,14 @@ Each part is a group on the Code Project tab. The engine's tab parts table holds
 | PR auto-fix | Ship (Check) |
 | Shipping and merging | Ship |
 
-Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json), [`project.json`](project.json), [`ship.json`](ship.json), [`environment.json`](environment.json), [`remember.json`](remember.json).
+Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json), [`project.json`](project.json), [`ship.json`](ship.json), [`environment.json`](environment.json), [`remember.json`](remember.json), [`setup.json`](setup.json), [`memory.json`](memory.json), [`schedule.json`](schedule.json).
+
+## Code Project page maps: Setup, Memory and Schedule
+
+Each lane scores one tab or feature of a Claude Code Project. A map holds six steps at most, so 18 lanes fit in three maps. The Usage tab has no lane in these maps. Every lane reads local files, so the public page leaves all three maps out.
+
+| Map | Lanes |
+|---|---|
+| `setup` | General, Environment, Network access, Network secrets, Setup script, Work locally |
+| `memory` | Conversation, Context, Memory, Extensions, Connectors, Plugins |
+| `schedule` | Threads, Scheduled tasks, Hooks, Subagents, Pull request auto fix, Skills |

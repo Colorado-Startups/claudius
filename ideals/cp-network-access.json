@@ -1,0 +1,13 @@
+{
+  "ideal": "No thread meets a blocked host, the first fetch is fast and the allow list holds only what threads use.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Configure cloud environments",
+      "url": "https://code.claude.com/docs/en/cloud-environments",
+      "date": "2026-11-26"
+    }
+  ],
+  "quality": "No blocked host appears in the last 10 threads.",
+  "speed": "The first fetch of a thread answers within seconds.",
+  "consumption": "No allowed host goes unused."
+}

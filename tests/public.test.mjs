@@ -30,7 +30,7 @@ test('public: each metric that needs local files is dropped but the repo-file on
   const pub = read(join(ROOT, 'quality', 'public-params.json'));
   const local = localOnlyIds([join(ROOT, 'targets')]);
   assert.deepEqual(new Set(dropped), new Set([...local].filter((id) => !pub.ids.includes(id))));
-  assert.equal(dropped.length, 48);
+  assert.equal(dropped.length, 105);
   const files = readdirSync(join(ROOT, 'targets')).filter((f) => f.endsWith('.json')).sort();
   assert.deepEqual(readdirSync(join(root, 'quality', 'public', 'targets')).sort(), [...files, DROPS].sort(), 'every targets file, so no collector runs without its targets, and the drops');
   assert.deepEqual(read(join(root, 'quality', 'public', 'targets', DROPS)), [...pub.drop.map((id) => ({ id, drop: true })), ...Object.entries(pub.params_for ?? {}).map(([id, params]) => ({ id, params }))]);
@@ -59,7 +59,7 @@ test('public: the config is the repo own, its targets and the page files under q
   assert.deepEqual({ ...pub, comment: mine.comment, tabs: mine.tabs }, { ...mine, targets: 'quality/public/targets', ideals: 'quality/public/ideals', data: 'quality/public/data', history: 'quality/public/history', out: 'quality/public/dist' });
   // A tab of the repo's own with no metric left goes, with its ideal; a Git Crafter tab stays (Git Crafter #116).
   const ids = pub.tabs.map((t) => (Array.isArray(t) ? t[0] : t));
-  for (const gone of ['desktop-app', 'tokens']) assert.ok(!ids.includes(gone) && !existsSync(join(root, 'quality', 'public', 'ideals', `${gone}.json`)), gone);
+  for (const gone of ['desktop-app', 'tokens', 'cp-conversation', 'cp-usage']) assert.ok(!ids.includes(gone) && !existsSync(join(root, 'quality', 'public', 'ideals', `${gone}.json`)), gone);
   for (const kept of ['claude', 'claude-settings', 'blockers', 'instructions', 'practices', 'visibility', 'code-project', 'dependabot', 'security']) assert.ok(ids.includes(kept), kept);
   assert.ok(existsSync(join(root, 'quality', 'public', 'ideals', 'blockers.json')));
   assert.match(pub.comment, /quality\/public\.mjs/);
@@ -78,7 +78,7 @@ test('public: the Process config writes each pack map in full, without the steps
   const dropped = new Set(writePublic(root));
   const mine = read(join(ROOT, 'quality', 'process', 'config.json'));
   const pub = read(join(root, 'quality', 'public', 'process.json'));
-  assert.deepEqual(mine.maps, [{ use: 'guard' }, { use: 'decide' }, { use: 'equip' }, { use: 'publish' }, { use: 'visibility' }, { use: 'project' }, { use: 'ship' }, { use: 'environment' }, { use: 'remember' }]);
+  assert.deepEqual(mine.maps, [{ use: 'guard' }, { use: 'decide' }, { use: 'equip' }, { use: 'publish' }, { use: 'visibility' }, { use: 'project' }, { use: 'ship' }, { use: 'environment' }, { use: 'remember' }, { use: 'setup' }, { use: 'memory' }, { use: 'schedule' }]);
   assert.deepEqual({ ...pub, comment: mine.comment, maps: mine.maps }, {
     ...mine,
     docs: { maps: 'quality/public/process.json' },
