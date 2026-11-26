@@ -106,9 +106,36 @@ test('collect in CI: scored from the PR opening, the session step named missing;
   assert.ok(!('value' in partial[ID]), 'a missing deploy still leaves the total unscored');
   assert.match(partial[ID].could_not_check, /^not scored: .*merge to live not read/);
   const bad = await collect({ mode: 'ci', params: { repo: 'acme/site' }, gh: fakeGh(true), now });
-  assert.equal(bad[ID].could_not_check, 'gh api graphql failed: HTTP 502: Bad Gateway');
+  assert.equal(bad[ID].could_not_check, 'gh api graphql failed', 'an unclassified failure names the call, never the error text');
   assert.ok(!('value' in bad[ID]));
 });
+
+// A failed GitHub call is a fixed reason, never the error's own text. GitHub's rate-limit message names an
+// installation or user ID, and an adopter's privacy gate refuses an ID on the public page (Claudius#115).
+const FAILURES = [
+  ['a rate limit naming an installation ID', new Error('GraphQL: API rate limit already exceeded for installation ID 87654321. (HTTP 403)'), 'gh api graphql failed: rate limited'],
+  ['a rate limit naming a user ID', new Error('API rate limit exceeded for user ID 1234567.'), 'gh api graphql failed: rate limited'],
+  ['a secondary rate limit', new Error('You have exceeded a secondary rate limit. Please wait a few minutes before you try again.'), 'gh api graphql failed: rate limited'],
+  ['a rate limit on the process stderr only', Object.assign(new Error('Command failed: gh api graphql'), { stderr: 'gh: API rate limit exceeded for installation ID 87654321 (HTTP 429)\n' }), 'gh api graphql failed: rate limited'],
+  ['a rate limit with a status field', Object.assign(new Error('Forbidden'), { status: 429 }), 'gh api graphql failed: rate limited'],
+  ['a bad token', new Error('HTTP 401: Bad credentials (https://api.github.com/graphql)'), 'gh api graphql failed: auth'],
+  ['a token that cannot read the repo', new Error('HTTP 403: Resource not accessible by integration'), 'gh api graphql failed: auth'],
+  ['gh with no login', new Error('You are not logged into any GitHub hosts. To log in, run: gh auth login'), 'gh api graphql failed: auth'],
+  ['a server error', new Error('HTTP 502: Bad Gateway\nmore'), 'gh api graphql failed'],
+  ['a thrown string', 'ID 87654321 went wrong', 'gh api graphql failed'],
+];
+
+for (const [name, thrown, want] of FAILURES) {
+  test(`collect: ${name} gives the fixed reason, no digits and an untouched source`, async () => {
+    const gh = { graphql: async () => { throw thrown; } };
+    const r = await collect({ mode: 'ci', params: { repo: 'acme/site' }, gh, now });
+    assert.equal(r[ID].could_not_check, want);
+    assert.doesNotMatch(r[ID].could_not_check, /\d/, 'no ID, status or count reaches the public page');
+    assert.ok(!('value' in r[ID]));
+    assert.match(r[ID].source, /^gh api graphql: the last 10 merged pullRequests timed end to end/, 'the source stays the template');
+    assert.doesNotMatch(r[ID].source, /rate limit|credentials|installation|Gateway|ID \d/i);
+  });
+}
 
 test('collect in local mode reads session starts from the Claude tab transcripts', async () => {
   const projects = fileURLToPath(new URL('../../fixtures/claude/projects/', import.meta.url));
