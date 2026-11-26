@@ -41,7 +41,8 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha || github.sha }}
         run: |
           # The ignore list and the config come from the base commit, never from the pull request's own tree,
-          # so a pull request cannot excuse its own finding.
+          # so a pull request cannot excuse a finding through either file. An inline gitleaks:allow comment or an edit to this
+          # workflow is not stopped here: a review reads the diff for both.
           rm -f .gitleaksignore .gitleaks.toml
           for f in .gitleaksignore .gitleaks.toml; do
             git cat-file -e "$BASE:$f" 2>/dev/null && git show "$BASE:$f" > "$f"
