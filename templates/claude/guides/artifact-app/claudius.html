@@ -418,7 +418,7 @@ function installView(state) {
   document.body.classList.add("plain");
   nav.hidden = true;
   const card = h("section", { class: "card install" }, h("h2", { text: "Claudius runs as a Mac app" }),
-    h("p", { text: "Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing or a step the platform forces." }),
+    h("p", { text: "Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing, a one-way change or a step the platform forces." }),
     h("p", { text: "This app is only a window onto that work, and the work runs without it. It watches your pull requests, builds, Quality scores and repo readiness with your own GitHub login (gh), and tells you when something needs a look. It needs its own window, so install it from the Claude desktop app." }));
   if (state === "available") {
     const b = h("button", { class: "primary", text: "Install as app" });

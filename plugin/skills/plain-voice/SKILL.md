@@ -6,7 +6,7 @@ compatibility: Works in chat, Cowork and Claude Code with no tool. Reads project
 
 # Plain voice
 
-**Outcome:** Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing or a step the platform forces.
+**Outcome:** Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing, a one-way change or a step the platform forces.
 
 Make writing short, visual and human. Keep what the original says.
 

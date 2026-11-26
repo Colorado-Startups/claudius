@@ -1,6 +1,6 @@
 {
   "name": "claudius",
-  "description": "Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing or a step the platform forces.",
+  "description": "Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing, a one-way change or a step the platform forces.",
   "owner": {
     "name": "Colorado Startups",
     "url": "https://github.com/Colorado-Startups"
@@ -9,7 +9,7 @@
     {
       "name": "claudius",
       "source": "./plugin",
-      "description": "Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing or a step the platform forces."
+      "description": "Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing, a one-way change or a step the platform forces."
     }
   ]
 }
