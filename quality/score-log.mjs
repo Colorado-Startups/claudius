@@ -1,6 +1,6 @@
 // Prints the public Quality page's master score and its work queue, one line each, from the run the build scored.
 // A cloud thread cannot reach the deployed page and the build log held counts only, so the score was unreadable
-// there (#81). Every id, value and goal printed is already on the public page; no address or path is read.
+// there. Every id, value and goal printed is already on the public page; no address or path is read.
 //
 //   node quality/score-log.mjs <engine dir> [--config quality/public/config.json]
 //
