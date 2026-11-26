@@ -1,0 +1,52 @@
+# Secrets anywhere in this repository's history: gitleaks over every commit, failing on any finding. Secret values are
+# redacted in the log. A false positive goes in .gitleaksignore, one finding fingerprint per line, and counts once it is on main.
+name: gitleaks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer commit on the same branch or pull request cancels the older scan (it scans the whole history anyway).
+concurrency:
+  group: gitleaks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VERSION: 8.30.1
+      SHA256_X64: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # every commit, not just the tip
+          persist-credentials: false
+
+      - name: gitleaks ${{ env.VERSION }} (checksum verified)
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/gitleaks.tgz" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v$VERSION/gitleaks_${VERSION}_linux_x64.tar.gz"
+          echo "$SHA256_X64  $RUNNER_TEMP/gitleaks.tgz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP" gitleaks
+
+      - name: scan the history
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.sha }}
+        run: |
+          # The ignore list and the config come from the base commit, never from the pull request's own tree,
+          # so a pull request cannot excuse a finding through either file. An inline gitleaks:allow comment or an edit to this
+          # workflow is not stopped here: a review reads the diff for both.
+          rm -f .gitleaksignore .gitleaks.toml
+          for f in .gitleaksignore .gitleaks.toml; do
+            git cat-file -e "$BASE:$f" 2>/dev/null && git show "$BASE:$f" > "$f"
+          done
+          ignore=()
+          [ -s .gitleaksignore ] && ignore=(--gitleaks-ignore-path .gitleaksignore)
+          "$RUNNER_TEMP/gitleaks" git --redact --no-banner --verbose "${ignore[@]}" .
