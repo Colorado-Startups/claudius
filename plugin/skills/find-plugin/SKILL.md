@@ -41,5 +41,5 @@ flowchart LR
 
 | Never | Why |
 |---|---|
-| Install a 🅲 or 🅳 pick before reading its source and license | a plugin runs code on this machine: record the license and the reason in the answer, then install only when nothing official fits |
+| Install a 🅲 or 🅳 pick | a plugin runs code on this machine: name it with its license, source and the reason, and write a small skill with `skill-creator` instead |
 | Put an unreviewed source ahead of an official one | the owner's rule: Anthropic first |

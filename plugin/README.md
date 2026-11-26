@@ -63,7 +63,7 @@ Lift is the mean score with Claudius minus without it, over each skill's three c
 | `plan` | `gh`, `python3 watch_workers.py`, which reads GitHub by `gh api` | GitHub issues in your repo; sessions you start; a state file and its `.lock` in `$TMPDIR` |
 | `merge` | `gh`, `git` | A PR comment and a merge, at the reviewed commit only |
 | `equip` | `claude plugin` | Installs official plugins, turns back on ones left off and removes install records whose project folder is gone, then reports what it did in a table. It turns nothing off ([All on, app-wide](https://github.com/Colorado-Startups/claudius/blob/main/templates/claude/README.md#all-on-app-wide)) |
-| `find-plugin` | `claude plugin install` | Turns on an Anthropic-built or Anthropic-reviewed pick. A community pick is installed only when nothing official fits |
+| `find-plugin` | `claude plugin install` | Turns on an Anthropic-built or Anthropic-reviewed pick. A community pick is named with its license, never installed |
 | `plain-voice` | nothing | Nothing; it returns text |
 | `visibility` | `gh api`, `git clone`, `curl` | Turns on secret scanning and push protection on a public repo, and sets a private repo's site private. It never makes a repo public or deletes one. It reports counts |
 
