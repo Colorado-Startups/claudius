@@ -15,9 +15,10 @@
     "needs": "github-admin",
     "chart": "number",
     "params": {
-      "comment": "owner: the GitHub org audited; empty means this repo's owner. org_domains: email domains the org owns, beyond its profile's site and email domain, so an author at one is not personal.",
+      "comment": "owner: the GitHub org or personal account audited; empty means this repo's owner. A personal account is read through users/<owner> and user/repos, so it needs a login as that user. org_domains: email domains the org owns, beyond its profile's site and email domain, so an author at one is not personal. bot_emails: author addresses that are tools, not people, such as the one Claude Code cloud sessions commit as; an address listed is not personal. Setting it replaces the default, so keep noreply@anthropic.com in the list.",
       "owner": "",
-      "org_domains": []
+      "org_domains": [],
+      "bot_emails": ["noreply@anthropic.com"]
     }
   },
   {
@@ -42,7 +43,7 @@
     "kind": "quality",
     "group": "Public",
     "label": "Personal emails in public history",
-    "means": "Distinct author emails, on every branch of each public repo, that are neither GitHub noreply nor the org's domain.",
+    "means": "Distinct author emails in public history that are not noreply, a listed tool address or an owned domain.",
     "unit": "emails",
     "goal": 0,
     "near": 1,
