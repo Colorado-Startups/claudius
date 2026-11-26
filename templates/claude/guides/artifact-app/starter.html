@@ -15,12 +15,28 @@
 const out = document.getElementById("out");
 const desktop = await window.claude?.use?.("desktop").catch(() => null);
 
+function button(text, onclick) {
+  const b = document.body.appendChild(document.createElement("button"));
+  b.textContent = text;
+  b.onclick = onclick;
+  return b;
+}
+
+// A small template icon: black on transparent, so the menu bar paints it in its own color.
+function trayIcon() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 36;
+  const x = c.getContext("2d");
+  x.beginPath();
+  x.arc(18, 18, 12, 0, Math.PI * 2);
+  x.fill();
+  return c.toDataURL("image/png");
+}
+
 if (!desktop?.tray) {
   // Outside the installed app: offer the install button, or say where it runs.
   if ((await desktop?.install?.state().catch(() => "unavailable")) === "available") {
-    const b = document.body.appendChild(document.createElement("button"));
-    b.textContent = "Install as app";
-    b.onclick = () => desktop.install.request().catch(() => {});
+    button("Install as app", () => desktop.install.request().catch(() => {}));
     out.textContent = "This page runs as an app.";
   } else {
     out.textContent = "Open this artifact in the Claude desktop app and choose Install as app.";
@@ -28,11 +44,25 @@ if (!desktop?.tray) {
 } else {
   let n = 0;
   const show = async () => {
-    // The menu bar item goes away when the page reloads, so set it on every load.
-    await desktop.tray.set({ title: String(n), menu: [{ label: "Add one", click: () => { n++; show(); } }] })
-      .catch((e) => { out.textContent = "Menu bar item refused: " + e.message; });
-    out.textContent = "Count: " + n;
+    try {
+      // The menu bar item goes away when the page reloads, so set it on every load.
+      await desktop.tray.set({
+        icon: trayIcon(),
+        title: String(n),
+        menu: [{ label: "Add one", click: () => { n++; show(); } }],
+      });
+      out.textContent = "Count: " + n;
+    } catch (e) {
+      out.textContent = "Menu bar item refused: " + e.message;
+    }
   };
-  show();
+  // A call that needs a permission waits for a click while the window is hidden (during install),
+  // so start on load only when the permission is already granted.
+  if ((await desktop.permissions.state("menu-bar")) === "granted") {
+    show();
+  } else {
+    out.textContent = "Allow the menu bar item to start.";
+    button("Show in menu bar", show);
+  }
 }
 </script>
