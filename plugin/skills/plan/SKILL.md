@@ -55,6 +55,7 @@ Paste the worker contract into every brief. A cloud session loads the repo's `CL
 | Repo rules | Follows the repo's `AGENTS.md` and `CLAUDE.md` where present. Never pushes to main, force-pushes or commits a secret |
 | Findings | Files each bug as an issue in the repo at fault, and each idea as a draft card by the Filing table's REST route, or a `To card` row in the PR body when that fails. Files each when found and after a search for a duplicate, and lists each in the PR body |
 | Pushes | Opens a draft PR within 10 minutes and pushes after each step, so the orchestrator sees progress |
+| Setup | Never asks the owner to click or configure anything. Tries config files, plugins, the CLI, the API, CI, a local session and other accounts first, and escalates only a hard platform limit (a passkey, a billing purchase, a typed-word check) as one exact line |
 | Done when | Stops at the open PR once the goal the brief states is met. Never merges or approves its own PR |
 
 | Check once, before Show and go | Passes when |
