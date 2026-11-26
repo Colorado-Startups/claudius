@@ -1,5 +1,7 @@
 # Governance
 
+**Outcome:** Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing or a step the platform forces.
+
 Colorado Startups owns the project. AI agents run its day-to-day work under Git Crafter's [rules](https://github.com/SoulCraft-Org/git-crafter/tree/main/rules); people hold the seats in [`MAINTAINERS.md`](MAINTAINERS.md).
 
 | Decision | Who decides |

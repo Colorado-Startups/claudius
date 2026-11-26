@@ -6,6 +6,8 @@ compatibility: Needs the gh CLI signed in as an org owner, so private repos and 
 
 # Visibility
 
+**Outcome:** Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing or a step the platform forces.
+
 One audit per org: every repo, both sides checked, counts reported. It reads only; every change waits for the person's yes.
 
 Requires `gh` signed in as an org owner (`gh auth status`), `git` and `curl`. ORG, REPO and BRANCH below are placeholders.

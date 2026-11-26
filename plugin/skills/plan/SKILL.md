@@ -6,6 +6,8 @@ compatibility: Needs the gh CLI signed in, python3 for the watch, and the Claude
 
 # Plan
 
+**Outcome:** Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing or a step the platform forces.
+
 The owner outlines the product. Claude plans it visually, and the desktop app runs the plan.
 
 Requires `gh` signed in (`gh auth status`), `python3` for the watch, and the desktop app's Code tab for sessions and Artifacts.
