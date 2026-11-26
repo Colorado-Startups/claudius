@@ -58,8 +58,8 @@
     "near": 90,
     "direction": "higher",
     "goal_source": "template goal, no public benchmark: a pull request that carries its attribution lines can be traced to the thread that wrote it; see Claude Code Docs: Let Claude coordinate ongoing work with Projects (code.claude.com/docs/en/claude-projects), read 2026-11-26",
-    "source": "gh api repos pulls, bodies of the last 30 days of merged claude/ pull requests; not measured until a collector reads it",
-    "needs": "local-files",
+    "source": "gh api repos pulls, bodies of the last 30 days of merged claude/ pull requests; read by collectors/code-project/code-project-checks.mjs",
+    "needs": "gh",
     "chart": "gauge",
     "defined": "2026-11-25"
   },
@@ -74,8 +74,8 @@
     "near": 30,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: CI is the gate, so a short wait keeps the thread inside the one-hour cache lifetime that Pro, Max and Ultra give a project within plan limits; see Claude Code Docs: Let Claude coordinate ongoing work with Projects (code.claude.com/docs/en/claude-projects), read 2026-11-26",
-    "source": "gh api repos check-runs of merged claude/ pull requests; not measured until a collector reads it",
-    "needs": "local-files",
+    "source": "gh api repos check-runs of merged claude/ pull requests; read by collectors/code-project/code-project-checks.mjs",
+    "needs": "gh",
     "chart": "number",
     "defined": "2026-11-25"
   },

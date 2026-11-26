@@ -47,8 +47,11 @@ test('public: each metric that needs local files is dropped but the repo-file on
   }
   const kept = files.flatMap((f) => read(join(root, 'quality', 'public', 'targets', f))).filter((d) => d.drop !== true).map((d) => d.id);
   const ids = (f) => JSON.parse(readFileSync(join(ROOT, 'targets', f), 'utf8')).map((d) => d.id);
-  const [practices, visibility, codeProject] = [ids('practices.json'), ids('visibility.json'), ids('code-project.json').filter((id) => !['code_project.idle_revivals', 'code_project.tokens_per_merged_pr'].includes(id))];
-  assert.deepEqual([practices.length, visibility.length, codeProject.length], [10, 5, 15]);
+  const defs = (f) => JSON.parse(readFileSync(join(ROOT, 'targets', f), 'utf8'));
+  const stays = (f) => defs(f).filter((d) => d.needs !== 'local-files').map((d) => d.id);
+  const [practices, visibility, codeProject] = [ids('practices.json'), ids('visibility.json'), [...stays('code-project.json'), ...stays('code-project-tabs.json'), ...stays('code-project-features.json')]];
+  // The practices and visibility lines all read GitHub or repo files; a Code Project line stays public unless it needs local files.
+  for (const f of ['practices.json', 'visibility.json']) assert.ok(defs(f).every((d) => d.needs !== 'local-files'), f);
   assert.deepEqual(kept.sort(), ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr', 'claude.instruction_tokens', 'claude_settings.deny_coverage', 'claude_settings.setup_files', 'claude_settings.valid', 'instructions.description_tokens', 'lead_time.hours', ...practices, ...visibility, ...codeProject].sort());
 });
 
