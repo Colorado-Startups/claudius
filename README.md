@@ -1,6 +1,20 @@
 # Claudius
 
-The Claude pack for [Git Crafter](https://github.com/SoulCraft-Org/git-crafter): Claude Code templates, Quality tabs and Process maps for a GitHub repo that agents drive from the Claude desktop app.
+The Claude pack for [Git Crafter](https://github.com/SoulCraft-Org/git-crafter). Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing or a step the platform forces. The Claude Code templates, Quality tabs and Process maps below are how that setup is built and measured.
+
+```mermaid
+flowchart LR
+  V[You: objective and vision] --> P[Claude plans] --> B[Claude builds in Project threads] --> R[Two AI reviews, green CI] --> M[Claude merges] --> L[Live]
+  P -. only vision, billing or a platform step .-> Q[Your queue]
+  B -. same .-> Q
+```
+
+| Who | Does |
+|---|---|
+| You | Give the objective and vision. Answer a question only when it is about vision or billing, or when the platform forces a human step (a passkey, a typed release word, a signing step) |
+| Claude | Everything else: plan, issues, branches, tests, reviews, merges, setup in the desktop app, and fixing what a Quality page scores low |
+
+Every other file here is held to this outcome. A gate that waits for a person, a click Claude could make, or a dashboard only a person reads is a defect to remove.
 
 Brand: [Colorado Startups brand guide](https://colorado-startups.github.io/brand/)
 
