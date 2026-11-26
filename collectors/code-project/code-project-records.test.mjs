@@ -99,3 +99,22 @@ test('cp-records: a param names another file, and the repo may widen the age lim
   assert.equal((await go(root, { environment_file: 'mine.json', max_record_days: 60 }))['cp_environment.environment_gaps'].value, 1);
   assert.match((await go(root, { environment_file: 'mine.json' }))['cp_environment.environment_gaps'].could_not_check, /read it again/);
 });
+
+test('cp-records: a hostile or out-of-range record never reads as a good number', async () => {
+  const root = tmp();
+  // Rows with neither an expected nor an actual value are not matches.
+  put(root, 'project-settings.json', { read_at: READ, settings: [{}, { name: 'x' }] });
+  // A task with no status, or an error status, is not a pass.
+  put(root, 'scheduled-tasks.json', { read_at: READ, tasks: [{}, { last_status: 'error', last_run_at: '2999-01-01T00:00:00Z' }] });
+  // A record dated in the future never goes stale.
+  put(root, 'environment.json', { read_at: '2999-01-01T00:00:00Z', items: [{ present: true }] });
+  put(root, 'thread-tokens.json', { read_at: READ, threads: [{ tokens: 1e308 }, { tokens: 1e308 }] });
+  const out = await go(root);
+  assert.match(out['cp_general.settings_gaps'].could_not_check, /no row with an expected and an actual value/);
+  assert.equal(out['cp_scheduled_tasks.task_failures'].value, 0 + 1, 'an error status is a failure, and a row with no status is not counted');
+  assert.match(out['cp_scheduled_tasks.hours_since_last_run'].could_not_check, /at or before it was read/);
+  assert.match(out['cp_environment.environment_gaps'].could_not_check, /in the future/);
+  assert.match(out['cp_threads.largest_thread_token_share'].could_not_check, /too large/);
+  put(root, 'scheduled-tasks.json', { read_at: READ, tasks: [{}, { name: 'x' }] });
+  assert.match((await go(root))['cp_scheduled_tasks.task_failures'].could_not_check, /has a last_status/);
+});

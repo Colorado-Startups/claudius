@@ -78,7 +78,7 @@ flowchart LR
 | --- | --- |
 | Templates | `templates/claude/`: the Claude-only files a repo commits. This repo runs copies of them (`tests/templates.test.mjs`) |
 | Plugin | `plugin/`: the `claudius` Claude Code plugin (skills `plan`, `merge`, `equip`, `find-plugin`, `plain-voice`, `visibility`). Install: `claude plugin marketplace add Colorado-Startups/claudius`, then `claude plugin install claudius@claudius` |
-| Pack | 28 tabs: Claude, Claude settings, Claude desktop app, Blockers, Tokens, Instructions, Best practices, Visibility, Code Project and 19 Code Project page tabs, one per part of a project. Maps: Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory, Schedule |
+| Pack | 28 tabs: Claude, Claude settings, Claude desktop app, Blockers, Tokens, Instructions, Best practices, Visibility, Code Project and 19 Code Project page tabs, one per part of a project. Maps: Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory, Schedule, the ten page maps, Brief and Runtime |
 | Engine | Git Crafter's `actions/pages` and CI standard, pinned by full commit SHA. No engine code lives here |
 | Public pages | Built in CI from `quality/public/`. The Quality page shows only metrics read from GitHub and the repo's files. Each metric that needs local files is dropped: not shown, counted or listed. The exceptions are the ones `quality/public-params.json` reads from committed files alone. A tab left with no metric (Tokens, Claude desktop app and 16 of the 19 `cp-` tabs) is left off; it shows on a `--local` page (Git Crafter v7.0.1 or later). The Process page shows each map step such a metric does not score |
 | Private numbers | Usage, cost, transcripts and connectors. Read on your own machine only, never uploaded |
@@ -152,5 +152,7 @@ flowchart LR
 | Skills | `write`, `test` | the other three steps read local-only metrics |
 | Subagents | `delegate`, `route` | the other three steps read local-only metrics |
 | Hooks | `say`, `safe` | the other two steps read local-only metrics |
+| Brief | `write` | the other four steps read local-only metrics |
+| Runtime | `setup` | the other five steps read local-only metrics |
 
 The table is the public Process page as `node quality/public.mjs` writes it on 2026-11-26: a map's steps are in [maps/README.md](maps/README.md), and each step's metric names whether it needs local files (`needs` in `targets/`).
