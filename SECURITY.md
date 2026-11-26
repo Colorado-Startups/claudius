@@ -12,7 +12,7 @@ Please do not open a public issue. A person replies.
 
 | Control | Where |
 |---|---|
-| Every fork run waits for approval and gets no secrets | Repo settings; `pull_request`, never `pull_request_target` with a fork checkout |
+| Every fork run waits for a maintainer to approve it and gets no secrets | Repo settings; `pull_request`, never `pull_request_target` with a fork checkout |
 | An outside PR merges as sent only on allowlisted paths. Every merge is at the reviewed head SHA, after the checks and two separate AI reviews pass | [`tools/merge_policy.json`](tools/merge_policy.json), beside `tools/merge_policy.py` |
 | Build, CI, dependency and gate changes are rebuilt by the orchestrator, never merged as sent | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 | Secret scanning and push protection on | Repo settings |

@@ -46,4 +46,4 @@ node <git-crafter>/quality/collect.mjs --config quality/config.json --local   # 
 | Only paths on `ai_mergeable` in [`tools/merge_policy.json`](tools/merge_policy.json), beside `tools/merge_policy.py` | An AI agent squash-merges it once the checks and both reviews pass |
 | Any other path: dependencies, build config, CI, hooks, gates, these docs | The orchestrator rebuilds it as its own PR with you as `Co-authored-by`. It links the new PR from yours |
 
-Check your paths first: `python3 -I tools/merge_policy.py --base origin/main`. An AI review is the approval: the agent merges once the checks and two separate reviews pass at the head commit. A fork's workflow run waits for a maintainer to approve it, and it gets no secrets.
+Check your paths first: `python3 -I tools/merge_policy.py --base origin/main`. An AI review is the approval. The agent merges once the checks and two separate reviews pass at the head commit. A fork's workflow run waits for a maintainer to approve it. It gets no secrets.
