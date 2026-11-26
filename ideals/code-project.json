@@ -48,8 +48,8 @@
     },
     {
       "part": "Plugins, skills, connectors",
-      "ideal": "Only official or own plugins are on, and read-only agents list reading tools and a small model",
-      "setup": "In each read-only agent file, list only reading tools and a small model; see the Equip map"
+      "ideal": "Every plugin is official or your own, and read-only agents list reading tools and a small model",
+      "setup": "In each read-only agent file, list only reading tools and a small model, as the template's explorer agent does; see the Equip map"
     },
     {
       "part": "Memory and instructions",

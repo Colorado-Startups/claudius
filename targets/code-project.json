@@ -32,7 +32,8 @@
         }
       ],
       "agent_dirs": [
-        ".claude/agents"
+        ".claude/agents",
+        "templates/claude/code-project/agents"
       ],
       "repo": "",
       "branch_prefix": "claude/",
