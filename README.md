@@ -82,7 +82,7 @@ flowchart LR
 | Engine | Git Crafter's `actions/pages` and CI standard, pinned by full commit SHA. No engine code lives here |
 | Public pages | Built in CI from `quality/public/`. The Quality page shows only metrics read from GitHub and the repo's files. Each metric that needs local files is dropped: not shown, counted or listed. The exceptions are the ones `quality/public-params.json` reads from committed files alone. A tab left with no metric (Tokens, Claude desktop app and 21 of the 24 `cp-` tabs) is left off; it shows on a `--local` page (Git Crafter v7.0.1 or later). The Process page shows each map step such a metric does not score |
 | Private numbers | Usage, cost, transcripts and connectors. Read on your own machine only, never uploaded |
-| Licence | Apache-2.0. Source of the moved files: [NOTICE](NOTICE) |
+| Licence | Apache-2.0. Source of the moved files: [NOTICE](NOTICE). The name: [TRADEMARKS.md](TRADEMARKS.md) |
 
 ## Layout
 
