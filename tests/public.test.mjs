@@ -30,7 +30,7 @@ test('public: each metric that needs local files is dropped but the repo-file on
   const pub = read(join(ROOT, 'quality', 'public-params.json'));
   const local = localOnlyIds([join(ROOT, 'targets')]);
   assert.deepEqual(new Set(dropped), new Set([...local].filter((id) => !pub.ids.includes(id))));
-  assert.equal(dropped.length, 46);
+  assert.equal(dropped.length, 48);
   const files = readdirSync(join(ROOT, 'targets')).filter((f) => f.endsWith('.json')).sort();
   assert.deepEqual(readdirSync(join(root, 'quality', 'public', 'targets')).sort(), [...files, DROPS].sort(), 'every targets file, so no collector runs without its targets, and the drops');
   assert.deepEqual(read(join(root, 'quality', 'public', 'targets', DROPS)), [...pub.drop.map((id) => ({ id, drop: true })), ...Object.entries(pub.params_for ?? {}).map(([id, params]) => ({ id, params }))]);
@@ -46,9 +46,9 @@ test('public: each metric that needs local files is dropped but the repo-file on
   }
   const kept = files.flatMap((f) => read(join(root, 'quality', 'public', 'targets', f))).filter((d) => d.drop !== true).map((d) => d.id);
   const ids = (f) => JSON.parse(readFileSync(join(ROOT, 'targets', f), 'utf8')).map((d) => d.id);
-  const [practices, visibility] = [ids('practices.json'), ids('visibility.json')];
-  assert.deepEqual([practices.length, visibility.length], [10, 5]);
-  assert.deepEqual(kept.sort(), ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr', 'claude.instruction_tokens', 'claude_settings.deny_coverage', 'claude_settings.setup_files', 'claude_settings.valid', 'instructions.description_tokens', 'lead_time.hours', ...practices, ...visibility].sort());
+  const [practices, visibility, codeProject] = [ids('practices.json'), ids('visibility.json'), ids('code-project.json').filter((id) => !['code_project.idle_revivals', 'code_project.tokens_per_merged_pr'].includes(id))];
+  assert.deepEqual([practices.length, visibility.length, codeProject.length], [10, 5, 15]);
+  assert.deepEqual(kept.sort(), ['blockers.enforcement_reverts', 'blockers.pushes_per_merged_pr', 'claude.instruction_tokens', 'claude_settings.deny_coverage', 'claude_settings.setup_files', 'claude_settings.valid', 'instructions.description_tokens', 'lead_time.hours', ...practices, ...visibility, ...codeProject].sort());
 });
 
 test('public: the config is the repo own, its targets and the page files under quality/public', () => {
@@ -60,7 +60,7 @@ test('public: the config is the repo own, its targets and the page files under q
   // A tab of the repo's own with no metric left goes, with its ideal; a Git Crafter tab stays (Git Crafter #116).
   const ids = pub.tabs.map((t) => (Array.isArray(t) ? t[0] : t));
   for (const gone of ['desktop-app', 'tokens']) assert.ok(!ids.includes(gone) && !existsSync(join(root, 'quality', 'public', 'ideals', `${gone}.json`)), gone);
-  for (const kept of ['claude', 'claude-settings', 'blockers', 'instructions', 'practices', 'visibility', 'dependabot', 'security']) assert.ok(ids.includes(kept), kept);
+  for (const kept of ['claude', 'claude-settings', 'blockers', 'instructions', 'practices', 'visibility', 'code-project', 'dependabot', 'security']) assert.ok(ids.includes(kept), kept);
   assert.ok(existsSync(join(root, 'quality', 'public', 'ideals', 'blockers.json')));
   assert.match(pub.comment, /quality\/public\.mjs/);
 });
@@ -78,7 +78,7 @@ test('public: the Process config writes each pack map in full, without the steps
   const dropped = new Set(writePublic(root));
   const mine = read(join(ROOT, 'quality', 'process', 'config.json'));
   const pub = read(join(root, 'quality', 'public', 'process.json'));
-  assert.deepEqual(mine.maps, [{ use: 'guard' }, { use: 'decide' }, { use: 'equip' }, { use: 'publish' }, { use: 'visibility' }]);
+  assert.deepEqual(mine.maps, [{ use: 'guard' }, { use: 'decide' }, { use: 'equip' }, { use: 'publish' }, { use: 'visibility' }, { use: 'project' }, { use: 'ship' }, { use: 'environment' }, { use: 'remember' }]);
   assert.deepEqual({ ...pub, comment: mine.comment, maps: mine.maps }, {
     ...mine,
     docs: { maps: 'quality/public/process.json' },
@@ -90,7 +90,14 @@ test('public: the Process config writes each pack map in full, without the steps
   const guard = read(join(ROOT, 'maps', 'guard.json'));
   const publish = read(join(ROOT, 'maps', 'publish.json'));
   const visibility = read(join(ROOT, 'maps', 'visibility.json'));
-  assert.deepEqual(pub.maps, [{ ...guard, critical_path: [], steps: guard.steps.filter((s) => s.id === 'change') }, publish, visibility], 'Decide and Equip score only local-only metrics, so both are left out; every Publish and Visibility step reads GitHub or repo files, so each stays whole');
+  const project = read(join(ROOT, 'maps', 'project.json'));
+  // Ship, Environment and Remember mix repo-file steps with local-only ones: each keeps the steps whose metric is public.
+  const trimmed = ['ship', 'environment', 'remember'].map((id) => {
+    const m = read(join(ROOT, 'maps', `${id}.json`));
+    const steps = m.steps.filter((s) => !dropped.has(s.metric));
+    return { ...m, critical_path: m.critical_path.filter((c) => steps.some((s) => s.id === c)), steps };
+  });
+  assert.deepEqual(pub.maps, [{ ...guard, critical_path: [], steps: guard.steps.filter((s) => s.id === 'change') }, publish, visibility, project, ...trimmed], 'Decide and Equip score only local-only metrics, so both are left out; every Publish, Visibility and Project step reads GitHub or repo files, so each stays whole; the three newer maps lose only their local-only steps');
   for (const s of pub.maps.flatMap((m) => m.steps)) assert.ok(!dropped.has(s.metric), s.metric);
 });
 

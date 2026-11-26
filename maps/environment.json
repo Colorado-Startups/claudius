@@ -1,0 +1,90 @@
+{
+ "id": "environment",
+ "name": "Environment",
+ "why": "A thread's machine, from its cloud environment to a local session when the work needs the Mac",
+ "ideal": "A cloud thread knows its GitHub route and limits, pushes in seconds, and hands local work to a Mac session that closes when done.",
+ "sources": [
+  {
+   "title": "Claude Code Projects",
+   "url": "https://code.claude.com/docs/en/claude-projects",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Claude Code: cloud environments",
+   "url": "https://code.claude.com/docs/en/cloud-environments",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Claude Code: Remote Control",
+   "url": "https://code.claude.com/docs/en/remote-control",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Claude Code: permissions",
+   "url": "https://code.claude.com/docs/en/permissions",
+   "date": "2026-11-26"
+  }
+ ],
+ "critical_path": [
+  "say",
+  "push",
+  "local"
+ ],
+ "steps": [
+  {
+   "id": "say",
+   "name": "Say",
+   "tools": [
+    "AGENTS.md",
+    "Cloud environment"
+   ],
+   "rule": "A thread reads its GitHub route, where network and variables live, and when work goes to a local session.",
+   "rule_ref": "https://code.claude.com/docs/en/cloud-environments",
+   "metric": "code_project.cloud_rules_missing"
+  },
+  {
+   "id": "push",
+   "name": "Push",
+   "tools": [
+    "git push",
+    "Network allowlist"
+   ],
+   "rule": "A push reaches GitHub in seconds, so the environment's network allows what the thread needs.",
+   "rule_ref": "https://code.claude.com/docs/en/cloud-environments",
+   "metric": "blockers.git_push_seconds"
+  },
+  {
+   "id": "local",
+   "name": "Hand off",
+   "tools": [
+    "Local thread",
+    "Remote Control"
+   ],
+   "rule": "Work that needs a local tool runs in a local session, which is archived when its task ends.",
+   "rule_ref": "https://code.claude.com/docs/en/remote-control",
+   "metric": "desktop_app.sub_sessions_closed"
+  },
+  {
+   "id": "ask",
+   "name": "Ask less",
+   "tools": [
+    "Permissions",
+    "Auto mode"
+   ],
+   "rule": "A session runs without stopping for approval, since each stop is a wait.",
+   "rule_ref": "https://code.claude.com/docs/en/permissions",
+   "metric": "claude_settings.prompts_per_100_calls"
+  },
+  {
+   "id": "spend",
+   "name": "Spend",
+   "tools": [
+    "Usage in project settings",
+    "Plan window"
+   ],
+   "rule": "The fullest weekly plan window stays under its goal, so new work is never blocked.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects#see-and-reduce-a-projects-usage",
+   "metric": "tokens.plan_used"
+  }
+ ]
+}

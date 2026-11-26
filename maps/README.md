@@ -1,6 +1,6 @@
 # Process maps
 
-Five maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }` and `{ "use": "visibility" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
+Nine maps for an agent-driven repo, each step held to one metric. Use them on your Process page with `{ "use": "guard" }`, `{ "use": "decide" }`, `{ "use": "equip" }`, `{ "use": "publish" }`, `{ "use": "visibility" }`, `{ "use": "project" }`, `{ "use": "ship" }`, `{ "use": "environment" }` and `{ "use": "remember" }` once the pack is in your `quality/config.json` `packs` ([README](../README.md#quickstart)). Steps marked 🔒 read the machine that runs the sessions, so they show only on a `--local` page.
 
 ## Guard: a tool call, through the guards, to run or blocked
 
@@ -96,4 +96,83 @@ flowchart LR
 
 Probe and Decide need an admin token: in CI without `ADMIN_READ_TOKEN` they read not measured, never 0. The [`visibility`](../plugin/skills/visibility/SKILL.md) skill runs the same audit in a session.
 
-Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json).
+## Project: a task from the project chat to a merged pull request
+
+```mermaid
+flowchart LR
+  brief["Brief"] --> load["Load"] --> delegate["Delegate"] --> route["Route"] --> ship["Ship"] --> merge["Merge"]
+```
+
+| Step | Ideal | Metric |
+|---|---|---|
+| Brief | Each guard is said in a file a cloud thread reads | `code_project.guard_rules_missing` |
+| Load | Each instruction file stays under 200 lines | `code_project.instruction_lines` |
+| Delegate | A read-only subagent lists only reading tools | `code_project.agents_unsafe` |
+| Route | Each subagent names its model | `code_project.agents_without_model` |
+| Ship | The draft pull request opens within 10 minutes of the first commit | `code_project.draft_pr_minutes` |
+| Merge | A green pull request merges within a day | `code_project.ready_to_merge_hours` |
+
+Every step reads repo files or the last 30 days of merged `claude/` pull requests, so all six show on the public page. A repo with no merged `claude/` pull request, or no agent files, reads not measured, never 0. Set it up with the [Code Project template](../templates/claude/code-project/README.md).
+
+## Ship: a ready repo, through a tracked and reviewed thread, to a merged pull request
+
+```mermaid
+flowchart LR
+  ready["Ready"] --> track["🔒 Track"] --> build["🔒 Build"] --> check["Check"] --> review["🔒 Review"] --> merge["🔒 Merge"]
+```
+
+| Step | Ideal | Metric |
+|---|---|---|
+| Ready | AGENTS.md, a CLAUDE.md that imports it, templates, CI and settings are in place | `code_project.setup_missing` |
+| Track | Each piece of work is an issue or card, and its pull request is merged, not closed | `claude.pr_merge_share` |
+| Build | A thread idle past the one hour cache is replaced, not revived | `code_project.idle_revivals` |
+| Check | The pull request opens as a draft and CI runs before a person reads it | `code_project.draft_first_share` |
+| Review | A reviewer that did not write the change reads it at its head commit | `claude.escaped_bugs_per_10_prs` |
+| Merge | A green, reviewed pull request squash merges, each costing fewer tokens | `code_project.tokens_per_merged_pr` |
+
+## Environment: a thread's machine, from the cloud environment to a local session
+
+```mermaid
+flowchart LR
+  say["Say"] --> push["🔒 Push"] --> local["🔒 Hand off"] --> ask["🔒 Ask less"] --> spend["🔒 Spend"]
+```
+
+| Step | Ideal | Metric |
+|---|---|---|
+| Say | A thread reads its GitHub route, where network and variables live, and when work goes local | `code_project.cloud_rules_missing` |
+| Push | A push reaches GitHub in seconds | `blockers.git_push_seconds` |
+| Hand off | A local or Remote Control session is archived when its task ends | `desktop_app.sub_sessions_closed` |
+| Ask less | A session runs without stopping for approval | `claude_settings.prompts_per_100_calls` |
+| Spend | The fullest plan window stays under its goal | `tokens.plan_used` |
+
+## Remember: a fact or recurring job, from the files a thread reads to a scheduled task
+
+```mermaid
+flowchart LR
+  say["Say"] --> load["🔒 Load"] --> save["🔒 Save"] --> clean["🔒 Clean"] --> schedule["Schedule"]
+```
+
+| Step | Ideal | Metric |
+|---|---|---|
+| Say | Each rule about memory and tracking sits in a file a thread loads | `code_project.memory_rules_missing` |
+| Load | The largest file every session loads stays under 200 lines | `instructions.lines_before_action` |
+| Save | The memory index head stays short | `instructions.memory_index_tokens` |
+| Clean | A rule, skill or agent no recent session used is put to work or fixed, never turned off or removed | `instructions.unused` |
+| Schedule | Each recurring job is a named scheduled task | `code_project.tasks_missing` |
+
+## Which part of a Code Project each map covers
+
+Each part is a group on the Code Project tab. The engine's tab parts table holds at most eight rows, so related parts share a group: plugins and skills with connectors, and the project with its settings.
+
+| Part (tab group) | Map |
+|---|---|
+| Project and settings | Ship (Ready), Project |
+| Coordinator and threads | Decide, Project |
+| Cloud environment and Mac | Environment |
+| Plugins, skills, connectors | Equip |
+| Memory and instructions | Remember, Project |
+| Scheduled tasks | Remember (Schedule) |
+| PR auto-fix | Ship (Check) |
+| Shipping and merging | Ship |
+
+Source of truth: [`guard.json`](guard.json), [`decide.json`](decide.json), [`equip.json`](equip.json), [`publish.json`](publish.json), [`visibility.json`](visibility.json), [`project.json`](project.json), [`ship.json`](ship.json), [`environment.json`](environment.json), [`remember.json`](remember.json).

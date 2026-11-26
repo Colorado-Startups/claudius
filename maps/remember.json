@@ -1,0 +1,85 @@
+{
+ "id": "remember",
+ "name": "Remember",
+ "why": "A fact or recurring job, from the files a thread reads to project memory and a scheduled task",
+ "ideal": "Rules sit where a thread reads them, memory stays short and current, and every recurring job runs as a scheduled task.",
+ "sources": [
+  {
+   "title": "Claude Code: how Claude remembers your project",
+   "url": "https://code.claude.com/docs/en/memory",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Claude Code Projects",
+   "url": "https://code.claude.com/docs/en/claude-projects",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Claude Code: automate work with scheduled tasks",
+   "url": "https://code.claude.com/docs/en/routines",
+   "date": "2026-11-26"
+  }
+ ],
+ "critical_path": [
+  "say",
+  "load",
+  "save"
+ ],
+ "steps": [
+  {
+   "id": "say",
+   "name": "Say",
+   "tools": [
+    "CLAUDE.md",
+    "AGENTS.md"
+   ],
+   "rule": "A thread reads each rule about memory and tracking in a file it loads.",
+   "rule_ref": "https://code.claude.com/docs/en/memory",
+   "metric": "code_project.memory_rules_missing"
+  },
+  {
+   "id": "load",
+   "name": "Load",
+   "tools": [
+    "CLAUDE.md",
+    "Path-scoped rules"
+   ],
+   "rule": "The largest file every session loads stays under 200 lines.",
+   "rule_ref": "https://code.claude.com/docs/en/memory",
+   "metric": "instructions.lines_before_action"
+  },
+  {
+   "id": "save",
+   "name": "Save",
+   "tools": [
+    "Project memory",
+    "Memory index"
+   ],
+   "rule": "The memory index head stays short, so every call carries little of it.",
+   "rule_ref": "https://code.claude.com/docs/en/memory",
+   "metric": "instructions.memory_index_tokens"
+  },
+  {
+   "id": "clean",
+   "name": "Clean",
+   "tools": [
+    "Rules",
+    "Skills",
+    "Agents"
+   ],
+   "rule": "A rule, skill or agent that no recent session used is put to work or fixed, never turned off or removed.",
+   "rule_ref": "https://code.claude.com/docs/en/memory",
+   "metric": "instructions.unused"
+  },
+  {
+   "id": "schedule",
+   "name": "Schedule",
+   "tools": [
+    "Cloud scheduled tasks"
+   ],
+   "rule": "Each recurring job is a named scheduled task with its day, not a thread kept alive.",
+   "rule_ref": "https://code.claude.com/docs/en/routines",
+   "metric": "code_project.tasks_missing"
+  }
+ ]
+}

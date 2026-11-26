@@ -1,0 +1,75 @@
+{
+  "ideal": "A cloud thread reads every guard in CLAUDE.md, carries short instructions, and hands side work to read-only subagents on small models.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-26"
+    },
+    {
+      "title": "Claude Code Docs: How Claude remembers your project",
+      "url": "https://code.claude.com/docs/en/memory",
+      "date": "2026-11-26"
+    },
+    {
+      "title": "Claude Code Docs: Create custom subagents",
+      "url": "https://code.claude.com/docs/en/sub-agents",
+      "date": "2026-11-26"
+    },
+    {
+      "title": "Claude Code Docs: Prompt caching, cache lifetime",
+      "url": "https://code.claude.com/docs/en/prompt-caching#cache-lifetime",
+      "date": "2026-11-26"
+    },
+    {
+      "title": "DORA: Working in small batches",
+      "url": "https://dora.dev/capabilities/working-in-small-batches/",
+      "date": "2025-12-08"
+    }
+  ],
+  "quality": "Every guard sits where a thread reads it, instructions stay short, read-only agents cannot edit, and each thread opens a draft pull request.",
+  "speed": "A thread opens its pull request within 10 minutes of its first commit, and a green one merges within a day.",
+  "consumption": "Every subagent names a model, a thread idle past the one-hour cache is replaced, and tokens per merged pull request hold or fall.",
+  "parts": [
+    {
+      "part": "Project and settings",
+      "ideal": "Every attached repo carries AGENTS.md, a CLAUDE.md that imports it, templates, CI and a valid settings.json",
+      "setup": "Run the setup check from Git Crafter's projects template and fix each gap it lists"
+    },
+    {
+      "part": "Coordinator and threads",
+      "ideal": "Draft pull request within 10 minutes, merge within a day, a fresh thread for new work",
+      "setup": "Use a claude/ branch, push after each step, open the draft pull request early"
+    },
+    {
+      "part": "Cloud environment and Mac",
+      "ideal": "A thread knows its GitHub route, where network and variables live, and when work moves to the Mac",
+      "setup": "Say each in AGENTS.md; set network and variables in the cloud environment"
+    },
+    {
+      "part": "Plugins, skills, connectors",
+      "ideal": "Every plugin is official or your own, and read-only agents list reading tools and a small model",
+      "setup": "In each read-only agent file, list only reading tools and a small model, as the template's explorer agent does; see the Equip map"
+    },
+    {
+      "part": "Memory and instructions",
+      "ideal": "Each guard sits in CLAUDE.md or AGENTS.md, each file under 200 lines, and lasting facts go to memory",
+      "setup": "Say each rule in CLAUDE.md; save each lasting fact to project memory"
+    },
+    {
+      "part": "Scheduled tasks",
+      "ideal": "Each recurring job is a named scheduled task with its day, not a thread kept alive",
+      "setup": "Ask Claude in the project to put each recurring job on a schedule as a cloud scheduled task"
+    },
+    {
+      "part": "PR auto-fix",
+      "ideal": "A pull request is watched with auto-fix until it merges, then the thread stops watching",
+      "setup": "Say it in AGENTS.md; a thread unsubscribes at merge"
+    },
+    {
+      "part": "Shipping and merging",
+      "ideal": "A draft pull request, a review at the head commit, then a squash merge guarded by the head SHA",
+      "setup": "Say the three steps in AGENTS.md; see the Ship map"
+    }
+  ]
+}

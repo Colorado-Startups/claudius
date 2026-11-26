@@ -1,0 +1,21 @@
+{
+ "id": "project",
+ "name": "Project",
+ "why": "A task from the project chat to a merged pull request, each step held to one metric",
+ "ideal": "A cloud thread reads its guards, delegates side work to cheap read-only agents, opens its pull request early and merges within a day.",
+ "sources": [
+  {"title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects", "url": "https://code.claude.com/docs/en/claude-projects", "date": "2026-11-25"},
+  {"title": "Claude Code Docs: How Claude remembers your project", "url": "https://code.claude.com/docs/en/memory", "date": "2026-11-25"},
+  {"title": "Claude Code Docs: Create custom subagents", "url": "https://code.claude.com/docs/en/sub-agents", "date": "2026-11-25"},
+  {"title": "DORA: Working in small batches", "url": "https://dora.dev/capabilities/working-in-small-batches/", "date": "2025-12-08"}
+ ],
+ "critical_path": ["brief", "load", "ship", "merge"],
+ "steps": [
+  {"id": "brief", "name": "Brief", "tools": ["Project instructions", "CLAUDE.md"], "rule": "Each guard is said in a file a cloud thread reads, never only in settings.json.", "rule_ref": "https://code.claude.com/docs/en/claude-projects", "metric": "code_project.guard_rules_missing"},
+  {"id": "load", "name": "Load", "tools": ["CLAUDE.md", "AGENTS.md"], "rule": "Each instruction file stays under 200 lines, so a thread keeps its context for the work.", "rule_ref": "https://code.claude.com/docs/en/memory", "metric": "code_project.instruction_lines"},
+  {"id": "delegate", "name": "Delegate", "tools": [".claude/agents"], "rule": "A read-only subagent lists only reading tools, so side work cannot change the repo.", "rule_ref": "https://code.claude.com/docs/en/sub-agents", "metric": "code_project.agents_unsafe"},
+  {"id": "route", "name": "Route", "tools": [".claude/agents"], "rule": "Each subagent names its model, so side work runs on a small one.", "rule_ref": "https://code.claude.com/docs/en/sub-agents", "metric": "code_project.agents_without_model"},
+  {"id": "ship", "name": "Ship", "tools": ["Branch claude/", "Draft pull request"], "rule": "A thread opens its draft pull request within 10 minutes of its first commit.", "rule_ref": "https://dora.dev/capabilities/working-in-small-batches/", "metric": "code_project.draft_pr_minutes"},
+  {"id": "merge", "name": "Merge", "tools": ["CI", "Pull request"], "rule": "A green pull request merges within a day, then the thread stops watching it.", "rule_ref": "https://dora.dev/capabilities/working-in-small-batches/", "metric": "code_project.ready_to_merge_hours"}
+ ]
+}
