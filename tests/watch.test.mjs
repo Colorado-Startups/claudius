@@ -295,3 +295,26 @@ test('watch: more than 8 workers is refused with exit 2', () => {
   assert.equal(r.status, 2);
   assert.match(r.stderr, /split the plan or watch fewer/i);
 });
+
+test('watch: a different workers list on the same state starts a new watch', () => {
+  const { repo, workers, state, run } = local();
+  const hourAgo = Math.floor(Date.now() / 1000) - 3600;
+  run(hourAgo); // an old watch with the first list
+  writeFileSync(workers, JSON.stringify([{ name: 'other', path: repo }]));
+  const t = Date.now();
+  watch(['--workers', workers, '--state', state, '--every', '0.2', '--max-minutes', '0.03']);
+  assert.ok(Date.now() - t >= 1000, 'the loop ran past its first check');
+  const saved = JSON.parse(readFileSync(state, 'utf8'));
+  assert.ok(saved._watch.started > hourAgo + 3000);
+  assert.equal(saved.w, undefined);
+});
+
+test('watch: --once past --max-minutes prints the over line and exits 3', () => {
+  const { workers, state, run } = local();
+  run(T0);
+  const r = spawnSync('python3', ['-I', SCRIPT, '--workers', workers, '--state', state, '--once', '--now', String(T0 + 3600), '--max-minutes', '1'], { encoding: 'utf8' });
+  assert.equal(r.status, 3);
+  const out = r.stdout.trim().split('\n');
+  assert.deepEqual(JSON.parse(out[out.length - 1]), { watch: 'over', max_minutes: 1 });
+  assert.equal(out.length, 2);
+});

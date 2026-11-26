@@ -16,6 +16,8 @@ workers.json is a list; a worker has `name` and either `repo` + `branch` (+ opti
      {"name": "docs", "repo": "owner/repo", "branch": "claude/docs"},
      {"name": "local", "path": "~/src/repo/.claude/worktrees/x"}]
 
+With --once, once --max-minutes have passed, the rows are followed by {"watch":"over","max_minutes":N} and the exit
+code is 3: the caller stops its `/loop`. The count belongs to the workers list: a changed list starts a new watch.
 Loop mode exits when every worker is done, or once --max-minutes (default 120) have passed since the watch's first check
 (kept in the state file, so a restarted loop does not start the count again), printing each unfinished worker's last
 row on the way out. A worker that is done is not read again in that loop: one `done` stays done.
@@ -360,6 +362,9 @@ def main():
         ap.error("--workers is required")
     workers = load_workers(args.workers)
 
+    names = {w["name"] for w in workers}
+    plan_hash = hashlib.sha1(json.dumps(
+        sorted([w["name"], w.get("repo"), w.get("branch"), w.get("path")] for w in workers)).encode()).hexdigest()
     last = {}
     rows_by_name = {}
     while True:
@@ -369,7 +374,12 @@ def main():
         now = args.now if args.now is not None else time.time()
         with locked_state(state_path) as state:
             # The watch's start is set once and kept across runs (Monitor restarts the script), so the cap holds.
-            started = state.setdefault("_watch", {"started": now})["started"]
+            # A different workers list is a different watch (a new plan on the same file path): start over.
+            if state.get("_watch", {}).get("hash") != plan_hash:
+                state["_watch"] = {"started": now, "hash": plan_hash}
+                for gone in [k for k in state if k != "_watch" and k not in names]:
+                    del state[gone]
+            started = state["_watch"]["started"]
             for w, r in zip(todo, results):
                 rows_by_name[w["name"]] = judge(w["name"], r, state, now, w["name"] in args.busy)
         rows = [rows_by_name[w["name"]] for w in workers]
@@ -380,7 +390,12 @@ def main():
                 emit(row)
                 printed.add(row["name"])
             last[row["name"]] = key
-        if args.once or all(r["verdict"] == "done" for r in rows):
+        if args.once:
+            if now - started >= args.max_minutes * 60:  # the cap has passed: tell a `/loop --once` caller to stop
+                emit({"watch": "over", "max_minutes": int(args.max_minutes) if args.max_minutes == int(args.max_minutes) else args.max_minutes})
+                sys.exit(3)
+            return
+        if all(r["verdict"] == "done" for r in rows):
             return
         left = args.max_minutes * 60 - (now - started)
         if left <= 0:
