@@ -32,10 +32,17 @@ test('pack: every collector file imports with no engine beside it', async () => 
 });
 
 // Git Crafter's build stops a page on a long ideal ("ideal must be at most 25 words"), but only in a repo that pins the pack, so the pack checks it here.
-test('pack: every ideal and its three lines are at most 25 words', () => {
-  const long = readdirSync(join(ROOT, 'ideals')).filter((f) => f.endsWith('.json')).flatMap((f) => {
-    const d = JSON.parse(readFileSync(join(ROOT, 'ideals', f), 'utf8'));
-    return ['ideal', 'quality', 'speed', 'consumption'].filter((k) => typeof d[k] === 'string' && d[k].trim().split(/\s+/).length > 25).map((k) => `${f} ${k}`);
-  });
+// Words as the engine counts them (quality/text-rules.mjs): each run of letters is one word per 20 letters, and numbers are free.
+const wordCount = (text) => (text.match(/\p{L}+/gu) ?? []).reduce((n, run) => n + Math.ceil(run.length / 20), 0);
+const tooLong = (name, d) => [...['ideal', 'quality', 'speed', 'consumption'].map((k) => [k, d[k]]), ...(d.parts ?? []).flatMap((row, i) => ['ideal', 'setup'].map((k) => [`parts[${i}].${k}`, row[k]]))].filter(([, v]) => typeof v === 'string' && wordCount(v) > 25).map(([k]) => `${name} ${k}`);
+
+test('pack: the word count is the engine rule, and the 29-word allow card ideal fails it', () => {
+  assert.equal(wordCount('read-only CLAUDE.md template\'s'), 6);
+  assert.equal(wordCount('a '.repeat(25) + '10 000 80% 2026'), 25);
+  assert.deepEqual(tooLong('x.json', { ideal: 'A Mac thread gets one Allow once card, in a worktree if its folder is shared, and each card or prompt is answered where it was asked within minutes.' }), ['x.json ideal']);
+});
+
+test('pack: every ideal, its three lines and its parts are at most 25 words', () => {
+  const long = readdirSync(join(ROOT, 'ideals')).filter((f) => f.endsWith('.json')).flatMap((f) => tooLong(f, JSON.parse(readFileSync(join(ROOT, 'ideals', f), 'utf8'))));
   assert.deepEqual(long, []);
 });
