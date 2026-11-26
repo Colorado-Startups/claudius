@@ -5,6 +5,7 @@
 //   desktop_app.plugins_untrusted    enabled plugins from community or third-party marketplaces
 //   desktop_app.plugins_stale        install records turned off, delisted plugins, plugins with no upstream update in params.stale_days
 //                                    (reported to turn back on, add the official one or fix; nothing is turned off: templates/claude/README.md#all-on-app-wide)
+//   desktop_app.off_switches         settings that turn something off, in the user, project and local settings files
 // Tiers follow code.claude.com/docs/en/plugins/security: a marketplace's name
 // places it, and Claude Code accepts the official and community names only
 // from github.com/anthropics/.
@@ -23,6 +24,7 @@ const readJson = (file) => {
     return null;
   }
 };
+const isObject = (d) => d !== null && typeof d === 'object' && !Array.isArray(d);
 const dirs = (dir) => {
   try {
     return fs.readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
@@ -58,6 +60,32 @@ export function repoOwner(root) {
 // enabledPlugins merged key by key, lowest precedence first (plugins/loading).
 function enabledMap(...settingsFiles) {
   return Object.assign({}, ...settingsFiles.map((f) => readJson(f)?.enabledPlugins ?? {}));
+}
+
+// The settings files in precedence order, lowest first (settings): user, the repo's shared project file, the repo's local file.
+function settingsFiles({ home, root, params }) {
+  const dot = params.claude_dir_name;
+  const [settingsFile, localFile] = params.settings_files;
+  return [path.join(home, dot, settingsFile), path.join(root, dot, settingsFile), path.join(root, dot, localFile)];
+}
+
+// Every setting that turns a plugin, skill or connector off, as one row each: a key set to
+// its off value in params.off_booleans, a skillOverrides entry whose value is in
+// params.skill_override_off, an enabledPlugins entry that is false. A key set in several files
+// counts once, by the file that wins. null when no settings file can be read.
+export function offSwitches({ home, root, params }) {
+  const files = settingsFiles({ home, root, params });
+  // A file that is there but does not parse would be skipped, and the count would read too low: not measured instead.
+  if (files.some((f) => fs.existsSync(f) && !isObject(readJson(f)))) throw new Error('a settings file cannot be read or parsed');
+  const docs = files.map(readJson).filter(isObject);
+  if (!docs.length) return null;
+  const merged = Object.assign({}, ...docs);
+  const rows = [];
+  for (const [key, off] of Object.entries(params.off_booleans ?? {})) if (merged[key] === off) rows.push(key);
+  const overrides = Object.assign({}, ...docs.map((d) => (isObject(d.skillOverrides) ? d.skillOverrides : {})));
+  for (const [skill, value] of Object.entries(overrides)) if ((params.skill_override_off ?? []).includes(value)) rows.push(`skillOverrides: ${skill}`);
+  for (const [id, on] of Object.entries(enabledMap(...settingsFiles({ home, root, params })))) if (on === false) rows.push(`enabledPlugins: ${id}`);
+  return rows.sort();
 }
 
 // Everything that adds plugins, as named records.
@@ -137,4 +165,10 @@ export function pluginMetrics(inv, params, now, { val, cnc }) {
   }
   const rows = [...stale.entries()].sort();
   val('plugins_stale', rows.length, `state: Claude Code install records no settings source enables, plugins in flagged-plugins.json, and enabled plugins whose last_updated in plugin-catalog-cache.json (fetched ${inv.cacheAt ? inv.cacheAt.slice(0, 10) : 'never'}) is older than params.stale_days`, rows.map(([id, why]) => ({ ...item(id, 1, 'plugins'), why })));
+}
+
+// The off-switch reading, written through val.
+export function offSwitchMetric(rows, { val, cnc }) {
+  if (!rows) return cnc('off_switches', 'no user, project or local settings file found', 'the desktop_app collector');
+  val('off_switches', rows.length, 'state: user, project and local settings files (params.settings_files), each key counted once by the file that wins: params.off_booleans at its off value, skillOverrides values in params.skill_override_off, enabledPlugins entries that are false', rows.map((r) => item(r, 1, 'switches')));
 }

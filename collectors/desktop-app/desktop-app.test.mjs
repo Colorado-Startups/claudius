@@ -9,6 +9,7 @@ import path from 'node:path';
 import { after, test } from 'node:test';
 import { CHARTS, loadTargets } from '../lib/engine.mjs';
 import { area, collect, metricIds, PARAMS } from './desktop-app.mjs';
+import { offSwitches } from './desktop-app-plugins.mjs';
 
 const now = new Date('2026-11-10T12:00:00Z');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'desktop-app-collector-'));
@@ -179,4 +180,49 @@ test('no path literal in the collector: every path comes from params', () => {
     const paths = literals.filter((s) => /~\/[\w.]|(^|[\s'"`])\/?[\w.-]+\/[\w.-]+|\.claude\b|Developer|Library/.test(s));
     assert.deepEqual(paths, [], file);
   }
+});
+
+// Settings that turn something off, in the three files: user (home), project and local (a repo of their own).
+const offRoot = path.join(tmp, 'off-repo');
+write(path.join(home, '.claude', 'settings.json'), JSON.stringify({ syncClaudeAiPlugins: false, syncClaudeAiSkills: false, enabledPlugins: { 'a@x': false, 'b@x': true, 'c@x': true }, skillOverrides: { s1: 'off', s2: 'on' } }));
+write(path.join(offRoot, '.claude', 'settings.json'), JSON.stringify({ syncClaudeAiSkills: false, disableClaudeAiConnectors: true, skillOverrides: { s3: 'user-invocable-only' } }));
+write(path.join(offRoot, '.claude', 'settings.local.json'), JSON.stringify({ syncClaudeAiPlugins: true, disableClaudeAiConnectors: false, enabledPlugins: { 'b@x': false } }));
+
+test('off_switches: each off value in the user, project and local files, a key set in two files counted once, a later file able to turn it back on', async () => {
+  const got = (await collect({ ...base, root: offRoot }))['desktop_app.off_switches'];
+  // syncClaudeAiSkills (user and project, once), skillOverrides s1 and s3, enabledPlugins a and b; syncClaudeAiPlugins and disableClaudeAiConnectors are back on by the local file.
+  assert.deepEqual(got.detail.map((d) => d.label), ['enabledPlugins: a@x', 'enabledPlugins: b@x', 'skillOverrides: s1', 'skillOverrides: s3', 'syncClaudeAiSkills']);
+  assert.equal(got.value, 5);
+  assert.match(got.source, /^state/);
+});
+
+test('off_switches: every switch the settings docs name, and none when all is on', () => {
+  const all = path.join(tmp, 'all-off');
+  write(path.join(all, '.claude', 'settings.json'), JSON.stringify({ syncClaudeAiPlugins: false, syncClaudeAiSkills: false, disableClaudeAiConnectors: true, skillOverrides: { a: 'off', b: 'user-invocable-only', c: 'on' }, enabledPlugins: { 'p@m': false, 'q@m': true } }));
+  assert.equal(offSwitches({ home: path.join(tmp, 'none'), root: all, params: PARAMS }).length, 6);
+  const on = path.join(tmp, 'all-on');
+  write(path.join(on, '.claude', 'settings.json'), JSON.stringify({ syncClaudeAiPlugins: true, disableClaudeAiConnectors: false, skillOverrides: { c: 'on' }, enabledPlugins: { 'q@m': true } }));
+  assert.deepEqual(offSwitches({ home: path.join(tmp, 'none'), root: on, params: PARAMS }), [], 'read and clear is 0');
+});
+
+test('off_switches: no settings file at all is not measured, never 0', async () => {
+  assert.equal(offSwitches({ home: path.join(tmp, 'none'), root: path.join(tmp, 'none'), params: PARAMS }), null);
+  const bare = path.join(tmp, 'no-settings-home');
+  write(path.join(bare, '.claude', 'projects', '-Users-someone-Developer-acme-site', 'c1.jsonl'), jsonl([call('c1', 0, 'Read')]));
+  assert.match((await collect({ ...base, home: bare, root: path.join(tmp, 'none') }))['desktop_app.off_switches'].could_not_check, /no user, project or local settings file/);
+});
+
+test('off_switches: a settings file that cannot be read or parsed is not measured, with a fixed reason and none of its text', async () => {
+  const broken = path.join(tmp, 'broken-repo');
+  write(path.join(broken, '.claude', 'settings.json'), '{ "syncClaudeAiSkills": false, secret-looking-text');
+  write(path.join(broken, '.claude', 'settings.local.json'), JSON.stringify({ disableClaudeAiConnectors: true }));
+  assert.throws(() => offSwitches({ home: path.join(tmp, 'none'), root: broken, params: PARAMS }), /^Error: a settings file cannot be read or parsed$/);
+  const bare = path.join(tmp, 'broken-settings-home');
+  write(path.join(bare, '.claude', 'projects', '-Users-someone-Developer-acme-site', 'c1.jsonl'), jsonl([call('c1', 0, 'Read')]));
+  const got = (await collect({ ...base, home: bare, root: broken }))['desktop_app.off_switches'];
+  assert.equal(got.could_not_check, 'could not read (a settings file cannot be read or parsed)');
+  // A skillOverrides that is a list, not a map, adds no rows.
+  const listy = path.join(tmp, 'listy-repo');
+  write(path.join(listy, '.claude', 'settings.json'), JSON.stringify({ skillOverrides: ['off'] }));
+  assert.deepEqual(offSwitches({ home: path.join(tmp, 'none'), root: listy, params: PARAMS }), []);
 });
