@@ -1,6 +1,6 @@
 ---
 name: visibility
-description: Audits which repos of a GitHub org are public or private in one run, and lists each check as a table. Use when asked which repos should be public or private, before changing a repo's visibility, or before calling a repo retired.
+description: Audits which repos of a GitHub org are public or private in one run, and lists each check as a table, then turns on missing secret scanning and makes a private repo's site private. Use when asked which repos should be public or private, before changing a repo's visibility, or before calling a repo retired.
 compatibility: Needs the gh CLI signed in as an org owner, so private repos and scanning settings are visible, plus git and curl. Without a shell it gives the checks as a table for the person to run.
 ---
 
