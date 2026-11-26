@@ -1,0 +1,30 @@
+# Keyless Claude in GitHub Actions: a copy-and-fill workflow. Recipe: templates/claude/guides/detail/claude-api-ci.md.
+# The three <...> values are identifiers, not secrets. The workload identity page shows them.
+# Do not add an API key secret: a static key wins over federation and defeats the point.
+name: claude-keyless
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write # lets the job ask GitHub for a signed token
+
+concurrency:
+  group: claude-keyless-${{ github.ref }}
+  cancel-in-progress: true # a newer push replaces the older run, so it never double-spends
+
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10 # a stuck job stops here
+    steps:
+      - uses: actions/checkout@v4 # pin to a full commit SHA in your repo
+      - uses: anthropics/claude-code-action@v1 # pin to a full commit SHA in your repo
+        with:
+          anthropic_federation_rule_id: <fdrl_ id>
+          anthropic_organization_id: <organization id>
+          anthropic_service_account_id: <svac_ id>
+          claude_args: --max-turns 8 # a turn cap keeps one run small

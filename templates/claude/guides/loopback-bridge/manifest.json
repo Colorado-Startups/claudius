@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/mcpb/main/schemas/mcpb-manifest-v0.4.schema.json",
+  "manifest_version": "0.4",
+  "name": "<app-id>-bridge",
+  "display_name": "<App name>",
+  "version": "1.0.0",
+  "description": "<App name>'s MCP tools, for Cowork and the Code tab. Needs <App name> open.",
+  "long_description": "Bridges Claude Desktop to the MCP server <App name> runs at http://127.0.0.1:<port>/mcp. The bridge forwards only to this computer. When <App name> is closed it reports no tools, then adds them when <App name> opens.",
+  "author": { "name": "<your name>" },
+  "server": {
+    "type": "node",
+    "entry_point": "server/bridge.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/bridge.js"],
+      "env": {
+        "MCP_URL": "http://127.0.0.1:<port>/mcp",
+        "MCP_APP_NAME": "<App name>"
+      }
+    }
+  },
+  "tools_generated": true,
+  "compatibility": {
+    "platforms": ["darwin", "win32"],
+    "runtimes": { "node": ">=18" }
+  }
+}
