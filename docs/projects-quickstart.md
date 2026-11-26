@@ -44,7 +44,7 @@ Paste this as the first message of the first thread. Each line is one step the t
 | Cost | Rule |
 |---|---|
 | Fixed context | The instructions and each repo's `CLAUDE.md` load in every thread. Move long procedures into skills |
-| Idle threads | A thread revived after an hour reads its whole context again, so a fresh thread is cheaper |
+| Idle threads | A thread revived after the one-hour cache lifetime reads its whole context again ([Claude Code Projects](https://code.claude.com/docs/en/claude-projects), read 2026-11-25), so a fresh thread is cheaper |
 | Reviews | Local `/code-review` first. Per-push reviews multiply cost |
 
 The same files work in OpenCode Desktop, which reads `AGENTS.md`.

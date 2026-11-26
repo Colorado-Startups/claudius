@@ -52,7 +52,7 @@ Cloud threads load a repo's `.claude/agents/`. The explorer reads and reports, s
 
 ## Scheduled tasks
 
-A cloud scheduled task runs without a conversation. It ignores the connectors it does not need and leaves them on ([All on, app-wide](../README.md#all-on-app-wide)).
+These tasks are suggestions to set up as scheduled tasks. A task ignores the connectors it does not need and leaves them on ([All on, app-wide](../README.md#all-on-app-wide)).
 
 | Task | When | Does |
 |---|---|---|
