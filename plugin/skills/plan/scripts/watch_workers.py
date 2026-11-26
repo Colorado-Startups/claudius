@@ -16,8 +16,13 @@ workers.json is a list; a worker has `name` and either `repo` + `branch` (+ opti
      {"name": "docs", "repo": "owner/repo", "branch": "claude/docs"},
      {"name": "local", "path": "~/src/repo/.claude/worktrees/x"}]
 
-Loop mode exits when every worker is done, or once --max-minutes (default 120) have passed, printing each unfinished worker's last
+Loop mode exits when every worker is done, or once --max-minutes (default 120) have passed since the watch's first check
+(kept in the state file, so a restarted loop does not start the count again), printing each unfinished worker's last
 row on the way out. A worker that is done is not read again in that loop: one `done` stays done.
+
+A throttled read (GitHub rate limit) shows `ok` for up to 10 minutes in a row, then as an error with signal `rate limited`.
+A ready PR with CI pending shows `ok`, signal `ci pending`, for up to 20 minutes from when CI first showed pending.
+At most 8 workers: more exits 2 (each cloud worker costs up to 5 `gh api` calls a minute against the shared 5,000/hr limit).
 
 Output line: {"name","signal","idle_min","pr":{"number","state","ci"}|null,"verdict":"ok|nudge|restart|done"}.
 Progress for a cloud worker is the branch's newest sha plus the PR's head sha, state and check rollup (comments and
@@ -52,6 +57,9 @@ except ImportError:
 NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)  # 0 where the platform has none
 NUDGE_AFTER_MIN = 1          # quiet this long -> nudge
 RESTART_AFTER_NUDGE_MIN = 1  # still quiet this long after the nudge -> restart
+THROTTLE_ERROR_AFTER_MIN = 10  # throttled reads this long in a row count as an error, so nudge and restart apply
+CI_PENDING_GRACE_MIN = 20     # a ready PR with CI pending is "ok" this long from when CI first showed pending
+MAX_WORKERS = 8               # each cloud worker costs up to 5 gh api calls a minute against a shared 5,000/hr limit
 BUSY_GRACE_MIN = 10          # a session shown busy may go this long without a push (the contract's draft-PR limit)
 RATE_LIMIT = re.compile(r"rate limit|HTTP 429|abuse detection|secondary rate", re.I)
 FAILED = {"FAILURE", "TIMED_OUT", "CANCELLED", "ACTION_REQUIRED", "STARTUP_FAILURE", "ERROR"}
@@ -160,11 +168,12 @@ def check_cloud(w):
         # Merged counts at the branch head, or once the branch is deleted: an old PR on a reused branch name does not.
         done = (state == "merged" and (sha is None or pr["head"] == sha)) or (
             state == "open" and pr["ci"] in ("green", "none") and pr["head"] == sha)
+        ci_pending = state == "open" and pr["ci"] == "pending"  # open and not a draft
         pr = {k: pr[k] for k in ("number", "state", "ci")}
     else:
         signal = f"push {sha[:7]}" if sha else "no branch yet"
-        fp, done = sha or "-", False
-    return {"fp": fp, "signal": signal, "pr": pr, "done": done}
+        fp, done, ci_pending = sha or "-", False, False
+    return {"fp": fp, "signal": signal, "pr": pr, "done": done, "ci_pending": ci_pending}
 
 
 def check_local(w):
@@ -198,10 +207,27 @@ def judge(name, result, state, now, busy=False):
         s = state[name] = {"fp": None, "changed": now, "nudged_at": None}
     error = "error" in result
     if not error and result["fp"] != s["fp"]:
-        s.update(fp=result["fp"], changed=now, nudged_at=None, done=False, done_seen=False)
+        s.update(fp=result["fp"], changed=now, nudged_at=None, done=False, done_seen=False, pending_since=None)
     idle = int((now - s["changed"]) // 60)
-    if error and RATE_LIMIT.search(result["error"]) and not s.get("done"):
-        v = "ok"  # GitHub throttled the read: no data, not no progress. Idle time still counts on the next read.
+    throttled = error and bool(RATE_LIMIT.search(result["error"]))
+    if throttled:
+        s.setdefault("throttled_since", now)
+        if s["throttled_since"] is None:
+            s["throttled_since"] = now
+    else:
+        s["throttled_since"] = None  # a good read, or another error, ends the run of throttled reads
+    # Ready PR, CI still running: the worker stopped correctly. Grace from when CI first showed pending.
+    pending = not error and bool(result.get("ci_pending"))
+    if pending and s.get("pending_since") is None:
+        s["pending_since"] = now
+    if not pending:
+        s["pending_since"] = None
+    ci_wait = pending and now - s["pending_since"] < CI_PENDING_GRACE_MIN * 60
+    rate_limited = throttled and now - s["throttled_since"] >= THROTTLE_ERROR_AFTER_MIN * 60
+    if throttled and not s.get("done") and not rate_limited:
+        v = "ok"  # GitHub throttled the read: no data, not no progress, for up to 10 minutes
+    elif ci_wait:
+        v = "ok"
     elif error and s.get("done"):
         v = "done"  # a finished worker stays finished through a failed read; new work clears it
     elif error and s.get("done_seen"):
@@ -215,7 +241,11 @@ def judge(name, result, state, now, busy=False):
         v = verdict(idle, None if nudged_at is None else int((now - nudged_at) // 60), busy)
         if v == "nudge":
             s["nudged_at"] = now
-    signal = short_error(result["error"]) if error else result["signal"]
+    signal = result.get("signal")
+    if error:
+        signal = "rate limited" if rate_limited else short_error(result["error"])
+    elif ci_wait:
+        signal = "ci pending"
     return {"name": name, "signal": signal, "idle_min": idle, "pr": None if error else result["pr"], "verdict": v}
 
 
@@ -260,7 +290,9 @@ def load_state(path):
     except (OSError, ValueError) as e:
         print(f"watch_workers: state file {path} unreadable ({type(e).__name__}); starting fresh", file=sys.stderr)
         return {}
-    ok = isinstance(state, dict) and all(isinstance(v, dict) and {"fp", "changed"} <= v.keys() for v in state.values())
+    ok = isinstance(state, dict) and all(
+        isinstance(v, dict) and ({"started"} <= v.keys() if k == "_watch" else {"fp", "changed"} <= v.keys())
+        for k, v in state.items())
     if not ok:
         print(f"watch_workers: state file {path} has the wrong shape; starting fresh", file=sys.stderr)
         return {}
@@ -277,7 +309,13 @@ def save_state(path, state):
 
 def load_workers(path):
     workers = json.loads(Path(path).expanduser().read_text())
+    if len(workers) > MAX_WORKERS:
+        print(f"watch_workers: {len(workers)} workers; the most is {MAX_WORKERS}. Split the plan or watch fewer: each cloud "
+              "worker costs up to 5 `gh api` calls a minute against the account's shared 5,000/hr limit.", file=sys.stderr)
+        sys.exit(2)
     names = [w["name"] for w in workers]
+    if "_watch" in names:
+        sys.exit("worker name _watch is reserved")
     if len(set(names)) != len(names):
         sys.exit("worker names must be unique")
     for w in workers:
@@ -324,13 +362,14 @@ def main():
 
     last = {}
     rows_by_name = {}
-    started = time.monotonic()
     while True:
         # A worker already done is not read again in a loop: one `done` stays done.
         todo = [w for w in workers if args.once or rows_by_name.get(w["name"], {}).get("verdict") != "done"]
         results = check_all(todo)
         now = args.now if args.now is not None else time.time()
         with locked_state(state_path) as state:
+            # The watch's start is set once and kept across runs (Monitor restarts the script), so the cap holds.
+            started = state.setdefault("_watch", {"started": now})["started"]
             for w, r in zip(todo, results):
                 rows_by_name[w["name"]] = judge(w["name"], r, state, now, w["name"] in args.busy)
         rows = [rows_by_name[w["name"]] for w in workers]
@@ -343,7 +382,7 @@ def main():
             last[row["name"]] = key
         if args.once or all(r["verdict"] == "done" for r in rows):
             return
-        left = args.max_minutes * 60 - (time.monotonic() - started)
+        left = args.max_minutes * 60 - (now - started)
         if left <= 0:
             for row in rows:  # out of time: leave with each worker's last row
                 if row["name"] not in printed and row["verdict"] != "done":  # a done row was printed already

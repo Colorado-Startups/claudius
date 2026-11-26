@@ -198,7 +198,7 @@ const lines = (file) => readFileSync(file, 'utf8').split('\n').filter(Boolean);
 test('watch: a commit status that is pending or failed counts in the CI rollup', () => {
   const c = cloud(pr({}));
   const status = (state) => ({ FAKE_STATUS: JSON.stringify({ statuses: [{ state }] }) });
-  assert.match(c.runEnv(T0, status('pending'))[0].signal, /CI pending/);
+  assert.equal(c.runEnv(T0, status('pending'))[0].pr.ci, 'pending');
   assert.match(c.runEnv(T0 + 1, status('failure'))[0].signal, /CI failing/);
   assert.match(c.runEnv(T0 + 2, status('success'))[0].signal, /CI green/);
 });
@@ -236,7 +236,7 @@ test('watch: loop mode does not read a done worker again', () => {
     { name: 'c', repo: 'owner/repo', branch: 'claude/c' },
     { name: 'w', path: l.repo },
   ]));
-  const rows = watch(['--workers', c.workers, '--state', c.state, '--now', String(T0), '--every', '0', '--max-minutes', '0.03'],
+  const rows = watch(['--workers', c.workers, '--state', c.state, '--every', '0', '--max-minutes', '0.03'],
     { ...c.env, FAKE_LOG: log });
   assert.deepEqual(rows.filter((r) => r.name === 'c').map((r) => r.verdict), ['ok', 'done']);
   assert.equal(lines(log).filter((x) => x.includes('/git/ref/')).length, 2);
@@ -252,4 +252,46 @@ test('watch: a symlinked lock file is refused, and the state file is private', (
   ok.run(T0);
   assert.equal(statSync(ok.state).mode & 0o077, 0);
   assert.equal(statSync(ok.state + '.lock').mode & 0o077, 0);
+});
+
+test('watch: --max-minutes counts from the first check, across runs', () => {
+  const { workers, state, run } = local();
+  run(T0); // the first run sets the start
+  const args = ['--workers', workers, '--state', state, '--every', '0', '--max-minutes', '1'];
+  // A restarted loop one hour later is already past the cap: it prints once and exits.
+  assert.equal(watch([...args, '--now', String(T0 + 3600)]).length, 1);
+});
+
+test('watch: throttled reads are ok for 10 minutes in a row, then an error that is nudged; a good read resets', () => {
+  const { runEnv } = cloud(pr({}));
+  const limited = { FAKE_FAIL: '1', FAKE_ERR: 'gh: API rate limit exceeded (HTTP 403)' };
+  assert.equal(runEnv(T0, limited)[0].verdict, 'ok');
+  assert.equal(runEnv(T0 + 540, limited)[0].verdict, 'ok');
+  const dead = runEnv(T0 + 600, limited)[0];
+  assert.deepEqual([dead.verdict, dead.signal], ['nudge', 'rate limited']);
+  runEnv(T0 + 700, {}); // a good read ends the run of throttled reads
+  assert.equal(runEnv(T0 + 710, limited)[0].verdict, 'ok');
+  assert.equal(runEnv(T0 + 1290, limited)[0].verdict, 'ok');
+  assert.equal(runEnv(T0 + 1310, limited)[0].signal, 'rate limited');
+});
+
+test('watch: a ready PR with CI pending is ok for 20 minutes, then quiet again; a draft is not given the grace', () => {
+  const pend = { FAKE_RUNS: JSON.stringify({ check_runs: [{ status: 'in_progress', conclusion: null }] }) };
+  const { runEnv } = cloud(pr({}));
+  const first = runEnv(T0, pend)[0];
+  assert.deepEqual([first.verdict, first.signal], ['ok', 'ci pending']);
+  assert.equal(runEnv(T0 + 19 * 60, pend)[0].verdict, 'ok');
+  assert.equal(runEnv(T0 + 20 * 60, pend)[0].verdict, 'nudge');
+  const draft = cloud(pr({ draft: true }));
+  draft.runEnv(T0, pend);
+  assert.equal(draft.runEnv(T0 + 60, pend)[0].verdict, 'nudge');
+});
+
+test('watch: more than 8 workers is refused with exit 2', () => {
+  const { dir, state } = local();
+  const file = join(dir, 'many.json');
+  writeFileSync(file, JSON.stringify(Array.from({ length: 9 }, (_, i) => ({ name: `w${i}`, path: dir }))));
+  const r = spawnSync('python3', ['-I', SCRIPT, '--workers', file, '--state', state, '--once'], { encoding: 'utf8' });
+  assert.equal(r.status, 2);
+  assert.match(r.stderr, /split the plan or watch fewer/i);
 });
