@@ -197,10 +197,12 @@ test('visibility: a short list on a personal account is not measured, never 0', 
   assert.equal(out['visibility.private_public_pages'].value, 0, 'the private count still matches');
 });
 
-test('visibility: an org never reads repos/<repo> for scanning', async () => {
+test('visibility: an org never reads repos/<repo> for scanning, even for a public repo with no security_and_analysis', async () => {
   const seen = [];
-  const ok = fakeGh();
+  const bare = REPOS.map(({ security_and_analysis, ...r }) => r);
+  const ok = fakeGh({ repos: bare });
   const gh = { rest: async (r) => (seen.push(r), ok.rest(r)), restAll: ok.restAll };
-  await collect({ params, gh, fetchPage: async () => false });
-  assert.ok(!seen.some((r) => r === 'repos/acme/site' || r === 'repos/acme/tools'));
+  const out = await collect({ params, gh, fetchPage: async () => false });
+  assert.ok(!seen.some((r) => r.startsWith('repos/acme/')), 'no per-repo read for an org');
+  assert.match(out['visibility.public_without_secret_scanning'].could_not_check, /security_and_analysis/);
 });
