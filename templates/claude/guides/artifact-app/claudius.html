@@ -5,7 +5,7 @@
 :root{
   --ground:#FFFBF3; --surface:#FDF1D8; --surface-2:#F8E3B8; --rule:#E6D3AE;
   --text:#2B1D12; --dim:#5A4632; --accent:#F0A92B; --accent-deep:#D9921A; --on-accent:#2B1D12; --link:#A3400F;
-  --night:#14223F; --on-night:#FFFBF3; --on-night-dim:#E9DCC0;
+  --focus:#14223F; --night:#14223F; --on-night:#FFFBF3; --on-night-dim:#E9DCC0;
   --good:#3E5A4A; --good-wash:#E3EEE6; --warn:#7A4B00; --warn-wash:#FBE9C2; --bad:#B42318; --bad-wash:#FBE1DC;
   --run:#1A5CA8; --run-wash:#E4EEF9;
   --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -13,20 +13,22 @@
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --ground:#101B33; --surface:#1B2A4B; --surface-2:#27396A; --rule:#34476F;
-  --text:#FFFBF3; --dim:#E9DCC0; --link:#FFB85C; --night:#0A1226;
+  --text:#FFFBF3; --dim:#E9DCC0; --link:#FFB85C; --focus:#F0A92B; --night:#0A1226;
   --good:#8FD0A9; --good-wash:#1B3A2C; --warn:#F5C25B; --warn-wash:#3A2F10; --bad:#FF8A7A; --bad-wash:#4A2220;
   --run:#8DB8F0; --run-wash:#1D3558; color-scheme:dark}}
 :root[data-theme="dark"]{
   --ground:#101B33; --surface:#1B2A4B; --surface-2:#27396A; --rule:#34476F;
-  --text:#FFFBF3; --dim:#E9DCC0; --link:#FFB85C; --night:#0A1226;
+  --text:#FFFBF3; --dim:#E9DCC0; --link:#FFB85C; --focus:#F0A92B; --night:#0A1226;
   --good:#8FD0A9; --good-wash:#1B3A2C; --warn:#F5C25B; --warn-wash:#3A2F10; --bad:#FF8A7A; --bad-wash:#4A2220;
   --run:#8DB8F0; --run-wash:#1D3558; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--ground);color:var(--text);font:14px/1.5 var(--font);margin:0}
 a{color:var(--link)}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.band :focus-visible{outline-color:var(--accent)}
+nav button:focus-visible{outline-offset:-3px}   /* the nav scrolls sideways, which would clip an outside ring */
 button{font:inherit;cursor:pointer}
-.band{background:var(--night);color:var(--on-night);padding:14px max(16px,env(safe-area-inset-right,0px)) 0 max(68px,env(safe-area-inset-left,0px))}
+.band{border-bottom:1px solid var(--rule);background:var(--night);color:var(--on-night);padding:14px max(16px,env(safe-area-inset-right,0px)) 0 max(68px,env(safe-area-inset-left,0px))}
 .id{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .gnome{width:44px;height:44px;border-radius:50%;border:2px solid var(--accent);display:block;background:var(--night)}
 .id h1{margin:0;font-size:1.375rem;font-weight:700;letter-spacing:.01em}
@@ -54,7 +56,8 @@ h3{font-size:.8125rem;margin:0 0 6px;font-weight:700;color:var(--dim)}
 .pill{display:inline-block;border-radius:var(--r-chip);padding:1px 8px;font-size:.75rem;font-weight:650;white-space:nowrap;background:var(--surface-2);color:var(--text)}
 .pill.bad{background:var(--bad-wash);color:var(--bad)} .pill.warn{background:var(--warn-wash);color:var(--warn)}
 .pill.ok{background:var(--good-wash);color:var(--good)} .pill.run{background:var(--run-wash);color:var(--run)}
-.empty{color:var(--dim);padding:14px 12px}
+.empty{color:var(--dim);padding:14px 12px} p.empty{padding:0}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .err{background:var(--bad-wash);color:var(--bad);border-radius:var(--r-chip);padding:8px 12px;margin-bottom:12px;overflow-wrap:anywhere}
 .counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 12px;margin:0 0 4px;padding:0;list-style:none}
 @media (max-width:420px){.counts{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -92,7 +95,7 @@ textarea{display:block;width:100%;max-width:520px;min-height:4.5em;margin:8px 0;
 <script type="application/json" id="claudius-config">{"repos":["Colorado-Startups/claudius"],"quality":["https://colorado-startups.github.io/claudius/"]}</script>
 <script type="application/json" id="claude-artifacts-manifest">{"permissions":["full-access","notifications","menu-bar"]}</script>
 
-<div class="band">
+<header class="band">
   <div class="id">
     <img class="gnome" id="gnome" alt="Claudius, an AI agent character" width="44" height="44">
     <h1>Claudius</h1>
@@ -100,8 +103,9 @@ textarea{display:block;width:100%;max-width:520px;min-height:4.5em;margin:8px 0;
     <button class="ghost" id="refresh" hidden>Refresh now</button>
   </div>
   <nav id="nav" aria-label="Views"></nav>
-</div>
+</header>
 <main id="app"></main>
+<div class="sr" id="live" role="status"></div>
 
 <script type="module">
 const CONFIG = JSON.parse(document.getElementById("claudius-config").textContent);   // the repos and Quality pages to start with
@@ -122,6 +126,7 @@ const app = document.getElementById("app");
 const meta = document.getElementById("meta");
 const refreshBtn = document.getElementById("refresh");
 const nav = document.getElementById("nav");
+const live = document.getElementById("live");
 document.getElementById("gnome").src = "data:image/png;base64," + blob("img-avatar");
 
 const store = {
@@ -210,11 +215,18 @@ function needs(all, ready, quals) {   // what to look at first, worst news first
     const s = readiness(r), gaps = s.rows.filter((x) => x.ok === false).map((x) => x.name);
     if (gaps.length) out.push({ rank: 1, kind: "warn", tag: `${s.pass} of ${s.of} ready`, title: repo, sub: "Missing: " + gaps.join(", "), url: `https://github.com/${repo}` });
   }
-  for (const q of quals) for (const t of q.tabs) {
-    const worst = Object.entries(t.scores).sort((a, b) => a[1] - b[1])[0];
-    if (worst && worst[1] < LOW) out.push({ rank: 0, kind: "bad", tag: `${worst[0][0].toUpperCase()}${worst[0].slice(1)} ${worst[1]}`, title: `${t.name} tab`, sub: `Under ${LOW} on the Quality page`, url: q.url });
+  for (const q of quals) {
+    const low = [];
+    for (const t of q.tabs) {
+      const worst = Object.entries(t.scores).sort((a, b) => a[1] - b[1])[0];
+      if (worst && worst[1] < LOW) low.push({ rank: 1, kind: "bad", tag: `${worst[0][0].toUpperCase()}${worst[0].slice(1)} ${worst[1]}`, title: `${t.name} tab`, sub: `Under ${LOW} on the Quality page`, url: q.url, score: worst[1] });
+    }
+    low.sort((a, b) => a.score - b.score);
+    out.push(...low.slice(0, 3));
+    if (low.length > 3) out.push({ rank: 1, kind: "bad", tag: `${low.length - 3} more`, title: "More tabs under " + LOW, sub: "See every tab, lowest first", url: "#quality", here: true });
   }
-  return out.sort((a, b) => a.rank - b.rank).slice(0, 12);
+  const KIND = { bad: 0, warn: 1, ok: 2 };
+  return out.sort((a, b) => a.rank - b.rank || KIND[a.kind] - KIND[b.kind]).slice(0, 12);
 }
 
 // ---- reading through the desktop app ----------------------------------------
@@ -238,6 +250,12 @@ async function gh(desktop, args, jq) {
     const full = e.full || e.message;
     if (/command not found: gh|gh: not found/.test(full)) throw new SetupError("The gh tool is not installed. Install it from cli.github.com, then choose Refresh.");
     if (/gh auth login|GH_TOKEN|not logged in/i.test(full)) throw new SetupError("gh is signed out. Run gh auth login in Terminal, then choose Refresh.");
+    if (/error connecting to|could not resolve host|dial tcp|i\/o timeout|network is unreachable/i.test(full)) throw new SetupError("Could not reach GitHub. Check your internet connection, then choose Refresh.");
+    const http = full.match(/HTTP (\d{3})/);
+    if (http) {
+      const why = { 401: "gh is signed out. Run gh auth login in Terminal", 403: "GitHub refused the request, which usually means a rate limit or no access. Try again in a few minutes", 404: "Not found, or this gh login cannot see it. Check the name in Settings" }[http[1]];
+      if (why) throw new Error(why);
+    }
     throw e;
   }
   try { return JSON.parse(out); } catch { throw new Error("gh did not return JSON"); }
@@ -269,14 +287,21 @@ async function readRepo(desktop, repo) {
 }
 async function readQuality(desktop, url) {
   const pat = '<section id="[a-z0-9-]+" class="view tab"|</svg>[^<]{1,60}</h2>|aria-valuenow="[0-9]+" aria-label="[A-Za-z ]+"';
-  const out = await sh(desktop, `curl -fsS -m 30 ${q(url)} | { grep -oE ${q(pat)} || true; }`);
+  let out;
+  try { out = await sh(desktop, `curl -fsS -m 30 ${q(url)} | { grep -oE ${q(pat)} || true; }`); }
+  catch (e) {
+    const full = e.full || e.message;
+    if (/\((6|7|28|35|52|56)\)|could not resolve|timed out|failed to connect/i.test(full)) throw new Error("Could not reach it. Check your internet connection, then choose Refresh");
+    if (/\(22\)|returned error/i.test(full)) throw new Error("The page answered with an error. Check the address in Settings");
+    throw e;
+  }
   const parsed = parseQuality(out);
-  if (parsed.totals.master === undefined) throw new Error("no scores found on " + url);
+  if (parsed.totals.master === undefined) throw new Error("No scores found. The page may have changed, or it is not a Quality page");
   return { url, ...parsed };
 }
 
 // ---- views ----------------------------------------------------------------
-const S = { data: [], errors: [], ready: {}, quals: [], at: null, repos: DEFAULT_REPOS, view: "today" };
+const S = { data: [], errors: [], slowErrs: [], failed: new Set(), ready: {}, quals: [], at: null, repos: DEFAULT_REPOS, view: "today" };
 
 function scoreRow(name, v, cls = "") {
   const meter = h("span", { class: "meter " + band(v), role: "meter", "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": String(v), "aria-label": name }, h("i", { style: `width:${v}%` }));
@@ -291,9 +316,15 @@ function prRow(p) {
     h("span", { class: "pill " + (isIdle(p) ? "warn" : ""), text: ago(m) }),
     h("span", { class: "sub", text: p.branch }));
 }
-function errors() { return S.errors.map((e) => h("div", { class: "err", role: "alert", text: e })); }
+const alertBox = h("div", { role: "alert" });   // one container, so a screen reader hears an error once, not on every check
+let alertKey = "";
+function errors() {
+  const key = S.errors.join("\n");
+  if (key !== alertKey) { alertKey = key; alertBox.replaceChildren(...S.errors.map((e) => h("div", { class: "err", text: /[.!?]$/.test(e) ? e : e + "." }))); }
+  return alertBox;
+}
 function qualityCard(qs) {
-  if (!qs.length) return h("section", { class: "card" }, h("h2", { text: "Quality" }), h("p", { class: "empty", text: "No Quality page read yet. Add one under Settings." }));
+  if (!qs.length) return h("section", { class: "card" }, h("h2", { text: "Quality" }), h("p", { class: "empty", text: S.errors.some((e) => /^https:/.test(e)) ? "Could not read the Quality page. See the errors above." : "No Quality page yet. Add one under Settings." }));
   return h("section", { class: "card" }, h("h2", { text: "Quality" }), ...qs.map((x) => h("div", {},
     scoreRow("Master score", x.totals.master, "master"),
     ...["quality", "speed", "consumption"].filter((k) => x.totals[k] !== undefined).map((k) => scoreRow(k[0].toUpperCase() + k.slice(1), x.totals[k])),
@@ -302,21 +333,24 @@ function qualityCard(qs) {
 function viewToday() {
   const all = S.data.flat(), n = (f) => all.filter(f).length;
   const list = needs(all, S.ready, S.quals), rows = list.length ? list.map((x) =>
-    h("div", { class: "row " + x.kind }, h("span", { class: "pill " + x.kind, text: x.tag }), h("span", { class: "t" }, h("a", { href: x.url, target: "_blank", rel: "noopener", text: x.title })), h("span"), h("span", { class: "sub", text: x.sub })))
+    h("div", { class: "row " + x.kind }, h("span", { class: "pill " + x.kind, text: x.tag }), h("span", { class: "t" }, h("a", x.here ? { href: x.url, text: x.title } : { href: x.url, target: "_blank", rel: "noopener", text: x.title })), h("span"), h("span", { class: "sub", text: x.sub })))
     : [h("div", { class: "empty", text: !S.at ? "Checking GitHub." : S.errors.length ? "Could not read everything. See the errors above." : "Nothing needs you. Claudius will say when that changes." })];
   const counts = h("ul", { class: "counts", "aria-label": "Open pull requests" },
     ...[["Open", all.length], ["Running", n((p) => p.checks === "running")], ["Ready", n((p) => label(p).text === "Ready")], ["Failing", n((p) => p.checks === "fail")]]
-      .map(([k, v]) => h("li", {}, h("b", { text: String(v) }), k)));
+      .map(([k, v]) => {
+        const unread = !S.at || (S.failed.size && !all.length);
+        return h("li", unread ? { "aria-label": k + ", unknown" } : {}, h("b", { text: unread ? "–" : String(v) }), k);
+      }));   // a dash, not 0, when the count could not be read
   return h("div", { class: "cols" },
     h("section", {}, h("h2", { text: "Needs a look" }), h("div", { class: "card list", style: "padding:4px 0" }, ...rows)),
-    h("div", { class: "stack" }, h("section", { class: "card" }, h("h2", { text: "Pull requests" }), counts), qualityCard(S.quals)));
+    h("div", { class: "stack" }, h("section", { class: "card" }, h("h2", { text: "Pull requests" }), counts, S.failed.size && all.length ? h("p", { class: "note", text: "Repos that could not be read are not counted." }) : null), qualityCard(S.quals)));
 }
 function viewBuilds() {
   const parts = [];
   S.repos.forEach((repo, i) => {
     const rows = (S.data[i] || []).slice().sort((a, b) => b.updated.localeCompare(a.updated));
     parts.push(h("section", {}, h("div", { class: "repohead" }, h("h2", { text: repo }), h("span", { class: "note", text: rows.length + " open" })),
-      h("div", { class: "card list", style: "padding:4px 0" }, ...(rows.length ? rows.map(prRow) : [h("div", { class: "empty", text: "No open pull requests." })]))));
+      h("div", { class: "card list", style: "padding:4px 0" }, ...(rows.length ? rows.map(prRow) : [h("div", { class: "empty", text: S.failed.has(repo) ? "Could not read this repo. See the errors above." : "No open pull requests." })]))));
   });
   return h("div", { class: "stack" }, ...parts);
 }
@@ -371,7 +405,7 @@ function render() {
     return b;
   }));
   S.settings = S.settings || settings();   // built once, so typed text and the open state survive a refresh
-  app.replaceChildren(...errors(), view, S.settings, foot());
+  app.replaceChildren(errors(), view, S.settings, foot());
 }
 function route() {
   const id = location.hash.slice(1);
@@ -428,7 +462,7 @@ if (!desktop?.childProcess) {
       const repos = store.get("repos", DEFAULT_REPOS).filter((r) => REPO_RE.test(r));
       const urls = store.get("quality", DEFAULT_QUALITY).filter((u) => URL_RE.test(u));
       meta.textContent = "Checking";
-      const errs = [], data = [];
+      const errs = [], data = [], slowErrs = doSlow ? [] : S.slowErrs;   // slow reads keep their errors until the next slow read
       let setup = false;   // gh missing or signed out: say it once and skip the rest
       const failed = new Set();
       for (const repo of repos) {
@@ -440,10 +474,10 @@ if (!desktop?.childProcess) {
       let ready = S.ready, quals = S.quals;
       if (doSlow) {
         ready = {}; quals = [];
-        if (!setup) for (const repo of repos) { try { ready[repo] = await readRepo(desktop, repo); } catch (e) { errs.push(`${repo} settings: ${e.message}`); } }
-        for (const u of urls) { try { quals.push(await readQuality(desktop, u)); } catch (e) { errs.push(`${u}: ${e.message}`); } }
+        if (!setup) for (const repo of repos.filter((r) => !failed.has(r))) { try { ready[repo] = await readRepo(desktop, repo); } catch (e) { slowErrs.push(`${repo} settings: ${e.message}`); } }
+        for (const u of urls) { try { quals.push(await readQuality(desktop, u)); } catch (e) { slowErrs.push(`${u}: ${e.message}`); } }
       }
-      Object.assign(S, { data, errors: errs, ready, quals, repos, at: new Date() });
+      Object.assign(S, { data, errors: [...errs, ...slowErrs], slowErrs, failed, ready, quals, repos, at: new Date() });
       render();
       const all = data.flat();
       // A repo that failed or came back partial keeps its old entries, so it neither alerts nor reports a false merge.
@@ -457,8 +491,11 @@ if (!desktop?.childProcess) {
         if (msgs.length) desktop.notification.show({ body: msgs.join(". ").slice(0, 280) }).catch(() => {});
         prev = now;
       }
+      const n = needs(all, ready, quals).length;
+      const summary = S.errors.length ? "Could not read everything" : n === 0 ? "Nothing needs a look" : n === 1 ? "1 item needs a look" : `${n} items need a look`;
+      if (live.textContent !== summary) live.textContent = summary;   // announced only when it changes
       await setBar(all, all.filter((p) => p.checks === "fail").length, quals);
-      meta.textContent = `Watching ${repos.length} ${repos.length === 1 ? "repo" : "repos"}, checked ` + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + (errs.length ? ", with errors" : "");
+      meta.textContent = `Watching ${repos.length} ${repos.length === 1 ? "repo" : "repos"}, checked ` + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + (S.errors.length ? ", with errors" : "");
     } catch (e) {
       meta.textContent = "Check failed: " + e.message;
     } finally {
@@ -493,7 +530,7 @@ if (!desktop?.childProcess) {
       S.waiting = false; nav.hidden = false; refreshBtn.hidden = false; route();
       await offerManage(); window.__refresh(true);
     };
-    app.replaceChildren(h("section", { class: "card install" }, h("h2", { text: "Allow three things" }),
+    app.replaceChildren(h("section", { class: "card install" }, h("h2", { text: "Claudius needs three permissions" }),
       h("p", { text: "Full access runs gh and curl on this Mac to read GitHub and the public Quality pages. Notifications tell you when a pull request is ready or failing. The menu bar item shows the open count. Claudius reads only and changes nothing." }),
       h("p", {}, go)));
   }
