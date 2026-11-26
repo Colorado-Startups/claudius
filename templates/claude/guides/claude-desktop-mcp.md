@@ -25,4 +25,19 @@ flowchart LR
 
 Where the Code tab and Cowork take their connectors from: Cowork takes them from your claude.ai account, not from the CLI's `~/.claude` directory ([Desktop docs](https://code.claude.com/docs/en/desktop), read 2026-11-26).
 
+## What a server can add to its tools
+
+Four features, all optional. A server declares each one, and a client uses it only when both sides support it ([Extensions](https://modelcontextprotocol.io/extensions/overview), read 2026-11-26).
+
+| Feature | What the server gets | Status in Claude (announced 2026-11-24) | Do |
+| --- | --- | --- | --- |
+| [Skills over MCP](https://modelcontextprotocol.io/extensions/skills/overview) | Publishes skills beside its tools. Claude loads one only when needed, and it updates with the server | Public beta in Claude and Claude Code. On by default for Pro, Max and Ultra. Team once an admin enables it. Enterprise coming | Serve `skills/list`, `skills/get` and each file over `resources/read`, and declare `io.modelcontextprotocol/skills`. Keep a skill under 512 files and 16 MiB |
+| [Tasks](https://modelcontextprotocol.io/extensions/tasks/overview) | Returns a task handle for work that takes time. Claude keeps working and polls `tasks/get` | Generally available for Pro, Max and Ultra. Rolling out to Team and Enterprise | Return a task for a tool that runs longer than a few seconds, so no connection stays open |
+| [Elicitation](https://modelcontextprotocol.io/specification/2026-07-28/client/elicitation) | Asks the user for input through a form or a link, then continues | Same as Tasks | Ask only before spend or a destructive step. A thread nobody watches waits for a person, so the question joins the owner's queue ([Decide](https://github.com/Colorado-Startups/claudius/blob/main/maps/README.md#decide-a-question-or-blocker-to-claudes-call-or-the-owners-queue)) |
+| [File Uploads](https://github.com/modelcontextprotocol/experimental-ext-file-uploads) | Receives PDFs, spreadsheets and images without passing them through the context window | Rolling out soon. The extension is experimental and not part of the MCP specification | Wait for a release before building on it |
+
+Source for the status column: [the announcement](https://claude.com/resources/articles/skills-over-mcp-tasks-and-more), read 2026-11-26. A skill a server publishes arrives as one more entry in the session's skill listing, so the [All on, app-wide](../README.md#all-on-app-wide) rule holds: an admin who has not enabled Skills over MCP is a step for the [`equip` skill](https://github.com/Colorado-Startups/claudius/blob/main/plugin/skills/equip/SKILL.md) to name, never a reason to turn a connector off.
+
+Through the [loopback bridge](claude-desktop-mcp/loopback.md), the server's declared extensions and a `skills/list` request pass as they are. The limits are in [the traps](claude-desktop-mcp/traps.md).
+
 For an app on this computer only, see [the loopback bridge](claude-desktop-mcp/loopback.md). Traps and sources: [Claude Desktop MCP traps and sources](claude-desktop-mcp/traps.md).

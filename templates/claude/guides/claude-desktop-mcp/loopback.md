@@ -20,6 +20,9 @@ A connector cannot reach `127.0.0.1`, because Claude connects from Anthropic's c
 | App closed | It still starts. A tools list request returns no tools, and a tool call returns "`<App name>` is not running at `<url>`. Open it, then try again." |
 | App opens later | It retries every 5 seconds, then sends `notifications/tools/list_changed` so the tools appear |
 | App restarts | A `404` on the old session opens a new one and retries the request once |
+| Skills and tasks | The server's `capabilities`, including `extensions`, reach Claude as sent. A `skills/list` request and its reply pass through, shown by `tests/bridge.test.mjs`. The bridge answers no method itself except `initialize` and, with the app closed, `tools/list` |
+| Capabilities are read once | With the app closed at the start, the bridge declares no skills or tasks. Open the app, then start a new session |
+| A question mid-call | A server that asks the user in the middle of a streamed reply, the older elicitation form, stalls the call: the bridge holds each reply until it ends. The 2026-07-28 form comes back as the call's result and passes ([#162](https://github.com/Colorado-Startups/claudius/issues/162)) |
 | Runtime | Node 18 or later. Node ships with Claude for macOS and Windows ([MCPB README](https://github.com/modelcontextprotocol/mcpb), read 2026-11-26) |
 
 It suits apps that serve MCP on loopback with no token.

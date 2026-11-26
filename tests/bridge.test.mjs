@@ -86,3 +86,40 @@ test('bridge: with the app closed, tools/list returns no tools and a tool call r
   assert.deepEqual(replies.find((r) => r.id === 2).result, { tools: [] });
   assert.match(replies.find((r) => r.id === 3).error.message, /^Demo is not running at http:\/\/127\.0\.0\.1:\d+\. Open it/);
 });
+
+test('bridge: a server\'s extensions and a skills/list request and reply pass through', async () => {
+  // Skills over MCP and Tasks ride on the server's capabilities.extensions and ordinary methods; the bridge must not strip or answer them.
+  const skills = [{ uri: 'skill://demo/SKILL.md', frontmatter: { name: 'demo', description: 'A demo skill.' }, resources: [] }];
+  const app = await listen((req, res) => {
+    let body = '';
+    req.on('data', (c) => { body += c; });
+    req.on('end', () => {
+      const msg = JSON.parse(body);
+      if (msg.id === undefined) { res.writeHead(202); return res.end(); }
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Mcp-Session-Id': 's1' });
+      const result = msg.method === 'initialize'
+        ? { protocolVersion: '2025-06-18', serverInfo: { name: 'demo', version: '1' },
+            capabilities: { resources: {}, extensions: { 'io.modelcontextprotocol/skills': { directoryRead: true }, 'io.modelcontextprotocol/tasks': {} } } }
+        : { resultType: 'complete', skills, ttlMs: 1000, cacheScope: 'public' };
+      res.end(JSON.stringify({ jsonrpc: '2.0', id: msg.id, result }));
+    });
+  });
+  try {
+    const msgs = [
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 't', version: '1' } } },
+      { jsonrpc: '2.0', id: 2, method: 'skills/list', params: {} },
+    ];
+    const child = spawn(process.execPath, [BRIDGE], { env: { ...process.env, MCP_URL: `http://127.0.0.1:${app.address().port}/mcp` }, stdio: ['pipe', 'pipe', 'pipe'] });
+    let out = '';
+    child.stdout.setEncoding('utf8').on('data', (c) => { out += c; });
+    child.stdin.end(msgs.map((m) => JSON.stringify(m)).join('\n') + '\n');
+    const [code] = await once(child, 'exit');
+    assert.equal(code, 0);
+    const replies = out.trim().split('\n').map((l) => JSON.parse(l));
+    const init = replies.find((r) => r.id === 1).result;
+    assert.deepEqual(init.capabilities.extensions, { 'io.modelcontextprotocol/skills': { directoryRead: true }, 'io.modelcontextprotocol/tasks': {} });
+    assert.deepEqual(replies.find((r) => r.id === 2).result.skills, skills);
+  } finally {
+    app.close();
+  }
+});
