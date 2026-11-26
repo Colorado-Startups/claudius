@@ -60,7 +60,7 @@ Paste the worker contract into every brief. A cloud session loads the repo's `CL
 | Small | Nothing beyond the ask. Where the repo has a Quality page, each step names the metric it moves |
 | Equipped | Each step names the skill, plugin or connector it uses. A missing one is listed to add |
 | Owner | Only product and billing items wait for the owner, each with a default |
-| Tracked | Every step has an issue, and every feature a card where the repo keeps a board |
+| Tracked | Every step's row names its issue title, and every feature step its card where the repo keeps a board |
 
 Fix what fails. Then put one line above the plan, each row marked ✅ for a pass or ❌ for a fail: `Checked: True ✅ · Whole ✅ · Small ✅ · Equipped ✅ · Owner ✅ · Tracked ✅ · Changed: <what the check fixed>`. A row that still fails after the pass keeps its ❌, with the reason in that line. One pass, never a loop. The check runs for any plan in plan mode, even one with no issues or sessions to follow. When the owner says "check", run the same table.
 
