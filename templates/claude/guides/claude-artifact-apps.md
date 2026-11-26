@@ -33,7 +33,7 @@ flowchart LR
 
 ## A worked example: the Claudius app
 
-[`artifact-app/claudius.html`](artifact-app/claudius.html) is a finished installable app that reads your repos through `gh` and the public Quality page, and draws them as an original fantasy command center. Each repo is a keep that grows as pull requests merge, each open pull request is a quest, and a guide gnome speaks for the realm. Ask Claude to publish the file as an artifact with the `desktop` capability. Then install it as above.
+[`artifact-app/claudius.html`](artifact-app/claudius.html) is a finished installable app that reads your repos through `gh` and the public Quality page, and draws them as an original fantasy command center with generated art: images, a dusk video loop and three 3D turntables, all embedded in the one file. The drawn art stays as the fallback when that block is missing. Each repo is a keep that grows as pull requests merge, each open pull request is a quest, and a guide gnome speaks for the realm. Ask Claude to publish the file as an artifact with the `desktop` capability. Then install it as above.
 
 | View | Shows | Read with |
 | --- | --- | --- |
