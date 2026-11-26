@@ -1,18 +1,19 @@
 # Open it as a Code Project
 
-A Claude Code Project is a beta feature of the Claude desktop app and claude.ai/code. It needs a Pro, Max or Ultra plan ([Claude Code Projects](https://code.claude.com/docs/en/claude-projects), read 2026-11-25). Each thread is a cloud session on its own branch of an attached repo.
+A Claude Code Project is a beta feature of the Claude desktop app and claude.ai/code. It needs a Pro, Max or Ultra plan ([Claude Code Projects](https://code.claude.com/docs/en/claude-projects), read 2026-11-26). Each thread is a cloud session on its own branch of an attached repo.
 
 ```mermaid
 flowchart LR
-  A[1 Create the Project<br/>attach your repos] --> B[2 Paste the instructions<br/>from Git Crafter] --> C[3 Check each repo's files] --> D[4 Ask for one change<br/>PR comes back]
+  A[1 Create the Project<br/>attach repos, paste instructions] --> B[2 Paste the setup prompt<br/>as the first message] --> C[3 Ask for one change<br/>PR comes back]
 ```
 
 | # | Do | Where |
 |---|---|---|
-| 1 | Create a Project and attach the one or two repos most tasks touch. Then read one file and push a branch in each repo. An attached repo can fail to connect ([Claude Code Projects](https://code.claude.com/docs/en/claude-projects), read 2026-11-25) | Code tab of the desktop app, or claude.ai/code |
-| 2 | Paste Git Crafter's `instructions.md`, filled in, into the Project's instructions | Project settings |
-| 3 | Check each attached repo for `AGENTS.md`, a `CLAUDE.md` that imports it, the main rule, a short PR template, an issue form, CI and a valid `.claude/settings.json` | The setup prompt below |
-| 4 | Ask for one change. The thread branches and opens a PR when asked | The project chat |
+| 1 | Create a Project, attach the one or two repos most tasks touch, and paste Git Crafter's `instructions.md`, filled in, into its instructions. They hold 16,000 characters at most ([Claude Code Projects](https://code.claude.com/docs/en/claude-projects), read 2026-11-26) | Code tab of the desktop app, or claude.ai/code |
+| 2 | Paste the [setup prompt](#setup-prompt) as the first message. The thread reads a file and pushes a branch in each repo, then checks its files. An attached repo can fail to connect ([Claude Code Projects](https://code.claude.com/docs/en/claude-projects), read 2026-11-26) | The project chat |
+| 3 | Ask for one change. The thread branches and opens a PR | The project chat |
+
+Then score it: copy the [Code Project pages](../templates/claude/code-project/README.md#pages) to the project's private repo.
 
 ## What a cloud thread loads
 

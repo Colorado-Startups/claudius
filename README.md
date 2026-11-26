@@ -20,7 +20,7 @@ Live page, 2026-11-15, commit 116d655.
 
 Claudius is not an Anthropic product and is not affiliated with Anthropic.
 
-## Quickstart: 4 steps
+## Quickstart: 3 steps
 
 `../claudius` and `../git-crafter` are clones beside your repo.
 
@@ -28,8 +28,7 @@ Claudius is not an Anthropic product and is not affiliated with Anthropic.
 |---|---|---|
 | 1 | Adopt Git Crafter: CI, open-repo files, `AGENTS.md` and `CLAUDE.md` | Git Crafter's [quickstart](https://github.com/SoulCraft-Org/git-crafter#quickstart-3-steps) |
 | 2 | Copy the Claude files, and keep every plugin, skill and connector on ([All on, app-wide](templates/claude/README.md#all-on-app-wide)) | `cp -r ../claudius/templates/claude/.claude .` |
-| 3 | Pin the latest release in `quality/config.json`. If it lists `tabs`, add the pack's tab ids | the script below |
-| 4 | Check the pack out at that pin. Run the one local command for the full page, with the numbers CI never sees | the script below, and [the command](#the-one-local-command) |
+| 3 | Run the script below. It pins the latest release, adds the pack's tab ids when `quality/config.json` lists `tabs`, and draws the full page locally ([the command](#the-one-local-command)) | your repo's root |
 
 ```bash
 U=https://github.com/Colorado-Startups/claudius
@@ -56,7 +55,7 @@ Then, each optional:
 |---|---|
 | Process maps | Add `{ "use": "<id>" }` to your Process config's `maps` for each map you want, one per file in [`maps/`](maps/). This repo's own [`quality/process/config.json`](quality/process/config.json) names every one ([maps/README.md](maps/README.md)) |
 | Page maps | If you run a Code Project, also add the ten page maps (`{ "use": "<id>" }` each): [maps/README.md](maps/README.md#page-maps-one-per-page) |
-| Code Project | To run the repo as a Claude Code Project, add it to a project, pick the environment and paste the [setup prompt](docs/projects-quickstart.md#setup-prompt). Then memory seeds, subagents, scheduled tasks and guard placement: [quick start](docs/projects-quickstart.md) and [templates/claude/code-project/README.md](templates/claude/code-project/README.md) |
+| Code Project | Attach the repo to a project and paste the [setup prompt](docs/projects-quickstart.md#setup-prompt) as its first message: [3 steps](docs/projects-quickstart.md). Score each Project tab with the [page kit](templates/claude/code-project/page/README.md) |
 
 The pin, the tab ids and the Pages setup in detail: [Add the pack](#add-the-pack).
 
