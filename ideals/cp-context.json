@@ -1,0 +1,13 @@
+{
+  "ideal": "The Context tab holds only what a thread needs, never a stale one-time copy.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-26"
+    }
+  ],
+  "quality": "No uploaded folder is older than its repo, and none holds anything private.",
+  "speed": "A thread finds the file it needs on the first read.",
+  "consumption": "The Context tab loads few tokens into each thread."
+}

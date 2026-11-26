@@ -54,7 +54,8 @@ Then, each optional:
 | Add | Do |
 |---|---|
 | Process maps | Add `{ "use": "<id>" }` to your Process config's `maps` for each map you want, one per file in [`maps/`](maps/). This repo's own [`quality/process/config.json`](quality/process/config.json) names every one ([maps/README.md](maps/README.md)) |
-| Code Project | Attach the repo to a project and paste the [setup prompt](docs/projects-quickstart.md#setup-prompt) as its first message: [3 steps](docs/projects-quickstart.md). Its [Quality, Speed and Consumption pages](templates/claude/code-project/README.md#pages) score each Project tab |
+| Page maps | If you run a Code Project, also add the ten page maps (`{ "use": "<id>" }` each): [maps/README.md](maps/README.md#page-maps-one-per-page) |
+| Code Project | Attach the repo to a project and paste the [setup prompt](docs/projects-quickstart.md#setup-prompt) as its first message: [3 steps](docs/projects-quickstart.md). Score each Project tab with the [page kit](templates/claude/code-project/page/README.md) |
 
 The pin, the tab ids and the Pages setup in detail: [Add the pack](#add-the-pack).
 
@@ -77,7 +78,7 @@ flowchart LR
 | --- | --- |
 | Templates | `templates/claude/`: the Claude-only files a repo commits. This repo runs copies of them (`tests/templates.test.mjs`) |
 | Plugin | `plugin/`: the `claudius` Claude Code plugin (skills `plan`, `merge`, `equip`, `find-plugin`, `plain-voice`, `visibility`). Install: `claude plugin marketplace add Colorado-Startups/claudius`, then `claude plugin install claudius@claudius` |
-| Pack | 9 tabs: Claude, Claude settings, Claude desktop app, Blockers, Tokens, Instructions, Best practices, Visibility, Code Project. Maps: Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember |
+| Pack | 28 tabs: Claude, Claude settings, Claude desktop app, Blockers, Tokens, Instructions, Best practices, Visibility, Code Project and 19 Code Project page tabs, one per part of a project. Maps: Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory, Schedule |
 | Engine | Git Crafter's `actions/pages` and CI standard, pinned by full commit SHA. No engine code lives here |
 | Public pages | Built in CI from `quality/public/`. The Quality page shows only metrics read from GitHub and the repo's files. Each metric that needs local files is dropped: not shown, counted or listed. The exceptions are the ones `quality/public-params.json` reads from committed files alone. A tab left with no metric, Tokens and Claude desktop app, is left off; it shows on a `--local` page (Git Crafter v7.0.1 or later). The Process page shows each map step such a metric does not score |
 | Private numbers | Usage, cost, transcripts and connectors. Read on your own machine only, never uploaded |
@@ -88,10 +89,10 @@ flowchart LR
 | Path | Holds |
 | --- | --- |
 | `templates/claude/` | the Claude templates; `AGENTS.md`, `CLAUDE.md` and `.claude/` at the root are this repo's own |
-| `pack.json` | the nine tabs |
-| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment and Remember maps |
+| `pack.json` | the 28 tabs |
+| `targets/`, `ideals/`, `maps/` | metric definitions, ideal states, the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps, and the ten page maps |
 | `collectors/<tab>/`, `fixtures/` | the collectors, their tests and test fixtures |
-| `quality/process/config.json` | the Process page: the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment and Remember maps, named by `use` |
+| `quality/process/config.json` | the Process page: the Guard, Decide, Equip, Publish, Visibility, Project, Ship, Environment, Remember, Setup, Memory and Schedule maps and the ten page maps, named by `use` |
 | `quality/public.mjs`, `quality/public-params.json` | write `quality/public/`, the configs CI builds the public pages from. Each metric that needs local files is dropped but the repo-file ones. Each map is written out in full without the steps those metrics score |
 | `tests/moved.json` | where each file came from in Git Crafter |
 | `tests/engine-tests.sh` | CI: each file matches its source or is listed as edited, then the tests run beside the pinned engine |

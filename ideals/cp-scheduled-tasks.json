@@ -1,0 +1,13 @@
+{
+  "ideal": "Each scheduled task runs on time, ends well and keeps its up-front connector load small.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Automate work with scheduled tasks",
+      "url": "https://code.claude.com/docs/en/routines",
+      "date": "2026-11-26"
+    }
+  ],
+  "quality": "Each scheduled task's last run succeeded.",
+  "speed": "Each scheduled task starts at its set time.",
+  "consumption": "Each scheduled task's up-front connector load stays small, with every connector on."
+}

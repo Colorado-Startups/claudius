@@ -1,0 +1,84 @@
+{
+ "id": "memory",
+ "name": "Memory",
+ "why": "What a thread reads and can call at start, each lane held to one metric",
+ "ideal": "A thread starts with short context, current memory and tools whose source is known, all ready in seconds.",
+ "sources": [
+  {
+   "title": "Claude Code Docs: How Claude remembers your project",
+   "url": "https://code.claude.com/docs/en/memory",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+   "url": "https://code.claude.com/docs/en/claude-projects",
+   "date": "2026-11-26"
+  }
+ ],
+ "critical_path": [
+  "conversation",
+  "plugins"
+ ],
+ "steps": [
+  {
+   "id": "conversation",
+   "name": "Conversation",
+   "tools": [
+    "Conversation"
+   ],
+   "rule": "Each question to the owner is one decision card with options and a recommendation.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_conversation.card_share"
+  },
+  {
+   "id": "context",
+   "name": "Context",
+   "tools": [
+    "Context"
+   ],
+   "rule": "The Context tab holds no copy that is older than its repo.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_context.stale_copies"
+  },
+  {
+   "id": "memory",
+   "name": "Memory",
+   "tools": [
+    "Memory"
+   ],
+   "rule": "Instructions stay under the limit, and no note outlives the fact it holds.",
+   "rule_ref": "https://code.claude.com/docs/en/memory",
+   "metric": "cp_memory.start_tokens"
+  },
+  {
+   "id": "extensions",
+   "name": "Extensions",
+   "tools": [
+    "Extensions"
+   ],
+   "rule": "Every installed set has a known publisher, and its sign-ins are complete.",
+   "rule_ref": "https://code.claude.com/docs/en/plugins/overview",
+   "metric": "cp_extensions.unknown_provenance"
+  },
+  {
+   "id": "connectors",
+   "name": "Connectors",
+   "tools": [
+    "Connectors"
+   ],
+   "rule": "Each installed connector is signed in.",
+   "rule_ref": "https://code.claude.com/docs/en/mcp",
+   "metric": "cp_connectors.incomplete_sign_ins"
+  },
+  {
+   "id": "plugins",
+   "name": "Plugins",
+   "tools": [
+    "Plugins"
+   ],
+   "rule": "Every plugin set has a verified listing or an official equivalent, or is named and recorded.",
+   "rule_ref": "https://code.claude.com/docs/en/plugins/overview",
+   "metric": "cp_plugins.unverified_sets_on"
+  }
+ ]
+}
