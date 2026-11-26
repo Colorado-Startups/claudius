@@ -24,6 +24,7 @@ const readJson = (file) => {
     return null;
   }
 };
+const isObject = (d) => d !== null && typeof d === 'object' && !Array.isArray(d);
 const dirs = (dir) => {
   try {
     return fs.readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
@@ -73,7 +74,10 @@ function settingsFiles({ home, root, params }) {
 // params.skill_override_off, an enabledPlugins entry that is false. A key set in several files
 // counts once, by the file that wins. null when no settings file can be read.
 export function offSwitches({ home, root, params }) {
-  const docs = settingsFiles({ home, root, params }).map(readJson).filter((d) => d && typeof d === 'object');
+  const files = settingsFiles({ home, root, params });
+  // A file that is there but does not parse would be skipped, and the count would read too low: not measured instead.
+  if (files.some((f) => fs.existsSync(f) && !isObject(readJson(f)))) throw new Error('a settings file does not parse');
+  const docs = files.map(readJson).filter(isObject);
   if (!docs.length) return null;
   const merged = Object.assign({}, ...docs);
   const rows = [];
