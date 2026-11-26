@@ -6,7 +6,7 @@ compatibility: Needs the gh CLI signed in and the pr-review-toolkit plugin from 
 
 # Merge
 
-One review per PR, pinned to a commit, so what merges is what was reviewed. A review-only request gets the verdict in chat.
+Two separate reviews per PR, pinned to a commit, so what merges is what was reviewed. An AI review is the approval ([GOVERNANCE](../../../GOVERNANCE.md)): once the checks are green and both reviews say MERGE at the head commit, the agent merges with no wait for a person's yes. A review-only request gets the verdict in chat.
 
 Requires `gh` signed in (`gh auth status`) and `pr-review-toolkit` from `claude-plugins-official` (`claude plugin install pr-review-toolkit@claude-plugins-official`).
 
@@ -14,18 +14,18 @@ No `gh` (no shell tool, or `command -v gh` finds nothing), as in chat or Cowork 
 
 ```mermaid
 flowchart LR
-  C[Checks green] --> R[Reviewer at the head SHA] -->|BLOCK| F[Fix, push] --> D[Review the delta] --> R
-  R -->|MERGE| V[Post verdict] --> Q[Queue every ready PR at its SHA] --> M[Merged]
+  C[Checks green] --> R[Two reviewers at the head SHA] -->|BLOCK| F[Fix, push] --> D[Review the delta] --> R
+  R -->|both MERGE| V[Post verdict] --> Q[Merge at the reviewed SHA] --> M[Merged]
   Q -->|conflict| U[Merge main in, push] --> D
 ```
 
 | # | Step | Command or rule |
 |---|---|---|
 | 1 | Wait once | `gh pr checks N --watch --interval 60`, in the background. Never a tight poll |
-| 2 | Pick the reviewer | `pr-review-toolkit:code-reviewer` as a fresh subagent. Model: Haiku for docs, data and code under about 200 lines; Sonnet for settings, workflows, permissions, rules or anything larger |
-| 3 | Brief | The PR number, head SHA (`gh pr view N --json headRefOid -q .headRefOid`) and intent in a few lines; the reviewer reads `gh pr diff N`. Two passes: mechanical (it does what it says, every check passed), then judgment (what breaks). Reply in at most 120 words: `MERGE <sha>` or `BLOCK <sha>` plus fixes as file, problem, replacement |
-| 4 | Fix | On BLOCK, fix on the branch and push. Send the same reviewer only the delta from the reviewed SHA. Each finding is fixed, or linked to an issue or card, before merge |
-| 5 | Verdict | Post and merge only after the person's yes, unless they asked to merge. Post a PR comment whose first line is exactly `Review: MERGE at <40-hex sha>` (`BLOCK` in place of `MERGE` for a blocked commit). One account that authors and merges leaves no GitHub review, so this line is the record |
+| 2 | Pick the reviewers | Two fresh `pr-review-toolkit:code-reviewer` subagents, neither the PR's author, and the second never shown the first's verdict. Model: Haiku for docs, data and code under about 200 lines; Sonnet for settings, workflows, permissions, rules or anything larger; the second reviewer at the same model or one step up |
+| 3 | Brief | The PR number, head SHA (`gh pr view N --json headRefOid -q .headRefOid`) and intent in a few lines; the reviewer reads `gh pr diff N`. Two passes: mechanical (it does what it says, every check passed), then judgment (what breaks). Each reviewer replies in at most 120 words: `MERGE <sha>` or `BLOCK <sha>` plus fixes as file, problem, replacement |
+| 4 | Fix | On BLOCK, fix on the branch and push. Send the same reviewers only the delta from the reviewed SHA. Each finding is fixed, or linked to an issue or card, before merge |
+| 5 | Verdict | Post a PR comment whose first line is exactly `Review: MERGE at <40-hex sha>` (`BLOCK` in place of `MERGE` for a blocked commit) for each reviewer, then merge once both say MERGE and the checks are green. No wait for a person's yes: a person's veto comment on the PR is the only stop. One account that authors and merges leaves no GitHub review, so this line is the record |
 | 6 | Queue | Queue every PR with a MERGE verdict at once, each at the literal SHA that passed: `gh api graphql -f query='mutation($id:ID!,$sha:GitObjectID!){enqueuePullRequest(input:{pullRequestId:$id,expectedHeadOid:$sha}){mergeQueueEntry{position}}}' -F id=<PR node id> -F sha=<sha>`. The node id is `gh pr view N --json id -q .id` |
 | 7 | No queue yet | Set one up (table below). Until then, `gh pr merge N --squash --match-head-commit <sha>`, one PR at a time, in a method the repo allows (`gh api repos/{owner}/{repo}`) |
 | 8 | Conflict | A PR the queue drops for a conflict goes back: merge `main` into its branch, resolve each hunk, push, review the delta (step 4) and queue the new head |
@@ -33,7 +33,7 @@ flowchart LR
 
 ## In a cloud thread
 
-`gh pr checks`, `gh pr view`, `gh pr diff`, `gh pr merge` and the queue mutation use GraphQL, and a Claude Code Project cloud thread may be unable to run them. If one fails there, do steps 1 to 5 with `gh api` REST reads and a comment, then hand the merge off.
+`gh pr checks`, `gh pr view`, `gh pr diff`, `gh pr merge` and the queue mutation use GraphQL, and a Claude Code Project cloud thread may be unable to run them. If one fails there, do every step with `gh api` REST: reads, a comment per verdict and the merge itself. No hand-off to a local session is needed.
 
 | Step | REST form |
 |---|---|
@@ -41,7 +41,7 @@ flowchart LR
 | 3 Head SHA | `gh api repos/{owner}/{repo}/pulls/N --jq .head.sha` |
 | 3 Diff | `gh api -H 'Accept: application/vnd.github.diff' repos/{owner}/{repo}/pulls/N` |
 | 5 Verdict | `gh api repos/{owner}/{repo}/issues/N/comments -f body=...` |
-| 6 and 7 Merge | From a local thread or a Remote Control session, by the skill's own step 6 (queue at the reviewed SHA with `expectedHeadOid`) or, where the repo has no queue, step 7 (`gh pr merge N --squash --match-head-commit <reviewed sha>`) |
+| 6 and 7 Merge | `gh api -X PUT repos/{owner}/{repo}/pulls/N/merge -f merge_method=squash -f sha=<reviewed sha>`: GitHub refuses it if the head moved. Where the repo requires a merge queue and no REST route enqueues, leave the PR with both MERGE verdicts and the queue mutation for a local thread: the only case that needs one |
 
 Green CI, a separate review and the head SHA guard all stay. Never bypass a required merge queue.
 
