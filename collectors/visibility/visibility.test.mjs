@@ -83,3 +83,61 @@ test('visibility: no org, or an org gh cannot read, is not measured', async () =
 test('visibility: personal is any address but GitHub noreply or an org domain', () => {
   assert.deepEqual(['1+a@users.noreply.github.com', 'noreply@github.com', 'ops@ACME.example', 'me@mail.example', ''].map((e) => personal(e, ['acme.example'])), [false, false, false, true, false]);
 });
+
+test('visibility: the address Claude Code cloud sessions commit as is a tool, not a person', async () => {
+  assert.deepEqual(['noreply@anthropic.com', ' NoReply@Anthropic.com ', 'me@anthropic.com'].map((e) => personal(e, [])), [false, false, true]);
+  assert.equal(personal('noreply@anthropic.com', [], []), true, 'params.bot_emails replaces the default');
+  const routes = { ...ROUTES, 'repos/acme/tools/branches?per_page=100': [{ name: 'main' }], 'repos/acme/tools/commits?sha=main&per_page=100': [commit('noreply@anthropic.com'), commit('bot@tools.example')] };
+  assert.equal((await run({ routes }))['visibility.personal_author_emails'].value, 2, 'default: the Anthropic address is skipped, the other bot counts');
+  const listed = await collect({ params: { ...params, bot_emails: ['bot@tools.example'] }, gh: fakeGh({ routes }), fetchPage: async () => false });
+  assert.equal(listed['visibility.personal_author_emails'].value, 2, 'a listed address is skipped, the Anthropic one now counts');
+  const none = await collect({ params: { ...params, bot_emails: ['noreply@anthropic.com', 'bot@tools.example'] }, gh: fakeGh({ routes }), fetchPage: async () => false });
+  assert.equal(none['visibility.personal_author_emails'].value, 1, 'both skipped: only the first repo\'s own address is left');
+});
+
+// A personal account: orgs/<owner> answers 404, so the account is read through users/<owner> and user/repos.
+const MINE = { login: 'jo' };
+const PERSONAL_REPOS = [
+  { name: 'blog', full_name: 'jo/blog', visibility: 'public', archived: false, forks_count: 1, owner: MINE },
+  { name: 'diary', full_name: 'jo/diary', visibility: 'private', has_pages: true, owner: MINE },
+  { name: 'other', full_name: 'sam/other', visibility: 'public', archived: false, owner: { login: 'sam' } },
+];
+const PERSONAL_ROUTES = {
+  'users/jo': { login: 'jo', total_private_repos: 1, blog: 'https://jo.example', email: 'jo@jo.example' },
+  'repos/jo/diary/pages': { public: false, html_url: 'https://jo.github.io/diary/' },
+  'repos/jo/blog': { security_and_analysis: sa() },
+  'repos/jo/blog/branches?per_page=100': [{ name: 'main' }],
+  'repos/jo/blog/commits?sha=main&per_page=100': [commit('jo@jo.example'), commit('noreply@anthropic.com'), commit('2+jo@users.noreply.github.com')],
+};
+function fakeUser({ repos = PERSONAL_REPOS, routes = PERSONAL_ROUTES } = {}) {
+  const rest = async (route) => {
+    if (route in routes) return structuredClone(routes[route]);
+    throw Object.assign(new Error(`HTTP 404: ${route}`), { status: 404 });
+  };
+  return { rest, restAll: async (route) => (route.startsWith('user/repos') ? structuredClone(repos) : rest(route)) };
+}
+const runUser = (opts = {}) => collect({ params: { owner: 'jo', org_domains: [] }, gh: fakeUser(opts), fetchPage: async () => false, ...opts });
+
+test('visibility: a personal account is read through users/<owner> and user/repos, scanning per public repo', async () => {
+  const out = await runUser();
+  assert.deepEqual(Object.keys(out).sort(), [...metricIds].sort());
+  for (const id of metricIds) assert.equal(out[id].could_not_check, undefined, id);
+  assert.equal(out['visibility.private_public_pages'].value, 0, 'the private repo\'s site is private');
+  assert.equal(out['visibility.public_without_secret_scanning'].value, 0, 'read from repos/<repo>: the list omitted it');
+  assert.equal(out['visibility.personal_author_emails'].value, 1, 'the profile\'s own address is personal; noreply and the Anthropic address are not');
+  assert.equal(out['visibility.requests'].value, 7, 'org 404, user, list, Pages, one repo, branches, commits');
+  assert.ok(!JSON.stringify(out).includes('jo.example') && !/diary|other/.test(JSON.stringify(out)), 'no address, no private or foreign name');
+  const off = await runUser({ routes: { ...PERSONAL_ROUTES, 'repos/jo/blog': { security_and_analysis: sa({ status: 'disabled' }) } } });
+  assert.deepEqual(off['visibility.public_without_secret_scanning'].detail, [{ label: 'blog', value: 1, unit: 'repos' }]);
+});
+
+test('visibility: a check a personal account cannot make reads not measured, never 0', async () => {
+  const hidden = await runUser({ routes: { ...PERSONAL_ROUTES, 'users/jo': { login: 'jo' }, 'repos/jo/blog': {} } });
+  assert.match(hidden['visibility.private_public_pages'].could_not_check, /cannot count/);
+  assert.match(hidden['visibility.public_without_secret_scanning'].could_not_check, /security_and_analysis/);
+  assert.equal(hidden['visibility.personal_author_emails'].value, 1, 'public history reads with any token');
+  const short = await runUser({ routes: { ...PERSONAL_ROUTES, 'users/jo': { login: 'jo', owned_private_repos: 3 } } });
+  assert.match(short['visibility.private_public_pages'].could_not_check, /sees 1 of the account's 3/);
+  const neither = await runUser({ routes: { 'repos/jo/blog': {} } });
+  for (const id of metricIds) assert.match(neither[id].could_not_check, /orgs\/jo.*users\/jo/, id);
+});
