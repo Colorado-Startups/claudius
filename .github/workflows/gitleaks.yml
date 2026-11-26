@@ -1,5 +1,5 @@
 # Secrets anywhere in this repository's history: gitleaks over every commit, failing on any finding. Secret values are
-# redacted in the log. A false positive goes in .gitleaksignore, one finding fingerprint per line.
+# redacted in the log. A false positive goes in .gitleaksignore, one finding fingerprint per line, and counts once it is on main.
 name: gitleaks
 
 on:
@@ -37,7 +37,15 @@ jobs:
           tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP" gitleaks
 
       - name: scan the history
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.sha }}
         run: |
+          # The ignore list and the config come from the base commit, never from the pull request's own tree,
+          # so a pull request cannot excuse its own finding.
+          rm -f .gitleaksignore .gitleaks.toml
+          for f in .gitleaksignore .gitleaks.toml; do
+            git cat-file -e "$BASE:$f" 2>/dev/null && git show "$BASE:$f" > "$f"
+          done
           ignore=()
           [ -s .gitleaksignore ] && ignore=(--gitleaks-ignore-path .gitleaksignore)
           "$RUNNER_TEMP/gitleaks" git --redact --no-banner --verbose "${ignore[@]}" .
