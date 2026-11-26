@@ -1,6 +1,7 @@
 cff-version: 1.2.0
 message: "If you use Claudius, please cite it as below."
 title: "Claudius: the Claude pack for Git Crafter"
+abstract: "Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing, a one-way change or a step the platform forces."
 type: software
 authors:
   - name: "Colorado Startups"

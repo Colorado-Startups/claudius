@@ -6,6 +6,8 @@ compatibility: Needs the gh CLI signed in and the pr-review-toolkit plugin from 
 
 # Merge
 
+**Outcome:** Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing, a one-way change or a step the platform forces.
+
 Two separate reviews per PR, pinned to a commit, so what merges is what was reviewed. An AI review is the approval ([GOVERNANCE](../../../GOVERNANCE.md)): once the checks are green and both reviews say MERGE at the head commit, the agent merges with no wait for a person's yes. A review-only request gets the verdict in chat.
 
 Requires `gh` signed in (`gh auth status`) and `pr-review-toolkit` from `claude-plugins-official` (`claude plugin install pr-review-toolkit@claude-plugins-official`).

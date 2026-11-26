@@ -6,6 +6,8 @@ compatibility: Needs the Claude Code CLI (claude plugin) only to turn a pick on,
 
 # Find plugin
 
+**Outcome:** Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing, a one-way change or a step the platform forces.
+
 Answer "is there a plugin, skill or connector for X?" with what Anthropic builds or reviews, before anything else.
 
 Requires the Claude Code CLI (`claude plugin`) only to turn a pick on, and only after a yes. The answer needs no CLI.

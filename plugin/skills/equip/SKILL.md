@@ -6,6 +6,8 @@ compatibility: Needs the Claude Code CLI (claude plugin). Without a shell it giv
 
 # Equip
 
+**Outcome:** Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing, a one-way change or a step the platform forces.
+
 Every plugin, skill, connector and agent stays on for the whole desktop app; a session only skips loading what it doesn't need ([All on, app-wide](https://github.com/Colorado-Startups/claudius/blob/main/templates/claude/README.md#all-on-app-wide)). Put each one to work.
 
 Requires the Claude Code CLI (`claude plugin`).

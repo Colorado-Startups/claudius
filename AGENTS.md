@@ -1,5 +1,7 @@
 # Claudius
 
+**Outcome:** Claudius sets up the Claude desktop app as an autonomous, agentic system: you give the objective and the vision, and Claude plans, builds, reviews and merges on its own, asking you only about vision, billing, a one-way change or a step the platform forces.
+
 Instructions for every coding agent in this repo, from Git Crafter `templates/agents/AGENTS.md`. OpenCode reads this file, and Claude Code reads it through `CLAUDE.md` ([OpenCode rules](https://opencode.ai/docs/rules), [Claude Code memory](https://code.claude.com/docs/en/memory), read 2026-11-13).
 
 | Topic | Rule |
