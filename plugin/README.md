@@ -62,10 +62,10 @@ Lift is the mean score with Claudius minus without it, over each skill's three c
 |---|---|---|
 | `plan` | `gh`, `python3 watch_workers.py`, which reads GitHub by `gh api` | GitHub issues in your repo; sessions you start; a state file and its `.lock` in `$TMPDIR` |
 | `merge` | `gh`, `git` | A PR comment and a merge, at the reviewed commit only |
-| `equip` | `claude plugin` | Installs official plugins, turns back on ones left off and removes install records whose project folder is gone, only after you say yes to its change table. It turns nothing off ([All on, app-wide](https://github.com/Colorado-Startups/claudius/blob/main/templates/claude/README.md#all-on-app-wide)) |
-| `find-plugin` | `claude plugin install`, after a yes | Nothing until you say yes |
+| `equip` | `claude plugin` | Installs official plugins, turns back on ones left off and removes install records whose project folder is gone, then reports what it did in a table. It turns nothing off ([All on, app-wide](https://github.com/Colorado-Startups/claudius/blob/main/templates/claude/README.md#all-on-app-wide)) |
+| `find-plugin` | `claude plugin install` | Turns on an Anthropic-built or Anthropic-reviewed pick. A community pick is installed only when nothing official fits |
 | `plain-voice` | nothing | Nothing; it returns text |
-| `visibility` | `gh api`, `git clone`, `curl`, all reads | Nothing; it reports counts |
+| `visibility` | `gh api`, `git clone`, `curl` | Turns on secret scanning and push protection on a public repo, and sets a private repo's site private. It never makes a repo public or deletes one. It reports counts |
 
 The plugin itself collects nothing and sends nothing of its own. Its one script, `watch_workers.py`, reads the branches, pull requests and checks you list by REST through your signed-in `gh`, writes only a small state file of timestamps and shas in the temp directory, and sends nothing anywhere else. Its skills run `gh` commands that write to GitHub under your account, and `plan` saves its plan as an Artifact in your claude.ai account. It reads your local Claude Code plugin records and transcripts only when you ask the `equip` skill to measure use. Details: [PRIVACY.md](https://github.com/Colorado-Startups/claudius/blob/main/PRIVACY.md).
 
