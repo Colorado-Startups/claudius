@@ -71,7 +71,7 @@
     "goal": 10,
     "near": 30,
     "direction": "lower",
-    "goal_source": "template goal, no public benchmark: a thread opens its draft pull request within 10 minutes so CI starts early; DORA, Working in small batches (dora.dev/capabilities/working-in-small-batches, read 2026-11-25)",
+    "goal_source": "template goal, no public benchmark: a thread opens its draft pull request within 10 minutes so CI starts early; DORA, Working in small batches (dora.dev/capabilities/working-in-small-batches, read 2026-11-26)",
     "source": "gh api repos/<repo>/pulls and each pull request's first commit (collectors/code-project/code-project.mjs); not measured with no merged claude/ pull request",
     "needs": "gh",
     "chart": "number"
@@ -87,7 +87,7 @@
     "goal": 24,
     "near": 72,
     "direction": "lower",
-    "goal_source": "template goal, no public benchmark: a green pull request merges within a day; DORA, Working in small batches (dora.dev/capabilities/working-in-small-batches, read 2026-11-25)",
+    "goal_source": "template goal, no public benchmark: a green pull request merges within a day; DORA, Working in small batches (dora.dev/capabilities/working-in-small-batches, read 2026-11-26)",
     "source": "created_at and merged_at of merged claude/ pull requests, gh api repos/<repo>/pulls (collectors/code-project/code-project.mjs)",
     "needs": "gh",
     "chart": "number"
@@ -123,5 +123,64 @@
     "source": "gh api requests collectors/code-project/code-project.mjs made",
     "needs": "gh",
     "chart": "number"
+  },
+  {
+    "id": "code_project.draft_first_share",
+    "params": {
+      "comment": "weeks: how many 7-day buckets tokens_per_merged_pr compares. idle_minutes: the project cache lifetime, one hour. projects_dir: where Claude Code keeps session transcripts; a ~/ path is under home. project_match: names no path here, the default is the repo's own project folder. subagents_dir: the folder of a session's subagent transcripts. human_origin: the origin kind of a record a person typed. repo, branch_prefix and window_days are set on the first target.",
+      "weeks": 4,
+      "idle_minutes": 60,
+      "projects_dir": "~/.claude/projects",
+      "subagents_dir": "subagents",
+      "human_origin": "human"
+    },
+    "tab": "code-project",
+    "kind": "quality",
+    "group": "Threads",
+    "label": "Thread PRs opened as drafts",
+    "means": "Merged pull requests from claude/ branches that were drafts when opened, so CI runs before a person reads them.",
+    "unit": "%",
+    "goal": 100,
+    "near": 80,
+    "direction": "higher",
+    "goal_source": "goal from the Projects docs: the example project instructions say \"Branch from main and open one draft pull request per thread\" (code.claude.com/docs/en/claude-projects, Write project instructions, read 2026-11-26), so every thread's PR starts as a draft",
+    "source": "gh api graphql: the merged pullRequests of the last params.window_days (30) days whose branch starts with params.branch_prefix, up to the latest 100 by update; a PR counts as opened as a draft when its first ready-for-review or convert-to-draft event is ready-for-review (state, N = 100 PRs at most) (collectors/code-project/code-project-threads.mjs)",
+    "needs": "gh",
+    "chart": "gauge",
+    "defined": "2026-11-25"
+  },
+  {
+    "id": "code_project.idle_revivals",
+    "tab": "code-project",
+    "kind": "consumption",
+    "group": "Cache",
+    "label": "Sessions revived after an idle hour",
+    "means": "Sessions that a person resumed after more than an hour idle, so the whole conversation was read again.",
+    "unit": "per week",
+    "goal": 1,
+    "near": 3,
+    "direction": "lower",
+    "goal_source": "goal from the Projects docs: the cache lifetime is an hour on Pro, Max and Ultra, and a thread idle longer than that re-reads its whole conversation when a follow-up reaches it, so new work starts a fresh thread (code.claude.com/docs/en/claude-projects, See and reduce a project's usage, read 2026-11-26); the docs give no count, so one a week is a template choice",
+    "source": "the last 7 days of this repo's session transcripts, main sessions only: a record a person typed (params.human_origin) more than params.idle_minutes (60) after the session's previous record; N = 7 days (collectors/code-project/code-project-threads.mjs)",
+    "needs": "local-files",
+    "chart": "number",
+    "defined": "2026-11-25"
+  },
+  {
+    "id": "code_project.tokens_per_merged_pr",
+    "tab": "code-project",
+    "kind": "consumption",
+    "group": "Cache",
+    "label": "Tokens per merged thread PR, 4-week change",
+    "means": "How much the tokens spent per merged claude/ pull request rose or fell from the oldest week to the latest.",
+    "unit": "%",
+    "goal": 0,
+    "near": 25,
+    "direction": "lower",
+    "goal_source": "template goal, no public benchmark: the Projects docs say a project uses plan limits faster than one session and show usage by thread (code.claude.com/docs/en/claude-projects, See and reduce a project's usage, read 2026-11-26), so the cost of a merged PR falls or holds, never rises; zero change is the goal",
+    "source": "params.weeks (4) buckets of 7 days: billable tokens (input, output and cache write, one count per message id, cache reads left out) of this repo's session transcripts, subagents included, divided by the merged PRs from params.branch_prefix branches of the same week (gh api graphql, up to the latest 100 by update); the change from the oldest bucket with both to the latest; N = 4 weeks (collectors/code-project/code-project-threads.mjs)",
+    "needs": "local-files",
+    "chart": "bar",
+    "defined": "2026-11-25"
   }
 ]

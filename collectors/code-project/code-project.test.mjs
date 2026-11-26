@@ -53,7 +53,7 @@ test('code-project: every metric of the targets file, from one repo', async () =
   assert.equal(out['code_project.agents_without_model'].value, 1);
   assert.equal(out['code_project.draft_pr_minutes'].value, 12.5, 'median of 5 and 20 minutes; the feat/ pull request is not a thread');
   assert.equal(out['code_project.ready_to_merge_hours'].value, 18, 'median of 24 and 12 hours');
-  assert.equal(out['code_project.requests'].value, 3, 'one list and two first commits');
+  assert.equal(out['code_project.requests'].value, 4, 'one list, two first commits and the draft read');
 });
 
 test('code-project: a missing guard rule is listed by label, and the longest file counts', async () => {
@@ -68,7 +68,7 @@ test('code-project: nothing to read is not measured, never 0', async () => {
   const out = await run(repo({}), fakeGh([]));
   for (const id of ['code_project.guard_rules_missing', 'code_project.instruction_lines', 'code_project.agents_unsafe', 'code_project.agents_without_model', 'code_project.draft_pr_minutes', 'code_project.ready_to_merge_hours']) assert.ok(out[id].could_not_check, id);
   assert.match(out['code_project.draft_pr_minutes'].could_not_check, /no claude\/ pull request merged in 30 days/);
-  assert.equal(out['code_project.requests'].value, 1);
+  assert.equal(out['code_project.requests'].value, 2);
 });
 
 test('code-project: a merge older than the window, or a gh failure, leaves the speed metrics not measured', async () => {
