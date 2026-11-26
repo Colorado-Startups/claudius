@@ -88,7 +88,7 @@ test('bridge: with the app closed, tools/list returns no tools and a tool call r
 });
 
 test('bridge: a server\'s extensions and a skills/list request and reply pass through', async () => {
-  // Skills over MCP and Tasks ride on the server's capabilities.extensions and ordinary methods; the bridge must not strip or answer them.
+  // The bridge forwards capabilities.extensions and unknown methods unchanged; it must not strip or answer them.
   const seen = [];
   const skills = [{ uri: 'skill://demo/SKILL.md', frontmatter: { name: 'demo', description: 'A demo skill.' }, resources: [] }];
   const app = await listen((req, res) => {

@@ -15,7 +15,7 @@ What goes wrong with each route, and the pages this guide read. The routes are i
 | An API key login | Claude Code fetches claude.ai connectors only under a claude.ai subscription login. They are not loaded while `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` or `apiKeyHelper` is active ([Claude Code MCP][mcp], read 2026-11-26) |
 | Extensions turned off | An organization can turn extensions off or limit them. Then Extensions does not appear in settings ([Add unlisted][unlisted], read 2026-11-26) |
 | Always allow on write tools | Select Always allow only for trusted servers ([Add unlisted][unlisted], read 2026-11-26) |
-| An empty skill list from a server | On Team, an admin enables Skills over MCP first. Enterprise is coming ([announcement][skills], read 2026-11-26) |
+| An empty skill list from a server | On Team, an admin enables Skills over MCP first, and Enterprise is coming ([announcement][skills], read 2026-11-26). The app may have been closed when the session started (see [Bridge behavior](loopback.md#bridge-behavior)). The MCP client matrix lists no Skills support for Claude Desktop ([matrix](https://modelcontextprotocol.io/extensions/client-matrix), read 2026-11-26) |
 | A server on revision 2026-07-28 behind the bridge | That revision removes `initialize`, which the bridge needs, and requires `Mcp-Method` and `Mcp-Name` headers on each POST, which the bridge does not send ([changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog), read 2026-11-26). Read from the code, not run ([#162](https://github.com/Colorado-Startups/claudius/issues/162)) |
 | An app that needs a token | The bridge sends no auth header |
 
@@ -29,6 +29,7 @@ What goes wrong with each route, and the pages this guide read. The routes are i
 | [MCPB README](https://github.com/modelcontextprotocol/mcpb) and [manifest spec](https://github.com/modelcontextprotocol/mcpb/blob/main/MANIFEST.md) | 2026-11-26 |
 | [MCP servers can now ship skills, run tasks, and more with Claude][skills] | 2026-11-26 |
 | [MCP Skills extension](https://modelcontextprotocol.io/extensions/skills/overview), [Tasks extension](https://modelcontextprotocol.io/extensions/tasks/overview), [Elicitation](https://modelcontextprotocol.io/specification/2026-07-28/client/elicitation) and [File Uploads](https://github.com/modelcontextprotocol/experimental-ext-file-uploads) | 2026-11-26 |
+| [MCP extension support matrix](https://modelcontextprotocol.io/extensions/client-matrix) | 2026-11-26 |
 | [Claude Code: connect to MCP servers][mcp] | 2026-11-26 |
 | [Claude Code: the desktop app][desktop] | 2026-11-26 |
 
