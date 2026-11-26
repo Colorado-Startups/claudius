@@ -89,12 +89,14 @@ test('bridge: with the app closed, tools/list returns no tools and a tool call r
 
 test('bridge: a server\'s extensions and a skills/list request and reply pass through', async () => {
   // Skills over MCP and Tasks ride on the server's capabilities.extensions and ordinary methods; the bridge must not strip or answer them.
+  const seen = [];
   const skills = [{ uri: 'skill://demo/SKILL.md', frontmatter: { name: 'demo', description: 'A demo skill.' }, resources: [] }];
   const app = await listen((req, res) => {
     let body = '';
     req.on('data', (c) => { body += c; });
     req.on('end', () => {
       const msg = JSON.parse(body);
+      seen.push(msg.method);
       if (msg.id === undefined) { res.writeHead(202); return res.end(); }
       res.writeHead(200, { 'Content-Type': 'application/json', 'Mcp-Session-Id': 's1' });
       const result = msg.method === 'initialize'
@@ -117,7 +119,9 @@ test('bridge: a server\'s extensions and a skills/list request and reply pass th
     assert.equal(code, 0);
     const replies = out.trim().split('\n').map((l) => JSON.parse(l));
     const init = replies.find((r) => r.id === 1).result;
-    assert.deepEqual(init.capabilities.extensions, { 'io.modelcontextprotocol/skills': { directoryRead: true }, 'io.modelcontextprotocol/tasks': {} });
+    assert.deepEqual(init.capabilities, { resources: {}, tools: { listChanged: true },
+      extensions: { 'io.modelcontextprotocol/skills': { directoryRead: true }, 'io.modelcontextprotocol/tasks': {} } });
+    assert.deepEqual(seen, ['initialize', 'notifications/initialized', 'skills/list'], 'the method name reaches the server unchanged');
     assert.deepEqual(replies.find((r) => r.id === 2).result.skills, skills);
   } finally {
     app.close();
