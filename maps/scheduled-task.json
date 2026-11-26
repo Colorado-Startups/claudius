@@ -1,0 +1,59 @@
+{
+ "id": "scheduled-task",
+ "name": "Scheduled task",
+ "why": "A recurring job, from its README row to a run that ends clean",
+ "ideal": "Each recurring job is a named task that starts on time, ends without error and keeps its up-front connector load small.",
+ "sources": [
+  {
+   "title": "Claude Code Docs: Automate work with scheduled tasks",
+   "url": "https://code.claude.com/docs/en/routines",
+   "date": "2026-11-26"
+  }
+ ],
+ "critical_path": [
+  "define",
+  "run"
+ ],
+ "steps": [
+  {
+   "id": "define",
+   "name": "Define",
+   "tools": [
+    "Instructions"
+   ],
+   "rule": "Each recurring job is a named scheduled task with its run time.",
+   "rule_ref": "https://code.claude.com/docs/en/routines",
+   "metric": "code_project.tasks_missing"
+  },
+  {
+   "id": "fire",
+   "name": "Fire",
+   "tools": [
+    "Scheduled tasks"
+   ],
+   "rule": "A run starts within ten minutes of its time.",
+   "rule_ref": "https://code.claude.com/docs/en/routines",
+   "metric": "cp_scheduled_tasks.on_time_share"
+  },
+  {
+   "id": "connect",
+   "name": "Connect",
+   "tools": [
+    "Scheduled tasks"
+   ],
+   "rule": "A task keeps its up-front connector load small, with every connector on.",
+   "rule_ref": "https://code.claude.com/docs/en/routines",
+   "metric": "cp_scheduled_tasks.connectors_per_task"
+  },
+  {
+   "id": "run",
+   "name": "Run",
+   "tools": [
+    "Scheduled tasks"
+   ],
+   "rule": "The latest run of every task ends without an error.",
+   "rule_ref": "https://code.claude.com/docs/en/routines",
+   "metric": "cp_scheduled_tasks.last_run_ok_share"
+  }
+ ]
+}

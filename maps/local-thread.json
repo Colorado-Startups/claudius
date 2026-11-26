@@ -1,0 +1,64 @@
+{
+ "id": "local-thread",
+ "name": "Local thread",
+ "why": "A local thread, from the folder it opens to the archive that closes it",
+ "ideal": "A local thread loads a small folder, runs its first command fast, ends pushed and is archived by its starter.",
+ "sources": [
+  {
+   "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+   "url": "https://code.claude.com/docs/en/claude-projects",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Claude Code Docs: Continue local sessions from any device with Remote Control",
+   "url": "https://code.claude.com/docs/en/remote-control",
+   "date": "2026-11-26"
+  }
+ ],
+ "critical_path": [
+  "start",
+  "end"
+ ],
+ "steps": [
+  {
+   "id": "folder",
+   "name": "Folder",
+   "tools": [
+    "Work locally"
+   ],
+   "rule": "A local thread loads little folder context at start.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_work_locally.folder_context_tokens"
+  },
+  {
+   "id": "start",
+   "name": "Start",
+   "tools": [
+    "Work locally"
+   ],
+   "rule": "The first command runs within two minutes.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_work_locally.first_command_minutes"
+  },
+  {
+   "id": "end",
+   "name": "End",
+   "tools": [
+    "Work locally"
+   ],
+   "rule": "A thread ends with no uncommitted or unpushed work.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "cp_work_locally.unclean_ends"
+  },
+  {
+   "id": "archive",
+   "name": "Archive",
+   "tools": [
+    "Remote Control"
+   ],
+   "rule": "A session is archived by its starter when its task ends.",
+   "rule_ref": "https://code.claude.com/docs/en/remote-control",
+   "metric": "desktop_app.sub_sessions_closed"
+  }
+ ]
+}

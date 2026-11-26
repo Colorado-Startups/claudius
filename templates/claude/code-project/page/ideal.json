@@ -1,0 +1,13 @@
+{
+  "ideal": "<One sentence, 25 words at most: what this page's tab or feature looks like at 100.>",
+  "sources": [
+    {
+      "title": "Claude Code Docs: <page title>",
+      "url": "https://code.claude.com/docs/en/<page>",
+      "date": "<yyyy-mm-dd you read it>"
+    }
+  ],
+  "quality": "<What right looks like.>",
+  "speed": "<What fast looks like.>",
+  "consumption": "<What cheap looks like.>"
+}

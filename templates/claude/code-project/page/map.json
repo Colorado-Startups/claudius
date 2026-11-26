@@ -1,0 +1,49 @@
+{
+  "id": "<name>",
+  "name": "<Name>",
+  "why": "<One line: what the lanes of this map decide>",
+  "ideal": "<One sentence, 25 words at most.>",
+  "sources": [
+    {
+      "title": "Claude Code Docs: <page title>",
+      "url": "https://code.claude.com/docs/en/<page>",
+      "date": "<yyyy-mm-dd>"
+    }
+  ],
+  "critical_path": [
+    "<first-step-id>",
+    "<last-step-id>"
+  ],
+  "steps": [
+    {
+      "id": "<first-step-id>",
+      "name": "<Name>",
+      "tools": [
+        "<Tab or feature>"
+      ],
+      "rule": "<20 words at most: the state this step holds.>",
+      "rule_ref": "https://code.claude.com/docs/en/<page>",
+      "metric": "cp_<name>.<what_is_wrong>"
+    },
+    {
+      "id": "<middle-step-id>",
+      "name": "<Name>",
+      "tools": [
+        "<Tab or feature>"
+      ],
+      "rule": "<20 words at most.>",
+      "rule_ref": "https://code.claude.com/docs/en/<page>",
+      "metric": "cp_<name>.<seconds_to_ready>"
+    },
+    {
+      "id": "<last-step-id>",
+      "name": "<Name>",
+      "tools": [
+        "<Tab or feature>"
+      ],
+      "rule": "<20 words at most.>",
+      "rule_ref": "https://code.claude.com/docs/en/<page>",
+      "metric": "cp_<name>.<tokens_added>"
+    }
+  ]
+}

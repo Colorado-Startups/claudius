@@ -78,7 +78,8 @@ test('public: the Process config writes each pack map in full, without the steps
   const dropped = new Set(writePublic(root));
   const mine = read(join(ROOT, 'quality', 'process', 'config.json'));
   const pub = read(join(root, 'quality', 'public', 'process.json'));
-  assert.deepEqual(mine.maps, [{ use: 'guard' }, { use: 'decide' }, { use: 'equip' }, { use: 'publish' }, { use: 'visibility' }, { use: 'project' }, { use: 'ship' }, { use: 'environment' }, { use: 'remember' }, { use: 'setup' }, { use: 'memory' }, { use: 'schedule' }]);
+  const PAGE_MAPS = ['context', 'setup-check', 'scheduled-task', 'local-thread', 'pr-flow', 'connectors', 'plugins', 'skills', 'subagents', 'hooks'];
+  assert.deepEqual(mine.maps, [...['guard', 'decide', 'equip', 'publish', 'visibility', 'project', 'ship', 'environment', 'remember', 'setup', 'memory', 'schedule', ...PAGE_MAPS].map((use) => ({ use }))]);
   assert.deepEqual({ ...pub, comment: mine.comment, maps: mine.maps }, {
     ...mine,
     docs: { maps: 'quality/public/process.json' },
@@ -87,17 +88,13 @@ test('public: the Process config writes each pack map in full, without the steps
     history: null,
     out: 'quality/public/dist',
   });
-  const guard = read(join(ROOT, 'maps', 'guard.json'));
-  const publish = read(join(ROOT, 'maps', 'publish.json'));
-  const visibility = read(join(ROOT, 'maps', 'visibility.json'));
-  const project = read(join(ROOT, 'maps', 'project.json'));
-  // Ship, Environment and Remember mix repo-file steps with local-only ones: each keeps the steps whose metric is public.
-  const trimmed = ['ship', 'environment', 'remember'].map((id) => {
-    const m = read(join(ROOT, 'maps', `${id}.json`));
+  // Each pack map in full, less the steps whose metric is dropped; a map with no step left is left out, and its critical path keeps the steps that remain.
+  const expected = mine.maps.map(({ use }) => read(join(ROOT, 'maps', `${use}.json`))).flatMap((m) => {
     const steps = m.steps.filter((s) => !dropped.has(s.metric));
-    return { ...m, critical_path: m.critical_path.filter((c) => steps.some((s) => s.id === c)), steps };
+    return steps.length ? [{ ...m, critical_path: m.critical_path.filter((c) => steps.some((s) => s.id === c)), steps }] : [];
   });
-  assert.deepEqual(pub.maps, [{ ...guard, critical_path: [], steps: guard.steps.filter((s) => s.id === 'change') }, publish, visibility, project, ...trimmed], 'Decide and Equip score only local-only metrics, so both are left out; every Publish, Visibility and Project step reads GitHub or repo files, so each stays whole; the three newer maps lose only their local-only steps');
+  assert.deepEqual(pub.maps, expected, 'Decide and Equip score only local-only metrics, so both are left out; Publish, Visibility and Project stay whole; every other map loses only its local-only steps');
+  for (const id of ['publish', 'visibility', 'project']) assert.deepEqual(pub.maps.find((m) => m.id === id), read(join(ROOT, 'maps', `${id}.json`)), id);
   for (const s of pub.maps.flatMap((m) => m.steps)) assert.ok(!dropped.has(s.metric), s.metric);
 });
 

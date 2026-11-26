@@ -1,0 +1,50 @@
+[
+  {
+    "id": "cp_<name>.<what_is_wrong>",
+    "tab": "cp-<name>",
+    "kind": "quality",
+    "label": "<Count of what is wrong>",
+    "means": "<One sentence: what the number counts.>",
+    "unit": "<unit>",
+    "goal": 0,
+    "near": 1,
+    "direction": "lower",
+    "goal_source": "<template goal, or the benchmark's name; the doc that backs it (url, read yyyy-mm-dd)>",
+    "source": "<where the number is read; not measured until a collector reads it>",
+    "needs": "local-files",
+    "chart": "number",
+    "defined": "<yyyy-mm-dd>"
+  },
+  {
+    "id": "cp_<name>.<seconds_to_ready>",
+    "tab": "cp-<name>",
+    "kind": "speed",
+    "label": "<Seconds until ready>",
+    "means": "<One sentence: the median time, and from what to what.>",
+    "unit": "s",
+    "goal": 5,
+    "near": 15,
+    "direction": "lower",
+    "goal_source": "<template goal, or the benchmark's name; the doc that backs it (url, read yyyy-mm-dd)>",
+    "source": "<where the number is read; not measured until a collector reads it>",
+    "needs": "local-files",
+    "chart": "number",
+    "defined": "<yyyy-mm-dd>"
+  },
+  {
+    "id": "cp_<name>.<tokens_added>",
+    "tab": "cp-<name>",
+    "kind": "consumption",
+    "label": "<Tokens added to a thread>",
+    "means": "<One sentence: the tokens this adds at start.>",
+    "unit": "tokens",
+    "goal": 2000,
+    "near": 4000,
+    "direction": "lower",
+    "goal_source": "<template goal, or the benchmark's name; the doc that backs it (url, read yyyy-mm-dd)>",
+    "source": "<where the number is read; not measured until a collector reads it>",
+    "needs": "local-files",
+    "chart": "number",
+    "defined": "<yyyy-mm-dd>"
+  }
+]

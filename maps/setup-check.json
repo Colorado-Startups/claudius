@@ -1,0 +1,84 @@
+{
+ "id": "setup-check",
+ "name": "Setup check",
+ "why": "The setup check a thread passes before work: route, variables, network, script, start",
+ "ideal": "A thread reads its cloud rules, holds no key in a variable, and starts fast on a narrow network.",
+ "sources": [
+  {
+   "title": "Claude Code Docs: Configure cloud environments",
+   "url": "https://code.claude.com/docs/en/cloud-environments",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+   "url": "https://code.claude.com/docs/en/claude-projects",
+   "date": "2026-11-26"
+  }
+ ],
+ "critical_path": [
+  "say",
+  "start"
+ ],
+ "steps": [
+  {
+   "id": "say",
+   "name": "Say",
+   "tools": [
+    "Instructions"
+   ],
+   "rule": "A thread reads its GitHub route, network, variables and local-thread rules.",
+   "rule_ref": "https://code.claude.com/docs/en/cloud-environments",
+   "metric": "code_project.cloud_rules_missing"
+  },
+  {
+   "id": "variables",
+   "name": "Variables",
+   "tools": [
+    "Environment"
+   ],
+   "rule": "No environment variable holds a key.",
+   "rule_ref": "https://code.claude.com/docs/en/cloud-environments",
+   "metric": "cp_environment.keys_in_variables"
+  },
+  {
+   "id": "network",
+   "name": "Network",
+   "tools": [
+    "Network access"
+   ],
+   "rule": "The allow list holds only hosts a thread calls.",
+   "rule_ref": "https://code.claude.com/docs/en/cloud-environments",
+   "metric": "cp_network_access.unused_hosts"
+  },
+  {
+   "id": "script",
+   "name": "Script",
+   "tools": [
+    "Setup script"
+   ],
+   "rule": "The setup script adds little time to a start.",
+   "rule_ref": "https://code.claude.com/docs/en/cloud-environments",
+   "metric": "cp_setup_script.script_seconds"
+  },
+  {
+   "id": "start",
+   "name": "Start",
+   "tools": [
+    "Environment"
+   ],
+   "rule": "A thread reaches its first tool call within a minute.",
+   "rule_ref": "https://code.claude.com/docs/en/cloud-environments",
+   "metric": "cp_environment.thread_start_seconds"
+  },
+  {
+   "id": "check",
+   "name": "Check",
+   "tools": [
+    "Setup check"
+   ],
+   "rule": "No file a thread needs is missing from the repo.",
+   "rule_ref": "https://code.claude.com/docs/en/claude-projects",
+   "metric": "code_project.setup_missing"
+  }
+ ]
+}

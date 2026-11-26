@@ -186,3 +186,30 @@ Each lane scores one tab or feature of a Claude Code Project. A map holds six st
 | `setup` | General, Environment, Network access, Network secrets, Setup script, Work locally |
 | `memory` | Conversation, Context, Memory, Extensions, Connectors, Plugins |
 | `schedule` | Threads, Scheduled tasks, Hooks, Subagents, Pull request auto fix, Skills |
+
+## Page maps: one per page
+
+Each page of a Code Project has a map of its own, six steps at most, scoring Quality, Speed and Consumption. The index of all 13 pages, with their tabs and metrics, is [`pages.json`](../templates/claude/code-project/pages.json); the kit to add one is [`page/`](../templates/claude/code-project/page/README.md).
+
+```mermaid
+flowchart LR
+  tab["Tab or feature"] --> page["Page: 3 metrics"] --> map["Map: 3 to 6 steps"] --> score["Score 0 to 100"]
+```
+
+| Page | Map | New or reused |
+|---|---|---|
+| 🛰️ Overview and threads | `project` | Reused |
+| 📎 Context | `context` | New |
+| ⚙️ General and Advanced | `decide` | Reused |
+| 🧠 Memory | `guard` | Reused |
+| 🌩️ Environment | `setup-check` | New |
+| ⏰ Scheduled tasks | `scheduled-task` | New |
+| 💻 Threads on your computer | `local-thread` | New |
+| 🔀 Pull requests and auto-fix | `pr-flow` | New |
+| 🔌 Connectors | `connectors` | New |
+| 🧩 Plugins | `plugins` | New |
+| 📚 Skills | `skills` | New |
+| 🤖 Subagents | `subagents` | New |
+| 🪝 Hooks | `hooks` | New |
+
+Steps that read local files show only on a `--local` page. A step on `code_project.*` or `practices.*` reads repo files, so it also shows on the public page.
