@@ -4,15 +4,15 @@ A Claude Code Project is a beta feature of the Claude desktop app and claude.ai/
 
 ```mermaid
 flowchart LR
-  A[1 Create the Project<br/>attach your repos] --> B[2 Paste the instructions<br/>from Git Crafter] --> C[3 Check each repo's files] --> D[4 Ask for one change<br/>draft PR comes back]
+  A[1 Create the Project<br/>attach your repos] --> B[2 Paste the instructions<br/>from Git Crafter] --> C[3 Check each repo's files] --> D[4 Ask for one change<br/>PR comes back]
 ```
 
 | # | Do | Where |
 |---|---|---|
-| 1 | Create a Project and attach the one or two repos most tasks touch. Then read one file and push a branch in each repo. An attached repo can still fail with `Unable to access your repository` or `Unable to connect to repository` ([Claude Code Projects](https://code.claude.com/docs/en/claude-projects), read 2026-11-25) | Code tab of the desktop app, or claude.ai/code |
+| 1 | Create a Project and attach the one or two repos most tasks touch. Then read one file and push a branch in each repo. An attached repo can fail to connect ([Claude Code Projects](https://code.claude.com/docs/en/claude-projects), read 2026-11-25) | Code tab of the desktop app, or claude.ai/code |
 | 2 | Paste Git Crafter's `instructions.md`, filled in, into the Project's instructions | Project settings |
 | 3 | Check each attached repo for `AGENTS.md`, a `CLAUDE.md` that imports it, the main rule, a short PR template, an issue form, CI and a valid `.claude/settings.json` | The setup prompt below |
-| 4 | Ask for one change. The thread branches, pushes after each step and opens a draft PR | The project chat |
+| 4 | Ask for one change. The thread branches and opens a PR when asked | The project chat |
 
 ## What a cloud thread loads
 

@@ -33,7 +33,7 @@ flowchart LR
 
 ## In a cloud thread
 
-A Claude Code Project cloud thread's proxy blocks GraphQL, so `gh pr checks`, `gh pr view`, `gh pr diff`, `gh pr merge` and the queue mutation fail there. Do steps 1 to 5 with `gh api` REST reads and a comment, then hand the merge off.
+`gh pr checks`, `gh pr view`, `gh pr diff`, `gh pr merge` and the queue mutation use GraphQL, and a Claude Code Project cloud thread may be unable to run them. If one fails there, do steps 1 to 5 with `gh api` REST reads and a comment, then hand the merge off.
 
 | Step | REST form |
 |---|---|
@@ -41,7 +41,7 @@ A Claude Code Project cloud thread's proxy blocks GraphQL, so `gh pr checks`, `g
 | 3 Head SHA | `gh api repos/{owner}/{repo}/pulls/N --jq .head.sha` |
 | 3 Diff | `gh api -H 'Accept: application/vnd.github.diff' repos/{owner}/{repo}/pulls/N` |
 | 5 Verdict | `gh api repos/{owner}/{repo}/issues/N/comments -f body=...` |
-| 6 and 7 Merge | From a local thread or a Remote Control session: `gh pr merge N --squash --match-head-commit <reviewed sha>`, or the queue (step 6). Where the session offers ready-for-review and auto-merge calls, use them with the reviewed head SHA as the guard |
+| 6 and 7 Merge | From a local thread or a Remote Control session, by the skill's own step 6 (queue at the reviewed SHA with `expectedHeadOid`) or, where the repo has no queue, step 7 (`gh pr merge N --squash --match-head-commit <reviewed sha>`) |
 
 Green CI, a separate review and the head SHA guard all stay. Never bypass a required merge queue.
 
