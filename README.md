@@ -55,6 +55,7 @@ Then, each optional:
 | Add | Do |
 |---|---|
 | Process maps | Add `{ "use": "<id>" }` to your Process config's `maps` for each map you want, one per file in [`maps/`](maps/). This repo's own [`quality/process/config.json`](quality/process/config.json) names every one ([maps/README.md](maps/README.md)) |
+| Code Project | To run the repo as a Claude Code Project, add it to a project, pick the environment and paste the [setup prompt](docs/projects-quickstart.md#setup-prompt). Then memory seeds, subagents, scheduled tasks and guard placement: [quick start](docs/projects-quickstart.md) and [templates/claude/code-project/README.md](templates/claude/code-project/README.md) |
 
 The pin, the tab ids and the Pages setup in detail: [Add the pack](#add-the-pack).
 

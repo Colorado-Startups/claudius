@@ -1,12 +1,12 @@
 # Privacy
 
-The plugin itself collects nothing, makes no network calls and keeps no files. Its skills run `gh` commands that write to GitHub under your account, and `plan` saves its plan as an Artifact in your claude.ai account. It is six skills: instructions Claude reads, with no hooks, servers or scripts.
+The plugin itself collects nothing and sends nothing of its own. Its one script, `watch_workers.py` (part of `plan`), reads the branches, pull requests and checks you list by REST through your signed-in `gh`, writes only a small state file of timestamps and shas in the temp directory, and sends nothing anywhere else. Its skills run `gh` commands that write to GitHub under your account, and `plan` saves its plan as an Artifact in your claude.ai account. It is six skills, instructions Claude reads, plus that one script, with no hooks or servers.
 
 | Data | Claudius does |
 |---|---|
 | Collects | Nothing |
-| Sends | Nothing of its own: no telemetry, no analytics, no network calls. Skills run `gh`, which writes to GitHub under your account |
-| Stores | No files, accounts or settings of its own. `plan` saves its plan as an Artifact in your claude.ai account |
+| Sends | Nothing of its own: no telemetry, no analytics. Skills run `gh`, which writes to GitHub under your account, and `watch_workers.py` reads GitHub through it |
+| Stores | No accounts or settings of its own, and one small state file of timestamps and shas, with its `.lock`, in the temp directory while `plan` watches workers. `plan` saves its plan as an Artifact in your claude.ai account |
 | Shares | With no one |
 
 | Skill | What it touches | Where |
