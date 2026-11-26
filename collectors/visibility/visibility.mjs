@@ -95,10 +95,23 @@ async function gather({ root = '.', mode, params = TEMPLATE, gh, fetchPage = sig
 
   // Decide: a public repo stays public only with secret scanning and push protection on. Archived ones take no push.
   const scanSource = `security_and_analysis of each public, unarchived repo in gh api ${list}: secret scanning and push protection both enabled`;
-  // user/repos, and a list read without admin rights, omit security_and_analysis; repos/<repo> returns it to an admin.
+  // user/repos omits security_and_analysis; repos/<repo> returns it to an admin. Only a personal account needs the read, one repo at a time.
+  const live = pub.filter((r) => !r.archived);
   let readErr;
-  const live = await Promise.all(pub.filter((r) => !r.archived).map(async (r) => (r.security_and_analysis ? r : { ...r, ...(await rest(`repos/${r.full_name}`).then((one) => ({ security_and_analysis: one?.security_and_analysis }), (err) => (notFound(err) ? {} : ((readErr ??= err), {})))) })));
-  if (readErr) cnc('visibility.public_without_secret_scanning', ghFailed('gh api repos/<repo>', readErr), scanSource);
+  if (user) {
+    for (const r of live) {
+      if (r.security_and_analysis) continue;
+      try {
+        r.security_and_analysis = (await rest(`repos/${r.full_name}`))?.security_and_analysis;
+      } catch (err) {
+        readErr ??= err;
+      }
+    }
+  }
+  // user/repos lists only the repos the token reaches: fewer public repos than the profile counts is a short list.
+  const short = user && typeof org.public_repos === 'number' && pub.length < org.public_repos ? 'the token lists fewer public repos than the profile counts' : '';
+  if (short) cnc('visibility.public_without_secret_scanning', short, scanSource);
+  else if (readErr) cnc('visibility.public_without_secret_scanning', ghFailed('gh api repos/<repo>', readErr), scanSource);
   else if (live.some((r) => !r.security_and_analysis)) cnc('visibility.public_without_secret_scanning', 'gh api answered without security_and_analysis: needs an admin token; refreshed by a --local collect run', scanSource);
   else {
     const off = live.filter((r) => ['secret_scanning', 'secret_scanning_push_protection'].some((k) => r.security_and_analysis[k]?.status !== 'enabled'));
@@ -111,7 +124,8 @@ async function gather({ root = '.', mode, params = TEMPLATE, gh, fetchPage = sig
   const domains = [...(params.org_domains ?? []), ...(user ? [] : orgDomains(org))];
   const bots = params.bot_emails ?? BOT_EMAILS;
   const emailSource = `gh api --paginate repos/<repo>/branches, then every commit of each branch, every page, of every public repo, one repo and four branches at a time; distinct author emails neither GitHub noreply, nor in params.bot_emails, nor at params.org_domains or an org profile's site or email domain; counts only`;
-  try {
+  if (short) cnc('visibility.personal_author_emails', short, emailSource);
+  else try {
     const hit = [];
     for (const r of pub) {
       const branches = await restAll(`repos/${r.full_name}/branches?per_page=100`);

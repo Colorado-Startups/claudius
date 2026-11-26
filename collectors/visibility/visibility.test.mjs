@@ -190,3 +190,17 @@ test('visibility: a failed per-repo scanning read keeps a fixed reason, not the 
   assert.equal(out['visibility.public_without_secret_scanning'].could_not_check, 'gh api repos/<repo> failed: rate limited');
   assert.ok(!JSON.stringify(out).includes('5551234'));
 });
+
+test('visibility: a short list on a personal account is not measured, never 0', async () => {
+  const out = await runUser({ routes: { ...PERSONAL_ROUTES, 'users/jo': { login: 'jo', total_private_repos: 1, public_repos: 3 } } });
+  for (const id of ['visibility.public_without_secret_scanning', 'visibility.personal_author_emails']) assert.equal(out[id].could_not_check, 'the token lists fewer public repos than the profile counts', id);
+  assert.equal(out['visibility.private_public_pages'].value, 0, 'the private count still matches');
+});
+
+test('visibility: an org never reads repos/<repo> for scanning', async () => {
+  const seen = [];
+  const ok = fakeGh();
+  const gh = { rest: async (r) => (seen.push(r), ok.rest(r)), restAll: ok.restAll };
+  await collect({ params, gh, fetchPage: async () => false });
+  assert.ok(!seen.some((r) => r === 'repos/acme/site' || r === 'repos/acme/tools'));
+});
