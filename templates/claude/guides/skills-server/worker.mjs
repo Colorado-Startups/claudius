@@ -36,6 +36,11 @@ export function createHandler(catalog, { allowedOrigins = [] } = {}) {
   });
   const byUri = new Map(skills.map((s) => [s.entry.uri, s]));
   const files = new Map(skills.flatMap((s) => s.files.map((f) => [`skill://${s.name}/${f.path}`, f])));
+  // params.uri must be a string; anything else is invalid params, never a crash.
+  const uriOf = (p) => {
+    if (typeof p?.uri !== 'string') throw { code: -32602, message: 'Invalid params: uri must be a string' };
+    return p.uri;
+  };
   // A SKILL.md resource carries the skill's name and description; any other file its path.
   const resourceName = (uri) => { const s = byUri.get(uri); return s ? { name: s.frontmatter.name, description: s.frontmatter.description } : { name: uri.slice('skill://'.length) }; };
   const info = catalog.serverInfo ?? { name: 'skills-server', version: '1.0.0' };
@@ -53,14 +58,14 @@ export function createHandler(catalog, { allowedOrigins = [] } = {}) {
     }),
     'skills/list': () => ({ skills: skills.map((s) => s.entry), ...cache }),
     'skills/get': (p) => {
-      const s = byUri.get(p?.uri);
-      if (!s) throw { code: -32602, message: `Unknown skill: ${p?.uri}` };
+      const s = byUri.get(uriOf(p));
+      if (!s) throw { code: -32602, message: `Unknown skill: ${p.uri}` };
       return { skill: s.entry, ...cache };
     },
     'resources/list': () => ({ resources: [...files.entries()].map(([uri, f]) => ({ uri, ...resourceName(uri), mimeType: f.mimeType, size: f.size })), ...cache }),
     'resources/read': (p) => {
-      const f = files.get(p?.uri);
-      if (!f) throw { code: -32602, message: `Unknown resource: ${p?.uri}` };
+      const f = files.get(uriOf(p));
+      if (!f) throw { code: -32602, message: `Unknown resource: ${p.uri}` };
       return { contents: [{ uri: p.uri, mimeType: f.mimeType, ...(f.text !== undefined ? { text: f.text } : { blob: f.blob }) }], ...cache };
     },
   });
@@ -75,10 +80,11 @@ export function createHandler(catalog, { allowedOrigins = [] } = {}) {
 
     let msg;
     try { msg = await request.json(); } catch { return fail(400, null, -32700, 'Parse error'); }
-    if (!msg || Array.isArray(msg) || typeof msg !== 'object' || typeof msg.method !== 'string') return fail(400, null, -32600, 'Invalid request');
+    const usable = (v) => (typeof v === 'string' || (typeof v === 'number' && Number.isInteger(v)) ? v : undefined);
+    if (!msg || Array.isArray(msg) || typeof msg !== 'object' || msg.jsonrpc !== '2.0' || typeof msg.method !== 'string') return fail(400, usable(msg?.id), -32600, 'Invalid request');
     const { id, method, params } = msg;
     if (id === undefined) return text(202, ''); // a notification takes no reply
-    if (typeof id !== 'string' && typeof id !== 'number') return fail(400, null, -32600, 'Invalid request: id must be a string or a number');
+    if (usable(id) === undefined) return fail(400, null, -32600, 'Invalid request: id must be a string or a number');
 
     const header = request.headers.get(`mcp-protocol-version`);
     const body = params?._meta?.[META];
@@ -91,7 +97,7 @@ export function createHandler(catalog, { allowedOrigins = [] } = {}) {
       if (!header || header !== body) return fail(400, id, -32020, `Header mismatch: MCP-Protocol-Version ${JSON.stringify(header)} does not match _meta ${JSON.stringify(body)}`);
       if (body !== VERSION) return fail(400, id, -32022, `Unsupported protocol version ${JSON.stringify(body)}`, { supported: [VERSION] });
       if (request.headers.get('mcp-method') !== method) return fail(400, id, -32020, 'Header mismatch: Mcp-Method does not match the request method');
-      if (method === 'resources/read' && headerValue(request.headers.get('mcp-name')) !== params?.uri) return fail(400, id, -32020, 'Header mismatch: Mcp-Name does not match params.uri');
+      if (method === 'resources/read' && typeof params?.uri === 'string' && headerValue(request.headers.get('mcp-name')) !== params?.uri) return fail(400, id, -32020, 'Header mismatch: Mcp-Name does not match params.uri');
     }
 
     if (method === 'initialize') {
@@ -108,8 +114,8 @@ export function createHandler(catalog, { allowedOrigins = [] } = {}) {
       if (legacy) { delete result.ttlMs; delete result.cacheScope; } else result.resultType = 'complete';
       return json(200, { jsonrpc: '2.0', id, result });
     } catch (e) {
-      if (typeof e?.code !== 'number') throw e;
-      return fail(200, id, e.code, e.message);
+      // A thrown {code, message} is a JSON-RPC error. Anything else is a bug here, and still answers in JSON.
+      return typeof e?.code === 'number' ? fail(200, id, e.code, e.message) : fail(500, id, -32603, 'Internal error');
     }
   };
 }

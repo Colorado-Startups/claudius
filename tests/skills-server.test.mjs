@@ -266,8 +266,58 @@ test('every result names the server, and resources/list names a SKILL.md by its 
 });
 
 test('catalog: an unquoted value a YAML parser would read differently fails the build', () => {
-  for (const v of ['has a # comment', 'a: b', 'trailing ', 'True', '~', 'yes', '1e3', '1.10', '*star', '- item']) {
+  for (const v of ['has a # comment', 'a: b', 'trailing ', 'True', '~', 'yes', '1e3', '1.10', '*star', '- item', '2026-11-26T10:00:00Z', '2026-11-26 10:00:00', '1:30', '12345678901234567890', '+5', '0x1f']) {
     assert.throws(() => parseFrontmatter(`---\nname: a\ndescription: d\nx: ${v}\n---\n`, 'x'), /plain YAML scalar|flat/, JSON.stringify(v));
   }
   assert.deepEqual(parseFrontmatter('---\nname: a\ndescription: d\nx: 10\ny: 1.5\nz: "True"\n---\n', 'x'), { name: 'a', description: 'd', x: 10, y: 1.5, z: 'True' });
+});
+
+test('a uri that is not a string is -32602 on both paths, never a 500', async () => {
+  for (const uri of [{ toString: 1 }, 5, null, ['a']]) {
+    for (const method of ['skills/get', 'resources/read']) {
+      const legacy = await handle(new Request('https://x.test/mcp', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params: { uri } }) }));
+      assert.equal(legacy.status, 200, `${method} ${JSON.stringify(uri)}`);
+      assert.equal((await legacy.json()).error.code, -32602);
+    }
+    const modern = await (await call('skills/get', { uri })).json();
+    assert.equal(modern.error.code, -32602);
+  }
+});
+
+test('a request without jsonrpc 2.0 or with an id that is not finite is -32600', async () => {
+  const post = (body) => handle(new Request('https://x.test/mcp', { method: 'POST', headers: { 'content-type': 'application/json' }, body }));
+  for (const body of ['{"id":1,"method":"ping"}', '{"jsonrpc":"1.0","id":1,"method":"ping"}', '{"jsonrpc":"2.0","id":1e400,"method":"ping"}']) {
+    const res = await post(body);
+    assert.equal(res.status, 400, body);
+    assert.equal((await res.json()).error.code, -32600);
+  }
+  const keep = await (await post('{"id":5}')).json();
+  assert.equal(keep.id, 5);
+});
+
+test('catalog: duplicate keys, odd single quotes and YAML floats fail, and a folder or name that is unsafe fails', () => {
+  const fm = (line) => `---\nname: a\ndescription: d\n${line}\n---\n`;
+  assert.throws(() => parseFrontmatter(`---\nname: a\nname: b\ndescription: d\n---\n`, 'x'), /appears twice/);
+  for (const v of ["'a' # c'", "'it's'", '.inf', '.NaN']) assert.throws(() => parseFrontmatter(fm(`x: ${v}`), 'x'), /plain YAML scalar/, v);
+  assert.equal(parseFrontmatter(fm("x: 'it''s'"), 'x').x, "it's");
+  const long = 'a'.repeat(65);
+  assert.throws(() => buildCatalog(fixture({ [`${long}/SKILL.md`]: `---\nname: ${long}\ndescription: d\n---\n` })), /not a valid skill name/);
+  const dir = fixture({ 'real/SKILL.md': '---\nname: a\ndescription: d\n---\n' });
+  const holder = mkdtempSync(join(tmpdir(), 'skills-'));
+  symlinkSync(join(dir, 'real'), join(holder, 'a'));
+  assert.throws(() => buildCatalog(holder), /symbolic link/);
+});
+
+test('an id that is not an integer is -32600, and resources/read with no uri is -32602', async () => {
+  const bad = await handle(new Request('https://x.test/mcp', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"jsonrpc":"2.0","id":1.5,"method":"skills/list"}' }));
+  assert.equal(bad.status, 400);
+  const res = await call('resources/read', {}, { headers: { 'mcp-name': '' } });
+  assert.equal((await res.json()).error.code, -32602);
+});
+
+test('catalog: a SKILL.md that starts with a BOM builds, and its text keeps the bytes', () => {
+  const md = Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), Buffer.from('---\nname: a\ndescription: d\n---\nbody\n')]);
+  const f = buildCatalog(fixture({ 'a/SKILL.md': md })).skills[0].files[0];
+  assert.equal(f.size, md.length);
+  assert.equal(Buffer.from(f.text, 'utf8').equals(md), true);
 });

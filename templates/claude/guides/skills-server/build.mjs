@@ -26,12 +26,13 @@ export function parseFrontmatter(src, where) {
     if (!kv || kv[2] === '' || /^[|>]/.test(kv[2]) || /^[[{]/.test(kv[2])) throw new Error(`${where}: frontmatter line is not a flat "key: value": ${line}`);
     let v = kv[2];
     if (/^"[\s\S]*"$/.test(v)) { try { v = JSON.parse(v); } catch { throw new Error(`${where}: bad double-quoted value: ${line}`); } }
-    else if (/^'[\s\S]*'$/.test(v)) v = v.slice(1, -1).replace(/''/g, "'");
+    else if (/^'(?:[^']|'')*'$/.test(v)) v = v.slice(1, -1).replace(/''/g, "'");
     else if (v === 'true' || v === 'false') v = v === 'true';
     else if (v === 'null') v = null;
-    else if (/^-?(0|[1-9]\d*)(\.\d*[1-9])?$/.test(v)) v = Number(v);
+    else if (/^-?(0|[1-9]\d{0,14})(\.\d{0,12}[1-9])?$/.test(v)) v = Number(v);
     // A plain value that a YAML parser would read another way is refused, so the served frontmatter is the file's.
-    else if (/(^|\s)#|:\s|:$|[ \t]$|^[&*!%@`|>'"[\]{},?-]|^(~|y|n|yes|no|on|off|true|false|null|[-+]?\.?\d[\w.+-]*)$/i.test(v)) throw new Error(`${where}: this value is not a plain YAML scalar (quote it): ${line}`);
+    else if (/(^|\s)#|:\s|:$|[ \t]$|^[&*!%@`|>'"[\]{},?-]|^(~|y|n|yes|no|on|off|true|false|null|[-+]?\.(inf|nan)|[-+.\d].*)$/i.test(v)) throw new Error(`${where}: this value is not a plain YAML scalar (quote it): ${line}`);
+    if (Object.hasOwn(out, kv[1])) throw new Error(`${where}: the key ${kv[1]} appears twice`);
     out[kv[1]] = v;
   }
   for (const k of ['name', 'description']) if (typeof out[k] !== 'string' || !out[k]) throw new Error(`${where}: frontmatter needs ${k}`);
