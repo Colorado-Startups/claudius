@@ -47,7 +47,7 @@ async function gather({ root = '.', mode, params = TEMPLATE, gh, fetchPage = sig
   const out = {};
   const val = (id, value, source, detail) => (out[id] = { value, ...(detail?.length ? { detail } : {}), source, read_at: readAt });
   const cnc = (id, reason, source) => (out[id] = { could_not_check: reason, source });
-  let org, repos, user = false;
+  let org, repos, user = false, blocked = '';
   try {
     org = await rest(`orgs/${owner}`);
     repos = await restAll(`orgs/${owner}/repos?per_page=100&type=all`);
@@ -58,15 +58,25 @@ async function gather({ root = '.', mode, params = TEMPLATE, gh, fetchPage = sig
       org = await rest(`users/${owner}`);
       repos = (await restAll('user/repos?per_page=100&affiliation=owner')).filter((r) => String(r.owner?.login ?? '').toLowerCase() === owner.toLowerCase());
       user = true;
+      // user/repos lists only the signed-in user's repos, so any other owner reads as empty, never as 0.
+      const me = await rest('user').then((u) => String(u?.login ?? '').toLowerCase(), (err3) => ghFailed('gh api user', err3));
+      if (me !== owner.toLowerCase()) blocked = me.includes(' failed') ? me : 'needs a login as that user';
     } catch (err2) {
       return all(`${ghFailed(`gh api orgs/${owner}`, err)}; ${ghFailed(`gh api users/${owner}`, err2)}`);
     }
+  }
+  if (blocked) {
+    for (const id of ['visibility.private_public_pages', 'visibility.public_without_secret_scanning', 'visibility.personal_author_emails']) cnc(id, blocked, `users/${owner} and user/repos: a personal account's repos are listed only to a login as that user`);
+    val('visibility.audit_seconds', Math.round((Date.now() - started) / 100) / 10, 'wall time of this collector, from the account read to the last read');
+    val('visibility.requests', requests, 'gh api requests this collector made, one per page');
+    return Object.fromEntries(metricIds.map((id) => [id, out[id] ?? { could_not_check: 'collector produced no value', source: SOURCE }]));
   }
   const pub = repos.filter((r) => r.visibility === 'public');
   const priv = repos.filter((r) => r.visibility !== 'public');
 
   // Probe: a private repo's site, public in its Pages setting or loading for a signed-out request.
-  const pagesSource = `gh api orgs/${owner}/repos, then repos/<repo>/pages of each private repo with a site (public true) and one signed-out request to its html_url (a 2xx not on github.com); a count, never a name`;
+  const list = user ? `user/repos (users/${owner})` : `orgs/${owner}/repos`;
+  const pagesSource = `gh api ${list}, then repos/<repo>/pages of each private repo with a site (public true) and one signed-out request to its html_url (a 2xx not on github.com); a count, never a name`;
   // A personal account counts its private repos under total_private_repos, or owned_private_repos; either is hidden from other logins.
   const total = typeof org.total_private_repos === 'number' ? org.total_private_repos : user ? org.owned_private_repos : undefined;
   if (typeof total !== 'number') cnc('visibility.private_public_pages', `this token cannot count the ${user ? 'account' : 'org'}'s private repos (${user ? 'users' : 'orgs'}/<owner> hides total_private_repos)`, pagesSource);
@@ -84,10 +94,12 @@ async function gather({ root = '.', mode, params = TEMPLATE, gh, fetchPage = sig
   }
 
   // Decide: a public repo stays public only with secret scanning and push protection on. Archived ones take no push.
-  const scanSource = `security_and_analysis of each public, unarchived repo in gh api orgs/${owner}/repos: secret scanning and push protection both enabled`;
+  const scanSource = `security_and_analysis of each public, unarchived repo in gh api ${list}: secret scanning and push protection both enabled`;
   // user/repos, and a list read without admin rights, omit security_and_analysis; repos/<repo> returns it to an admin.
-  const live = await Promise.all(pub.filter((r) => !r.archived).map(async (r) => (r.security_and_analysis ? r : { ...r, ...(await rest(`repos/${r.full_name}`).then((one) => ({ security_and_analysis: one?.security_and_analysis }), () => ({}))) })));
-  if (live.some((r) => !r.security_and_analysis)) cnc('visibility.public_without_secret_scanning', 'gh api answered without security_and_analysis: needs an admin token; refreshed by a --local collect run', scanSource);
+  let readErr;
+  const live = await Promise.all(pub.filter((r) => !r.archived).map(async (r) => (r.security_and_analysis ? r : { ...r, ...(await rest(`repos/${r.full_name}`).then((one) => ({ security_and_analysis: one?.security_and_analysis }), (err) => (notFound(err) ? {} : ((readErr ??= err), {})))) })));
+  if (readErr) cnc('visibility.public_without_secret_scanning', ghFailed('gh api repos/<repo>', readErr), scanSource);
+  else if (live.some((r) => !r.security_and_analysis)) cnc('visibility.public_without_secret_scanning', 'gh api answered without security_and_analysis: needs an admin token; refreshed by a --local collect run', scanSource);
   else {
     const off = live.filter((r) => ['secret_scanning', 'secret_scanning_push_protection'].some((k) => r.security_and_analysis[k]?.status !== 'enabled'));
     val('visibility.public_without_secret_scanning', off.length, `${scanSource}; ${live.length} repos`, off.map((r) => ({ label: r.name, value: 1, unit: 'repos' })));

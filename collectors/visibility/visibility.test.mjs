@@ -124,6 +124,7 @@ const PERSONAL_REPOS = [
   { name: 'other', full_name: 'sam/other', visibility: 'public', archived: false, owner: { login: 'sam' } },
 ];
 const PERSONAL_ROUTES = {
+  user: { login: 'jo' },
   'users/jo': { login: 'jo', total_private_repos: 1, blog: 'https://jo.example', email: 'jo@jo.example' },
   'repos/jo/diary/pages': { public: false, html_url: 'https://jo.github.io/diary/' },
   'repos/jo/blog': { security_and_analysis: sa() },
@@ -137,7 +138,7 @@ function fakeUser({ repos = PERSONAL_REPOS, routes = PERSONAL_ROUTES } = {}) {
   };
   return { rest, restAll: async (route) => (route.startsWith('user/repos') ? structuredClone(repos) : rest(route)) };
 }
-const runUser = (opts = {}) => collect({ params: { owner: 'jo', org_domains: [] }, gh: fakeUser(opts), fetchPage: async () => false });
+const runUser = (opts = {}) => collect({ params: { owner: 'jo', org_domains: [] }, gh: opts.gh ?? fakeUser(opts), fetchPage: async () => false });
 
 test('visibility: a personal account is read through users/<owner> and user/repos, scanning per public repo', async () => {
   const out = await runUser();
@@ -146,13 +147,13 @@ test('visibility: a personal account is read through users/<owner> and user/repo
   assert.equal(out['visibility.private_public_pages'].value, 0, 'the private repo\'s site is private');
   assert.equal(out['visibility.public_without_secret_scanning'].value, 0, 'read from repos/<repo>: the list omitted it');
   assert.equal(out['visibility.personal_author_emails'].value, 1, 'the profile\'s own address is personal; noreply and the Anthropic address are not');
-  assert.equal(out['visibility.requests'].value, 7, 'org 404, user, list, Pages, one repo, branches, commits');
+  assert.equal(out['visibility.requests'].value, 8, 'org 404, user, signed-in login, list, Pages, one repo, branches, commits');
   assert.ok(!JSON.stringify(out).includes('jo.example') && !/diary|other/.test(JSON.stringify(out)), 'no address, no private or foreign name');
   const off = await runUser({ routes: { ...PERSONAL_ROUTES, 'repos/jo/blog': { security_and_analysis: sa({ status: 'disabled' }) } } });
   assert.deepEqual(off['visibility.public_without_secret_scanning'].detail, [{ label: 'blog', value: 1, unit: 'repos' }]);
 });
 
-test('visibility: with no owner set and no personal account, nothing is read as one', async () => {
+test('visibility: an owner that is neither an org nor a user is not measured, never 0', async () => {
   const neither = await runUser({ routes: { 'repos/jo/blog': {} } });
   for (const id of metricIds) assert.match(neither[id].could_not_check, /orgs\/jo.*users\/jo/, id);
 });
@@ -172,4 +173,20 @@ test('visibility: a rate limit on the user read keeps the fixed reason and no ID
   const out = await collect({ params: { owner: 'jo', org_domains: [] }, gh: { ...gh, rest: (r) => (r === 'orgs/jo' ? Promise.reject(Object.assign(new Error('HTTP 404'), { status: 404 })) : gh.rest(r)) }, fetchPage: async () => false });
   for (const id of metricIds) assert.match(out[id].could_not_check, /users\/jo failed: rate limited/, id);
   assert.ok(!JSON.stringify(out).includes('12345678'));
+});
+
+test('visibility: a personal account read by another login is not measured, never 0', async () => {
+  const other = await runUser({ routes: { ...PERSONAL_ROUTES, user: { login: 'sam' } } });
+  for (const id of ['visibility.private_public_pages', 'visibility.public_without_secret_scanning', 'visibility.personal_author_emails']) assert.equal(other[id].could_not_check, 'needs a login as that user', id);
+  assert.ok(typeof other['visibility.requests'].value === 'number');
+  const limited = await runUser({ gh: { rest: async (r) => { if (r === 'user') throw Object.assign(new Error('rate limit, installation ID 5551234'), { status: 403 }); return fakeUser().rest(r); }, restAll: fakeUser().restAll } });
+  assert.equal(limited['visibility.personal_author_emails'].could_not_check, 'gh api user failed: rate limited');
+});
+
+test('visibility: a failed per-repo scanning read keeps a fixed reason, not the admin-token one', async () => {
+  const ok = fakeUser();
+  const gh = { rest: async (r) => { if (r === 'repos/jo/blog') throw Object.assign(new Error('rate limit, installation ID 5551234'), { status: 403 }); return ok.rest(r); }, restAll: ok.restAll };
+  const out = await collect({ params: { owner: 'jo', org_domains: [] }, gh, fetchPage: async () => false });
+  assert.equal(out['visibility.public_without_secret_scanning'].could_not_check, 'gh api repos/<repo> failed: rate limited');
+  assert.ok(!JSON.stringify(out).includes('5551234'));
 });

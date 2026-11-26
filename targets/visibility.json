@@ -43,7 +43,7 @@
     "kind": "quality",
     "group": "Public",
     "label": "Personal emails in public history",
-    "means": "Distinct author emails, on every branch of each public repo, that are neither GitHub noreply, a listed tool address, nor the org's domain.",
+    "means": "Distinct author emails in public history that are not noreply, a listed tool address or an owned domain.",
     "unit": "emails",
     "goal": 0,
     "near": 1,
