@@ -114,7 +114,10 @@ const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const URL_RE = /^https:\/\/[A-Za-z0-9.-]+(\/[A-Za-z0-9._~\/-]*)?$/;
 const SHA_RE = /^[0-9a-f]{40}$/;
 const VIEWS = [["today", "Today"], ["builds", "Builds"], ["quality", "Quality"], ["repos", "Repos"]];
-const blob = (id) => document.getElementById(id)?.textContent.trim();
+const blob = (id) => {   // an embedded image: base64 text only, anything else is dropped
+  const t = document.getElementById(id)?.textContent.trim() ?? "";
+  return /^[A-Za-z0-9+\/]+={0,2}$/.test(t) ? t : "";
+};
 const app = document.getElementById("app");
 const meta = document.getElementById("meta");
 const refreshBtn = document.getElementById("refresh");
@@ -352,7 +355,8 @@ function foot() {
 }
 function render() {
   if (S.waiting) return;   // the permission card is showing
-  const view = { today: viewToday, builds: viewBuilds, quality: viewQuality, repos: viewRepos }[S.view]();
+  const draw = new Map([["today", viewToday], ["builds", viewBuilds], ["quality", viewQuality], ["repos", viewRepos]]).get(S.view) ?? viewToday;
+  const view = draw();
   nav.replaceChildren(...VIEWS.map(([id, name]) => {
     const b = h("button", { text: name, type: "button" });
     if (id === S.view) b.setAttribute("aria-current", "page");
@@ -476,7 +480,8 @@ if (!desktop?.childProcess) {
     const go = h("button", { class: "primary", text: "Allow and start" });
     go.onclick = async () => {
       await desktop.permissions.request().catch(() => {});
-      S.waiting = false; nav.hidden = false; refreshBtn.hidden = false; await offerManage(); window.__refresh(true);
+      S.waiting = false; nav.hidden = false; refreshBtn.hidden = false; route();
+      await offerManage(); window.__refresh(true);
     };
     app.replaceChildren(h("section", { class: "card install" }, h("h2", { text: "Allow three things" }),
       h("p", { text: "Full access runs gh and curl on this Mac to read GitHub and the public Quality pages. Notifications tell you when a pull request is ready or failing. The menu bar item shows the open count. Claudius reads only and changes nothing." }),
