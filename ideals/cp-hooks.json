@@ -1,0 +1,13 @@
+{
+  "ideal": "Hooks fire when they should, run nothing unsafe and add little time or text.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Hooks reference",
+      "url": "https://code.claude.com/docs/en/hooks",
+      "date": "2026-11-26"
+    }
+  ],
+  "quality": "Every guard hook fires when it should, and none runs an unsafe command.",
+  "speed": "A hook adds under one second to a call.",
+  "consumption": "Hooks inject little text at start."
+}

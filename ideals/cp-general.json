@@ -1,0 +1,13 @@
+{
+  "ideal": "Each thread runs on a model and effort that fit its task.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-26"
+    }
+  ],
+  "quality": "The model fits the task.",
+  "speed": "Effort is no higher than the task needs.",
+  "consumption": "Few threads run above the default model."
+}

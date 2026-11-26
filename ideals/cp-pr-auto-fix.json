@@ -1,0 +1,18 @@
+{
+  "ideal": "Auto fix pushes a real fix with its test, turns a red check green quickly and stops when the pull request merges.",
+  "sources": [
+    {
+      "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",
+      "url": "https://code.claude.com/docs/en/claude-projects",
+      "date": "2026-11-26"
+    },
+    {
+      "title": "Claude Code Docs: Use Claude Code in the cloud",
+      "url": "https://code.claude.com/docs/en/claude-code-on-the-web",
+      "date": "2026-11-26"
+    }
+  ],
+  "quality": "Each fix comes with a test, and none skips or disables one.",
+  "speed": "A red check turns green within minutes.",
+  "consumption": "A pull request needs few fix attempts."
+}
