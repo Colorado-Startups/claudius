@@ -66,9 +66,9 @@
    "tools": [
     "Pull request auto fix"
    ],
-   "rule": "Auto fix pushes a fix with a test, never skips one, and stops when the pull request merges.",
+   "rule": "Auto fix never skips, disables or deletes a test to reach green.",
    "rule_ref": "https://code.claude.com/docs/en/claude-projects",
-   "metric": "cp_pr_auto_fix.red_to_green_minutes"
+   "metric": "cp_pr_auto_fix.skipped_tests"
   },
   {
    "id": "skills",
@@ -76,9 +76,9 @@
    "tools": [
     "Skills"
    ],
-   "rule": "A skill fires when its task comes up, and the thread finds it on the first try.",
+   "rule": "A skill fires when its task comes up.",
    "rule_ref": "https://code.claude.com/docs/en/skills",
-   "metric": "cp_skills.skill_listing_tokens"
+   "metric": "cp_skills.fired_when_due_share"
   }
  ]
 }
