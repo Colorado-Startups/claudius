@@ -27,10 +27,20 @@ flowchart LR
 | 3 | Split | In plan mode, cut the work into steps. Each step is one PR of at most 200 changed lines, with its test, touching files no other step touches. If superpowers is installed, its `writing-plans` is the method for design and step-by-step plans | Plan mode |
 | 4 | Show | Publish the plan as an Artifact: a flow diagram, then one row per step (step, issue title, files, test, runs with or after, metric it moves). Labels, not paragraphs | Artifacts |
 | 5 | Approve | Run the Check table once; if it fixed anything, republish the Artifact. Then ExitPlanMode with the `Checked:` line, the steps and the Artifact link. On a yes, file the issues (step 6), then start one session per independent step on a brief under 150 words; steps that share files run in order | Sessions, worktrees |
-| 6 | File | After the yes, one issue per step: `gh issue create`, its body the step's row and the Artifact link. Add `--type Task` only when `gh api orgs/<owner>/issue-types` lists Task; a 404 or no Task means plain | `gh` |
-| 7 | Build | A worker branches, tests, pushes once, and opens a PR that says `Closes #<issue>` with a table body. It stops at the open PR | Auto-fix |
+| 6 | File | After the yes, one issue per step: `gh issue create`, its body the step's row and the Artifact link. A fix step gets `--type Task`. A feature step gets `--type Feature --label enhancement`, so the board's auto-add cards it. Pass `--type` only when `gh api orgs/<owner>/issue-types` lists it; a 404 means the label alone. Where the board has no auto-add, add each feature issue (`gh project item-add`, Status Todo; `gh project item-edit`). Link every issue in the plan page. Use the board where the repo's owner keeps one (`gh project list --owner <owner>`). None, or `gh` lacks the `project` scope: skip quietly and say so in the plan | `gh` |
+| 7 | Build | A worker branches, tests, pushes once, and opens a PR that says `Closes #<issue>` with a table body. It stops at the open PR. A bug becomes an issue typed Bug (`--type Bug` where `gh api orgs/<owner>/issue-types` lists it, else label `bug`), in the repo at fault, and stays off the board. An idea becomes a draft card (`gh project item-create`), or an issue labelled `enhancement`, which the board's auto-add cards. File each the moment it is found, after a search (`gh issue list --search`) shows no duplicate, and list it in the PR body's Left table | Auto-fix, `gh` |
 | 8 | Merge | The orchestrator reviews and merges each PR with the `merge` skill | pr-review-toolkit |
 | 9 | Live | Load the live page in the app's browser. Mark the step done in the Artifact and republish it | Browser, Artifacts |
+| 10 | Wrap up | Before a session ends, reconcile: each merged PR closed its issue, each touched card is moved, each finding is linked | `gh` |
+
+| Filing in a cloud session | Do |
+|---|---|
+| Why | Its proxy blocks GraphQL, so `gh issue` and `gh project` fail. REST works |
+| Issue | `gh api repos/<owner>/<repo>/issues -f title=<t> -f body=<b> -f type=Bug`, or `-f 'labels[]=bug'` where the owner has no issue types. A feature step: `-f type=Feature -f 'labels[]=enhancement'` |
+| Card, org board | `gh api orgs/<owner>/projectsV2/<board>/drafts -f title=<t> -f body=<b>` |
+| Card, user board | `gh api user/<user id>/projectsV2/<board>/drafts -f title=<t> -f body=<b>` |
+| It fails | List the item in a `To card` table in the PR body; the orchestrator files it |
+| Source | Git Crafter `templates/agents/AGENTS.md`, which wins where the two differ |
 
 | Check once, before Approve | Passes when |
 |---|---|
@@ -39,8 +49,9 @@ flowchart LR
 | Small | Nothing beyond the ask. Where the repo has a Quality page, each step names the metric it moves |
 | Equipped | Each step names the skill, plugin or connector it uses. A missing one is listed to add |
 | Owner | Only product and billing items wait for the owner, each with a default |
+| Tracked | Every step has an issue, every feature a card |
 
-Fix what fails. Then put one line above the plan, each row marked ✅ for a pass or ❌ for a fail: `Checked: True ✅ · Whole ✅ · Small ✅ · Equipped ✅ · Owner ✅ · Changed: <what the check fixed>`. A row that still fails after the pass keeps its ❌, with the reason in that line. One pass, never a loop. The check runs for any plan in plan mode, even one with no issues or sessions to follow. When the owner says "check", run the same table.
+Fix what fails. Then put one line above the plan, each row marked ✅ for a pass or ❌ for a fail: `Checked: True ✅ · Whole ✅ · Small ✅ · Equipped ✅ · Owner ✅ · Tracked ✅ · Changed: <what the check fixed>`. A row that still fails after the pass keeps its ❌, with the reason in that line. One pass, never a loop. The check runs for any plan in plan mode, even one with no issues or sessions to follow. When the owner says "check", run the same table.
 
 | Keep usage low | Rule |
 |---|---|
