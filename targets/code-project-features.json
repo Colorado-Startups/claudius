@@ -90,7 +90,7 @@
     "near": 8000,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: every plugin stays on and the cost is reported, never fixed by turning one off: the skill listing holds every skill name, its descriptions are cut to fit a budget of 1% of the model context window, and a full skill loads only when invoked; see Claude Code Docs: Extend Claude with skills (code.claude.com/docs/en/skills), read 2026-11-26",
-    "source": "the start of recent threads, read on the machine that ran the sessions; not measured until a collector reads it",
+    "source": "the start of recent threads, read on the machine that ran the sessions; read by collectors/code-project/code-project-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -138,7 +138,7 @@
     "near": 5000,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: Claude Code loads a listing of skill names and descriptions into context, so a long description costs every thread; see Claude Code Docs: Extend Claude with skills (code.claude.com/docs/en/skills), read 2026-11-26",
-    "source": "the start of recent threads, read on the machine that ran the sessions; not measured until a collector reads it",
+    "source": "the start of recent threads, read on the machine that ran the sessions; read by collectors/code-project/code-project-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -170,7 +170,7 @@
     "near": 3000,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: under one second so a guard is never skipped for speed; see Claude Code Docs: Hooks reference (code.claude.com/docs/en/hooks), read 2026-11-26",
-    "source": "hook timings in recent threads, read on the machine that ran the sessions; not measured until a collector reads it",
+    "source": "hook timings in recent threads, read on the machine that ran the sessions; read by collectors/code-project/code-project-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -186,7 +186,7 @@
     "near": 2000,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: text a hook injects is read by every thread; see Claude Code Docs: Hooks reference (code.claude.com/docs/en/hooks), read 2026-11-26",
-    "source": "the start of recent threads, read on the machine that ran the sessions; not measured until a collector reads it",
+    "source": "the start of recent threads, read on the machine that ran the sessions; read by collectors/code-project/code-project-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -314,7 +314,7 @@
     "near": 5,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: the folder is allowed on a card before the thread works in it, so the wait is short; see Claude Code Docs: Let Claude coordinate ongoing work with Projects (code.claude.com/docs/en/claude-projects), read 2026-11-26",
-    "source": "local thread records, read on the machine that ran the sessions; not measured until a collector reads it",
+    "source": "local thread records, read on the machine that ran the sessions; read by collectors/code-project/code-project-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"
@@ -330,7 +330,7 @@
     "near": 6000,
     "direction": "lower",
     "goal_source": "template goal, no public benchmark: longer instruction files use more context; see Claude Code Docs: How Claude remembers your project (code.claude.com/docs/en/memory), read 2026-11-26",
-    "source": "the folder instruction files, read on the machine that ran the sessions; not measured until a collector reads it",
+    "source": "the folder instruction files, read on the machine that ran the sessions; read by collectors/code-project/code-project-local.mjs; not measured where nothing is there to read",
     "needs": "local-files",
     "chart": "number",
     "defined": "2026-11-25"

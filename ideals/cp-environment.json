@@ -9,5 +9,5 @@
   ],
   "quality": "No key sits in an environment variable, and the setup check passes.",
   "speed": "A thread starts within a minute.",
-  "consumption": "No server the environment loads fails to connect."
+  "consumption": "No server the project needs fails to connect."
 }
