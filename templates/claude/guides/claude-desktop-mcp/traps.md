@@ -16,7 +16,7 @@ What goes wrong with each route, and the pages this guide read. The routes are i
 | Extensions turned off | An organization can turn extensions off or limit them. Then Extensions does not appear in settings ([Add unlisted][unlisted], read 2026-11-26) |
 | Always allow on write tools | Select Always allow only for trusted servers ([Add unlisted][unlisted], read 2026-11-26) |
 | An empty skill list from a server | On Team, an admin enables Skills over MCP first, and Enterprise is coming ([announcement][skills], read 2026-11-26). The app may have been closed when the session started (see [Bridge behavior](loopback.md#bridge-behavior)). The MCP client matrix lists no Skills support for Claude Desktop ([matrix](https://modelcontextprotocol.io/extensions/client-matrix), read 2026-11-26) |
-| A server on revision 2026-07-28 behind the bridge | That revision removes `initialize`, which the bridge needs, and requires `Mcp-Method` and `Mcp-Name` headers on each POST, which the bridge does not send ([changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog), read 2026-11-26). Read from the code, not run ([#162](https://github.com/Colorado-Startups/claudius/issues/162)) |
+| A server on revision 2026-07-28 behind the bridge | That revision removes `initialize`, which the bridge needs, and requires the `Mcp-Method` and `Mcp-Name` request headers on Streamable HTTP POST requests, which the bridge does not send ([changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog), read 2026-11-26). Read from the code, not run ([#162](https://github.com/Colorado-Startups/claudius/issues/162)) |
 | An app that needs a token | The bridge sends no auth header |
 
 ## Sources
