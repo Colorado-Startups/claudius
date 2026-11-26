@@ -2,7 +2,7 @@
  "id": "allow-card",
  "name": "Allow cards",
  "why": "How a thread gets a folder on your computer, and where you answer the card and each prompt",
- "ideal": "One Allow once card per Mac thread, a worktree for a shared folder, and each answer given where it was asked within minutes.",
+ "ideal": "No Allow card per Mac thread: the allow list and Auto mode cover its work. Any card is answered where asked, within minutes.",
  "sources": [
   {
    "title": "Claude Code Docs: Let Claude coordinate ongoing work with Projects",

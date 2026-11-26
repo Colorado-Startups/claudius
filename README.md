@@ -77,14 +77,14 @@ The pin, the tab ids and the Pages setup in detail: [Add the pack](#add-the-pack
 
 ```mermaid
 flowchart LR
-  O[Outline] --> Q[Up to 4 vision questions] --> A[Plan Artifact] --> OK[Approve]
+  O[Outline] --> Q[Up to 4 vision questions] --> A[Plan Artifact] --> OK[Go]
   OK --> S[One session per step] --> PR[PR in one push] --> R[Review and merge] --> L[Live]
   R -. BLOCK .-> S
 ```
 
 | Owner | Claude |
 |---|---|
-| Outlines the app in a Code tab session, answers up to 4 questions, approves the plan | The rest, by the Claudius plugin's `plan` skill ([plugin/](plugin/README.md)) |
+| Outlines the app in a Code tab session and answers up to 4 vision questions. May veto the plan, never has to approve it | The rest, by the Claudius plugin's `plan` skill ([plugin/](plugin/README.md)): plan, issues, sessions, review, merge |
 
 ## What it is
 
