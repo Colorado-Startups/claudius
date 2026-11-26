@@ -102,7 +102,7 @@ test('code-project parts: a ready repo has no setup gap, and a missing file is l
 
 test('code-project parts: each rule metric lists the rules its files leave unsaid', async () => {
   const said = 'gh api REST. The cloud environment sets the network. Use a local thread. Project memory. An issue. No key or private name. Auto-fix; stop watching. A draft pull request, review at the head, head SHA.\n';
-  const full = await run(repo({ ...SETUP, 'AGENTS.md': said, 'templates/claude/code-project/README.md': '## Scheduled tasks\nPin check\n' }), fakeGh([]));
+  const full = await run(repo({ ...SETUP, 'AGENTS.md': said, 'templates/claude/code-project/README.md': '## Scheduled tasks\nDependency and CI sweep\nQuality read\nPin check\n' }), fakeGh([]));
   for (const id of ['cloud', 'memory', 'tasks', 'autofix', 'ship']) assert.equal(full[`code_project.${id}_rules_missing`]?.value ?? full[`code_project.${id}_missing`].value, 0, id);
   const bare = await run(repo({ 'AGENTS.md': 'Nothing.\n' }), fakeGh([]));
   assert.equal(bare['code_project.cloud_rules_missing'].value, 3);
