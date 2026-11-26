@@ -31,4 +31,17 @@ flowchart LR
 | Apps are not available in a browser, on the web or on mobile ([article](https://support.claude.com/en/articles/18516354-install-an-artifact-as-an-app), read 2026-11-26) | The same page also opens there, so test for the module you need (`desktop?.tray`) and show an install button or one line when it is missing |
 | Computer use can see an installed app on macOS but cannot click or type in it ([article](https://support.claude.com/en/articles/18516354-install-an-artifact-as-an-app), read 2026-11-26) | Test the page's logic in a browser with the desktop API mocked |
 
+## A worked example: the Claudius app
+
+[`artifact-app/claudius.html`](artifact-app/claudius.html) is a finished installable app that reads your repos through `gh` and the public Quality page, with the Claudius gnome as its Dock, window and menu bar icon. Ask Claude to publish the file as an artifact with the `desktop` capability, then install it as above.
+
+| View | Shows | Read with |
+| --- | --- | --- |
+| Today | What to look at first: failing CI, quiet pull requests, green pull requests that need a review, repos missing a setup piece, Quality tabs under 70 | all sources |
+| Builds | Open pull requests per repo with CI state, age and branch | `gh api repos/{repo}/pulls` and `commits/{sha}/check-runs` |
+| Quality | Master, Quality, Speed and Consumption scores, every tab lowest first | the public Quality page, trimmed with `curl` and `grep -o` |
+| Repos | Eight setup checks per repo: AGENTS.md, CLAUDE.md, README, SECURITY.md, a CI workflow, rules on main, squash only, deletes merged branches | `gh api repos/{repo}`, `contents`, `contents/.github`, `rules/branches/main` |
+
+Change what it watches in the page's Settings, or edit the `claudius-config` JSON block at the top of the file. It cannot read Project threads, plan limits or credit use, because they sit behind the Claude app and the Console rather than behind `gh`, and it says so on the page instead of guessing. It was checked in headless Chromium with the desktop API mocked. The real install, the permission prompts and Mac notifications are not checked here.
+
 The feature is in beta and its permissions change, so read the cited article again before you rely on a limit.
