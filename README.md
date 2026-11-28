@@ -26,7 +26,7 @@ Brand: [Colorado Startups brand guide](https://colorado-startups.github.io/brand
 
 [Scorecard](SCORECARD.md): 18 tasks on three models, measured 2026-11-15; `plan` re-measured and `visibility` measured 2026-11-19 at plugin 0.4.1.
 
-| [Best practices tab](https://colorado-startups.github.io/claudius/#practices): 10 of 10 at goal | [Publish map](https://colorado-startups.github.io/claudius/process.html#map-publish): 6 of 6 steps |
+| [Best practices tab](https://colorado-startups.github.io/claudius/#practices): 11 of 11 at goal | [Publish map](https://colorado-startups.github.io/claudius/process.html#map-publish): 6 of 6 steps |
 |---|---|
 | ![Best practices tab: quality, speed and consumption all 100](docs/best-practices-tab.jpg) | ![Publish map: Write, Trim, Test, Measure, Validate, Clear, all at goal](docs/publish-map.jpg) |
 
