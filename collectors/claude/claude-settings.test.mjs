@@ -54,6 +54,8 @@ test('settingsProblems: unknown keys, modes a project file cannot set, bad lists
   assert.deepEqual(settingsProblems({ skillListingBudgetFraction: 0.02, skipDangerousModePermissionPrompt: true, skillOverrides: {}, spinnerVerbs: {}, showTurnDuration: false, enforceAnthropicSignIn: true }), []);
   // A key no public page lists stays unknown, and so does a misspelling of a listed one.
   assert.deepEqual(settingsProblems({ skipWorkflowUsageWarning: true, skillListingBudgetFractions: 0.02 }).map((p) => p.where), ['skipWorkflowUsageWarning', 'skillListingBudgetFractions']);
+  // Claude Code 2.1.323 removed subagentStatusLine, and the index no longer lists it (read 2026-11-27), so it is unknown too.
+  assert.deepEqual(settingsProblems({ subagentStatusLine: {} }).map((p) => p.where), ['subagentStatusLine']);
 });
 
 test('decisions: a prompt is a user source; asking tools and config decisions are not', () => {

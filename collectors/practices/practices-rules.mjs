@@ -6,7 +6,7 @@
 // Rows follow the docs, read 2026-11-15; where a doc and this file differ, the doc wins:
 //   checklist   claude.com/docs/plugins/pre-submission-checklist
 //   manifest    code.claude.com/docs/en/plugins/manifest-reference
-//   hooks       code.claude.com/docs/en/hooks (33 events, 5 handler types)
+//   hooks       code.claude.com/docs/en/hooks (34 events, 5 handler types; read 2026-11-27)
 //   authoring   platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
 //   spec        agentskills.io/specification
 //   skills      code.claude.com/docs/en/skills (the 1,536-character listing cap; the six fields
@@ -164,7 +164,7 @@ function badUrl(url) {
 }
 
 // ------------------------------------------------------------------- hooks
-const EVENTS = new Set(['SessionStart', 'Setup', 'UserPromptSubmit', 'UserPromptExpansion', 'PreToolUse', 'PermissionRequest', 'PermissionDenied', 'PostToolUse', 'PostToolUseFailure', 'PostToolBatch', 'Notification', 'MessageDisplay', 'SubagentStart', 'SubagentStop', 'TaskCreated', 'TaskCompleted', 'Stop', 'StopFailure', 'TeammateIdle', 'InstructionsLoaded', 'ConfigChange', 'CwdChanged', 'DirectoryAdded', 'FileChanged', 'WorktreeCreate', 'WorktreeRemove', 'PreCompact', 'PostCompact', 'PreModelSwitch', 'PostModelSwitch', 'Elicitation', 'ElicitationResult', 'SessionEnd']);
+const EVENTS = new Set(['SessionStart', 'Setup', 'UserPromptSubmit', 'UserPromptExpansion', 'PreSkillShellCommand', 'PreToolUse', 'PermissionRequest', 'PermissionDenied', 'PostToolUse', 'PostToolUseFailure', 'PostToolBatch', 'Notification', 'MessageDisplay', 'SubagentStart', 'SubagentStop', 'TaskCreated', 'TaskCompleted', 'Stop', 'StopFailure', 'TeammateIdle', 'InstructionsLoaded', 'ConfigChange', 'CwdChanged', 'DirectoryAdded', 'FileChanged', 'WorktreeCreate', 'WorktreeRemove', 'PreCompact', 'PostCompact', 'PreModelSwitch', 'PostModelSwitch', 'Elicitation', 'ElicitationResult', 'SessionEnd']);
 const HOOK_TYPES = new Set(['command', 'http', 'mcp_tool', 'prompt', 'agent']);
 function hookProblems(src) {
   if (src.error) return [src.error];

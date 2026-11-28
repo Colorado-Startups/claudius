@@ -63,7 +63,8 @@ function goodPlugin(dir, { name = 'acme-notes', parts = true, manifest = {} } = 
   write(path.join(notes, 'reference.md'), '# Format\n\nOne heading per meeting, then a list of actions.\n');
   write(path.join(dir, 'commands', 'summarize.md'), '---\ndescription: Summarize the latest notes\n---\nSummarize the notes.\n');
   write(path.join(dir, 'agents', 'reviewer.md'), '---\nname: reviewer\ndescription: Reviews notes for missing owners.\n---\nReview the notes.\n');
-  json(path.join(dir, 'hooks', 'hooks.json'), { hooks: { PostToolUse: [{ matcher: 'Write', hooks: [{ type: 'command', command: '"${CLAUDE_PLUGIN_ROOT}"/scripts/format.sh' }] }] } });
+  // PreSkillShellCommand joined the hooks docs with Claude Code 2.1.332 (read 2026-11-27): a known event, so the good repo finds nothing.
+  json(path.join(dir, 'hooks', 'hooks.json'), { hooks: { PostToolUse: [{ matcher: 'Write', hooks: [{ type: 'command', command: '"${CLAUDE_PLUGIN_ROOT}"/scripts/format.sh' }] }], PreSkillShellCommand: [{ matcher: 'Bash', hooks: [{ type: 'command', command: '"${CLAUDE_PLUGIN_ROOT}"/scripts/format.sh' }] }] } });
   write(path.join(dir, 'scripts', 'format.sh'), '#!/bin/sh\necho formatted\n');
   json(path.join(dir, '.mcp.json'), { mcpServers: { notes: { type: 'http', url: 'https://api.acme.example.com/mcp', headers: { Authorization: 'Bearer ${user_config.api_token}' } } } });
   for (const i of [1, 2, 3]) {

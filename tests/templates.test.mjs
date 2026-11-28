@@ -22,6 +22,8 @@ test('templates: the settings template enables claude-plugins-official plugins, 
   // claudius is published from this repo (plugin/, .claude-plugin/marketplace.json) until Anthropic's directory lists it.
   for (const id of ids) assert.match(id, /@claude-plugins-official$|^claudius@claudius$/, id);
   assert.equal(settings.extraKnownMarketplaces?.claudius?.source?.repo, 'Colorado-Startups/claudius');
+  // A third-party marketplace does not auto-update unless its entry says so (code.claude.com/docs/en/discover-plugins, read 2026-11-27).
+  assert.equal(settings.extraKnownMarketplaces?.claudius?.autoUpdate, true, 'the claudius marketplace auto-updates');
 });
 
 // A Bash rule matches the whole command text, and each * matches any text, empty included
