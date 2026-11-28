@@ -238,7 +238,7 @@ test('collect: docs_drift counts each name one side lacks, and docs that cannot 
   assert.equal(out['practices.docs_drift'].value, 1);
   assert.deepEqual(out['practices.docs_drift'].detail, [{ label: 'hook events: PreNewThing, in the docs, not in the pack', value: 1, unit: 'names' }]);
   const offline = await collect({ root: good, mode: 'ci', docs: async () => { throw new Error('offline'); } });
-  assert.match(offline['practices.docs_drift'].could_not_check, /offline/);
+  assert.equal(offline['practices.docs_drift'].could_not_check, 'could not check the docs (offline)');
   assert.equal(offline['practices.skill_rules'].value, 0);
 });
 

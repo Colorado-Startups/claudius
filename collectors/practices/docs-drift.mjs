@@ -29,13 +29,17 @@ export function drift(pages, lists = LISTS) {
   });
 }
 
-// Each page's text by URL, read one after the other.
+// Each page's text by URL, read one after the other. An error names the page it came from.
 export async function readDocs(fetchPage = fetch, lists = LISTS) {
   const pages = {};
   for (const { url } of lists) {
-    const res = await fetchPage(url, { redirect: 'follow', signal: AbortSignal.timeout(15000) });
-    if (!res.ok) throw new Error(`${url} answered ${res.status}`);
-    pages[url] = await res.text();
+    try {
+      const res = await fetchPage(url, { redirect: 'follow', signal: AbortSignal.timeout(15000) });
+      if (!res.ok) throw new Error(`answered ${res.status}`);
+      pages[url] = await res.text();
+    } catch (err) {
+      throw new Error(`${url}: ${err?.message ?? err}`);
+    }
   }
   return pages;
 }

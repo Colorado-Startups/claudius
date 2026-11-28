@@ -39,5 +39,7 @@ test('readDocs: asks for each page once, and a page that does not load is an err
   });
   assert.deepEqual(asked, [HOOKS, SETTINGS]);
   assert.deepEqual(drift(pages), []);
-  await assert.rejects(readDocs(async () => ({ ok: false, status: 503, text: async () => '' })), /503/);
+  await assert.rejects(readDocs(async () => ({ ok: false, status: 503, text: async () => '' })), { message: `${HOOKS}: answered 503` });
+  // A network error names its page, so the reason on the tab says which read failed.
+  await assert.rejects(readDocs(async () => { throw new Error('fetch failed'); }), { message: `${HOOKS}: fetch failed` });
 });

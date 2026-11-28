@@ -61,7 +61,7 @@ async function gather({ root = '.', params = TEMPLATE, now = new Date(), docs = 
     const hits = drift(await docs());
     val('docs_drift', hits.length, `${DRIFT}: ${LISTS.map((l) => `${l.list} at ${l.url}`).join(', ')}`, hits.map((h) => ({ label: `${h.list}: ${h.name}, ${h.side}`, value: 1, unit: 'names' })));
   } catch (err) {
-    cnc('docs_drift', `could not read the docs (${firstLine(err)})`, DRIFT);
+    cnc('docs_drift', `could not check the docs (${firstLine(err)})`, DRIFT);
   }
   let a;
   try {
