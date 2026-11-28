@@ -13,7 +13,8 @@
       "source": {
         "source": "github",
         "repo": "Colorado-Startups/claudius"
-      }
+      },
+      "autoUpdate": true
     }
   },
   "permissions": {
