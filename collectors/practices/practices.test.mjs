@@ -8,9 +8,18 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { after, test } from 'node:test';
+import { KNOWN_KEYS } from '../claude/claude-settings.mjs';
 import { loadTargets } from '../lib/engine.mjs';
+import { LISTS } from './docs-drift.mjs';
 import { area, audit, collect, metricIds, parseFrontmatter } from './practices.mjs';
-import { DIRECTORY_RULES, SKILL_RULES } from './practices-rules.mjs';
+import { DIRECTORY_RULES, EVENTS, SKILL_RULES } from './practices-rules.mjs';
+
+// No network in tests: fetch answers each docs page with the pack's own names, so docs_drift reads 0.
+const docsPages = {
+  [LISTS[0].url]: [...EVENTS].map((n) => `| \`${n}\` | fires |`).join('\n'),
+  [LISTS[1].url]: [...KNOWN_KEYS].map((n) => `| [\`${n}\`](#key) | does |`).join('\n'),
+};
+globalThis.fetch = async (url) => ({ ok: true, status: 200, text: async () => docsPages[url] });
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'practices-'));
 after(() => fs.rmSync(tmp, { recursive: true, force: true }));
@@ -218,8 +227,19 @@ test('collect: the good repo scores at goal, its listing tokens are its names an
     'practices.listing_tokens': Math.round(always / 4),
     'practices.skills_under_three_evals': 0,
     'practices.skills_without_lift': 0,
+    'practices.docs_drift': 0,
   });
   assert.ok(out['practices.listing_tokens'].detail.some((d) => d.label === 'acme-notes/taking-notes'));
+});
+
+test('collect: docs_drift counts each name one side lacks, and docs that cannot be read are not measured', async () => {
+  const drifted = { ...docsPages, [LISTS[0].url]: `${docsPages[LISTS[0].url]}\n| \`PreNewThing\` | fires |` };
+  const out = await collect({ root: good, mode: 'ci', docs: async () => drifted });
+  assert.equal(out['practices.docs_drift'].value, 1);
+  assert.deepEqual(out['practices.docs_drift'].detail, [{ label: 'hook events: PreNewThing, in the docs, not in the pack', value: 1, unit: 'names' }]);
+  const offline = await collect({ root: good, mode: 'ci', docs: async () => { throw new Error('offline'); } });
+  assert.match(offline['practices.docs_drift'].could_not_check, /offline/);
+  assert.equal(offline['practices.skill_rules'].value, 0);
 });
 
 test('collect: the bad repo counts each finding by its result and names its file, rule and doc', async () => {

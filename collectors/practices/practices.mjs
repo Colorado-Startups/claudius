@@ -1,6 +1,6 @@
 // Best practices: how close a repo's plugins and skills are to Anthropic's directory review and its
-// skill authoring rules. Every metric reads the repo's own files, so CI and the public page measure
-// it too; no metric needs local files.
+// skill authoring rules. Every metric but Docs reads the repo's own files, so CI and the public page
+// measure it too; no metric needs local files.
 //
 //   Directory  the developer portal's checks on each plugin folder, one row per rule in
 //              practices-rules.mjs, counted by result: blocks, holds, warnings
@@ -9,6 +9,8 @@
 //   Cost       the largest plugin's always-on tokens: skill, command and agent names and descriptions
 //   Evals      plugin skills with fewer than three claude plugin eval cases that prove they fired,
 //              and those whose cases do not beat no plugin in every model's report
+//   Docs       hook events and settings keys the live Claude Code docs and this pack's lists
+//              disagree on, read when the page builds (docs-drift.mjs)
 //
 // Files: git ls-files -s, or a walk of the folder less params.skip_dirs outside git. A plugin folder
 // holds .claude-plugin/plugin.json; it and the repo's .claude/skills are looked for outside
@@ -21,6 +23,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { redact, useLib } from '../lib/engine.mjs';
+import { LISTS, drift, readDocs } from './docs-drift.mjs';
 import { DIRECTORY_RULES, SKILL_RULES } from './practices-rules.mjs';
 
 export const area = 'practices';
@@ -30,6 +33,7 @@ export const metricIds = TARGETS.map((t) => t.id);
 // The template's own params, merged as the engine merges a file's: the defaults for a bare call.
 const TEMPLATE = Object.assign({}, ...TARGETS.map((t) => t.params ?? {}));
 const SOURCE = 'collectors/practices/practices.mjs';
+const DRIFT = 'collectors/practices/docs-drift.mjs';
 export const NO_PLUGIN = 'no .claude-plugin/plugin.json';
 const PLUGIN_ROWS = ['directory_blocks', 'directory_holds', 'directory_warnings', 'listing_fields_missing', 'listing_tokens', 'skills_under_three_evals', 'skills_without_lift'];
 const LISTING_FIELDS = ['icon', 'documentationUrl', 'supportUrl', 'privacyPolicyUrl', 'termsOfServiceUrl', 'displayName', 'keywords', 'homepage'];
@@ -47,16 +51,23 @@ export async function collect(opts = {}) {
   return redact(await gather(opts), opts.home);
 }
 
-async function gather({ root = '.', params = TEMPLATE, now = new Date() } = {}) {
+async function gather({ root = '.', params = TEMPLATE, now = new Date(), docs = readDocs } = {}) {
   const readAt = now.toISOString();
   const out = {};
   const val = (k, value, source, detail = []) => (out[`practices.${k}`] = { value, ...(detail.length ? { detail } : {}), source, read_at: readAt });
   const cnc = (k, reason, source) => (out[`practices.${k}`] = { could_not_check: reason, source });
+  // The pack's own lists against the live docs, whatever the repo holds (docs-drift.mjs).
+  try {
+    const hits = drift(await docs());
+    val('docs_drift', hits.length, `${DRIFT}: ${LISTS.map((l) => `${l.list} at ${l.url}`).join(', ')}`, hits.map((h) => ({ label: `${h.list}: ${h.name}, ${h.side}`, value: 1, unit: 'names' })));
+  } catch (err) {
+    cnc('docs_drift', `could not read the docs (${firstLine(err)})`, DRIFT);
+  }
   let a;
   try {
     a = await audit({ root, params });
   } catch (err) {
-    for (const k of metricIds) out[k] = { could_not_check: `could not list the repo's files (${firstLine(err)})`, source: SOURCE };
+    for (const k of metricIds) out[k] ??= { could_not_check: `could not list the repo's files (${firstLine(err)})`, source: SOURCE };
     return out;
   }
   const { how, plugins, skills, findings } = a;
